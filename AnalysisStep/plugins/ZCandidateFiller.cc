@@ -94,11 +94,13 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   float closestZeeMassDiff = 99999.;
   float closestZmmMassDiff = 99999.;
+  float closestZttMassDiff = 99999.;
   float closestZMassDiff   = 99999.;
   float closestLLMassDiff = 99999.;
 
   int bestZeeidx = -1;
   int bestZmmidx = -1;
+  int bestZttidx = -1;
   int bestZidx = -1;
   int bestLLidx = -1;
 
@@ -214,10 +216,14 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       myCand.addUserFloat("d1.combRelIsoPFFSRCorr",myCand.userFloat("d1.combRelIsoPF"));
     }
 
-    
+    if (myCand.userFloat("ComputeSV"))
+	myCand.addUserFloat("goodMass",myCand.userFloat("SVfitMass"));
+    else
+	myCand.addUserFloat("goodMass",myCand.mass());
+
     //--- Find "best Z" (closest to mZ) among those passing the "bestZAmong" selection (2011 PRL logic), now deprecated!!!
     if (preBestZSelection(myCand)) {
-      float diffZmass = fabs(ZmassValue - myCand.mass());
+      float diffZmass = fabs(ZmassValue - myCand.userFloat("goodMass"));
       if (diffZmass < closestLLMassDiff) { // Best among any ll in the collection
         bestLLidx = i;
         closestLLMassDiff = diffZmass;
@@ -227,7 +233,12 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
           bestZidx = i;
           closestZMassDiff = diffZmass;
         }
-        if (abs(id0) == 13) { 
+	if (abs(id0) == 15 || abs(id1) == 15) {
+	  if (diffZmass < closestZttMassDiff) {
+	    bestZttidx = i;
+	    closestZttMassDiff = diffZmass;
+	  }
+        } else if (abs(id0) == 13) { 
           if (diffZmass < closestZmmMassDiff) { // Best among all mu+mu- pairs in the collection
             bestZmmidx = i;
             closestZmmMassDiff = diffZmass;
@@ -250,6 +261,7 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     myCand.addUserFloat("isBestZ",  (i==bestZidx));
     myCand.addUserFloat("isBestZmm",(i==bestZmmidx));
     myCand.addUserFloat("isBestZee",(i==bestZeeidx));
+    myCnad.addUserFloat("isBestZtt",(i==bestZttidx));
     myCand.addUserFloat("isBestInColl", (i==bestLLidx));
 
     //--- Embed flags (ie cuts specified in the "flags" pset)
@@ -257,6 +269,21 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     for(CutSet<pat::CompositeCandidate>::const_iterator cut = cuts.begin(); cut != cuts.end(); ++cut) {
       myCand.addUserFloat(cut->first,int((*(cut->second))(myCand)));
     }
+    
+    //In terms of etau, mutau, tautau, special good and iso requirements are needed
+    bool goodTau = true;
+    if (abs(id0)==15 && abs(id1)==11 && !myCand.userFloat("d0.isGood_Ele"))
+	goodTau=false;
+    if (abs(id0)==15 && abs(id1)==13 && !myCand.userFloat("d0.isGood_Mu"))
+        goodTau=false;
+    if (abs(id0)==15 && abs(id1)==15 && ( !myCand.userFloat("d0.isGood_Tau") || !myCand.userFloat("d1.isGood_Tau") ))
+        goodTau=false;
+    if (abs(id0)==11 && abs(id1)==15 && !myCand.userFloat("d1.isGood_Ele"))
+        goodTau=false;
+    if (abs(id0)==13 && abs(id1)==15 && !myCand.userFloat("d1.isGood_Mu"))
+        goodTau=false;
+    myCand.addUserFloat("isGoodTau",goodTau);
+
   }
   
   iEvent.put(std::move(result));

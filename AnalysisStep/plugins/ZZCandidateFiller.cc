@@ -140,7 +140,7 @@ ZZCandidateFiller::ZZCandidateFiller(const edm::ParameterSet& iConfig) :
   buildMELA();
 
   jetToken = consumes<edm::View<pat::Jet> >(edm::InputTag("cleanJets"));
-  metToken = consumes<pat::METCollection>(edm::InputTag("slimmedMETs"));
+  metToken = consumes<pat::METCollection>(edm::InputTag("ShiftMETcentral"));//("slimmedMETs"));
   softLeptonToken = consumes<edm::View<reco::Candidate> >(edm::InputTag("softLeptons"));
   ZCandToken = consumes<edm::View<reco::CompositeCandidate> >(edm::InputTag("ZCand"));
 
@@ -262,7 +262,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     int iZ1 = 0;
     int iZ2 = 1;
     if (ZRolesByMass) {
-      if(std::abs(myCand.daughter(0)->mass()-ZmassValue)>=std::abs(myCand.daughter(1)->mass()-ZmassValue)){
+      if(std::abs(myCand.daughter(0)->userFloat("goodMass")-ZmassValue)>=std::abs(myCand.daughter(1)->userFloat("goodMass")-ZmassValue)){
         swap(iZ1,iZ2);
         ZRoles = &rolesZ2Z1;
       }

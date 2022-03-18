@@ -314,12 +314,6 @@ SIP =  "userFloat('SIP') < 4"
 GOODELECTRON = "userFloat('ID') && " + SIP
 GOODMUON     = "userFloat('ID') && " + SIP
 TIGHTMUON    = "userFloat('isPFMuon') || (userFloat('isTrackerHighPtMuon') && pt>200)"
-TAUCUT	     = "tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
-SOSOTAU	     = "tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 10"
-GOODTAU	     = SOSOTAU + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
-GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-GOODTAU_TAU  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
 
 
 APPLYTESCORRECTION = True
@@ -535,6 +529,13 @@ process.cleanSoftElectrons = cms.EDProducer("PATElectronCleaner",
 
 #------- TAU LEPTONS -------
 
+TAUCUT       = "tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
+SOSOTAU      = "tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 10"
+GOODTAU      = SOSOTAU + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
+GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+GOODTAU_TAU  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+
 
 process.bareTaus = cms.EDFilter("PATTauRefSelector",
     src = cms.InputTag("slimmedTaus"),
@@ -687,7 +688,6 @@ process.softLeptons = cms.EDProducer("CandViewMerger",
 
 
 
-
 ### ----------------------------------------------------------------------
 ### ----------------------------------------------------------------------
 ### BUILD CANDIDATES
@@ -700,29 +700,18 @@ process.softLeptons = cms.EDProducer("CandViewMerger",
 ### Dileptons: combine/merge leptons into intermediate (bare) collections;
 ###            Embed additional user variables into final collections
 ### ----------------------------------------------------------------------
-TWOGOODLEPTONS = ("userFloat('d0.isGood') && userFloat('d1.isGood')") # Z made of 2 good leptons (ISO not yet applied)
-
+TWOGOODLEPTONS = "( userFloat('d0.isGood') && userFloat('d1.isGood') )" # Z made of 2 good leptons (ISO not yet applied)
+TWOISOLEPTONS = "( userFloat('d0.passCombRelIsoPFFSRCorr') && userFloat('d1.passCombRelIsoPFFSRCorr') )"
+TWOSFLEPTONS = "( ( abs(daughter(0).pdgId())!=15 && abs(daughter(1).pdgId())!=15 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) ) || abs(daughter(0).pdgId())==15 || abs(daughter(1).pdgId())==15 )"
 ### NOTE: Isolation cut has been moved to ZZ candidates as we now correct for FSR of all four photons.
 ### Because if this, isBestZ flags are no longer correct; BESTZ_AMONG is set to "" for safety
-# ZISO           = ("( (abs(daughter(0).pdgId)==11 && userFloat('d0.combRelIsoPFFSRCorr')<0.5) || (abs(daughter(0).pdgId)==13 && userFloat('d0.combRelIsoPFFSRCorr')<0.4) ) && ( (abs(daughter(1).pdgId)==11 && userFloat('d1.combRelIsoPFFSRCorr')<0.5) || (abs(daughter(1).pdgId)==13 && userFloat('d1.combRelIsoPFFSRCorr')<0.4) )") #ISO after FSR
-# ZLEPTONSEL     = TWOGOODLEPTONS + "&&" + ZISO
-# BESTZ_AMONG = ( ZLEPTONSEL ) # "Best Z" chosen among those with 2 leptons with ID, SIP, ISO
-# BESTZ_AMONG = ("")
-
-ZLEPTONSEL     = TWOGOODLEPTONS # Note: this is without ISO
-
-Z1PRESEL    = (ZLEPTONSEL + " && mass > 40 && mass < 120") # Note: this is without ISO
-
-BESTZ_AMONG = ( Z1PRESEL + "&& userFloat('d0.passCombRelIsoPFFSRCorr') && userFloat('d1.passCombRelIsoPFFSRCorr')" )
-
-TWOGOODISOLEPTONS = ( TWOGOODLEPTONS + "&& userFloat('d0.passCombRelIsoPFFSRCorr') && userFloat('d1.passCombRelIsoPFFSRCorr')" )
 
 # Cut to filter out unneeded ll combinations as upstream as possible
 if KEEPLOOSECOMB:
-    KEEPLOOSECOMB_CUT = 'mass > 0 && ( ( abs(daughter(0).pdgId())!=15 && abs(daughter(1).pdgId())!=15 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) ) || abs(daughter(0).pdgId())==15 || abs(daughter(1).pdgId())==15 )' # Propagate also combinations of loose leptons (for debugging); just require same-flavour
+    KEEPLOOSECOMB_CUT = 'mass > 0 && ' + TWOSFLEPTONS # Propagate also combinations of loose leptons (for debugging); just require same-flavour
 else:
     if FSRMODE == "RunII" : # Just keep combinations of tight leptons (passing ID, SIP and ISO)
-        KEEPLOOSECOMB_CUT = "mass > 0 && ( ( abs(daughter(0).pdgId())!=15 && abs(daughter(1).pdgId())!=15 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) ) || abs(daughter(0).pdgId())==15 || abs(daughter(1).pdgId())==15 ) && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood') && daughter(0).masterClone.userFloat('passCombRelIsoPFFSRCorr') &&  daughter(1).masterClone.userFloat('passCombRelIsoPFFSRCorr')"
+        KEEPLOOSECOMB_CUT = "mass > 0 && " + TWOSFLEPTONS + "daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood') && daughter(0).masterClone.userFloat('passCombRelIsoPFFSRCorr') &&  daughter(1).masterClone.userFloat('passCombRelIsoPFFSRCorr')"
     else :
         print "KEEPLOOSECOMB == False && FSRMODE =! RunII", FSRMODE, "is no longer supported"
         sys.exit()
@@ -739,16 +728,100 @@ process.bareZCand = cms.EDProducer("PATCandViewShallowCloneCombiner",
 )
 
 
-if KEEPLOOSECOMB:
-    process.bareZCand.cut = cms.string('mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId())') # Propagate also combinations of loose leptons (for debugging)
-else:
-    if FSRMODE == "RunII" : # Just keep combinations of tight leptons (passing ID, SIP and ISO)
-        process.bareZCand.cut = cms.string("mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood') && daughter(0).masterClone.userFloat('passCombRelIsoPFFSRCorr') &&  daughter(1).masterClone.userFloat('passCombRelIsoPFFSRCorr')")
-    else : # Just keep combinations of tight leptons (passing ID and SIP; iso cannot be required at this point, with the legacy FSR logic)
-        process.bareZCand.cut = cms.string("mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood')")
+#----------------- MET, also used for SVFit -------------------------
+
+process.METSequence = cms.Sequence()
+
+PFMetName = "slimmedMETs"
+uncorrPFMetTag = cms.InputTag(PFMetName)
+
+process.METSignificance = cms.EDProducer ("ExtractMETSignificance", 
+					srcMET=uncorrPFMetTag 
+					)
+
+    # add variables with MET shifted for TES corrections
+process.ShiftMETforTES = cms.EDProducer ("ShiftMETforTES", 
+					srcMET  = uncorrPFMetTag, 
+					tauCollection = cms.InputTag("softTaus")
+					)
+
+    # add variables with MET shifted for EES corrections (E->tau ES)
+process.ShiftMETforEES = cms.EDProducer ("ShiftMETforEES",
+					srcMET  = uncorrPFMetTag,
+					tauCollection = cms.InputTag("softTaus")
+					)
+
+    # Shift met due to central corrections of TES and EES
+process.ShiftMETcentral = cms.EDProducer ("ShiftMETcentral",
+					srcMET = uncorrPFMetTag,
+					tauUncorrected = cms.InputTag("bareTaus"),
+					tauCorrected = cms.InputTag("softTaus")
+					)
+
+    # Get a standalone Puppi MET significance collection
+process.PuppiMETSignificance = cms.EDProducer ("ExtractMETSignificance",
+					srcMET=cms.InputTag("slimmedMETsPuppi")
+					)
+
+    # Shift PUPPI met due to central corrections of TES and EES
+process.ShiftPuppiMETcentral = cms.EDProducer ("ShiftMETcentral",
+					srcMET = cms.InputTag("slimmedMETsPuppi"),
+					tauUncorrected = cms.InputTag("bareTaus"),
+					tauCorrected = cms.InputTag("softTaus")
+					)
+
+process.METSequence += process.METSignificance
+process.METSequence += process.ShiftMETforTES
+process.METSequence += process.ShiftMETforEES
+process.METSequence += process.ShiftMETcentral
+process.METSequence += process.PuppiMETSignificance
+process.METSequence += process.ShiftPuppiMETcentral
+
+srcMETTag = cms.InputTag("ShiftMETcentral")
+
+
+## ----------------------------------------------------------------------
+## SV fit
+## ----------------------------------------------------------------------
+
+process.SVZCand = cms.EDProducer("ClassicSVfitInterface",
+                                  srcPairs   = cms.InputTag("bareZCand"),
+                                  srcSig     = cms.InputTag("METSignificance", "METSignificance"),
+                                  srcCov     = cms.InputTag("METSignificance", "METCovariance"),
+                                  usePairMET = cms.bool(False),
+                                  srcMET     = srcMETTag,
+                                  computeForUpDownTES = cms.bool(True if IsMC else False),
+                                  computeForUpDownMET = cms.bool(True if IsMC else False),
+                                  METdxUP    = cms.InputTag("ShiftMETforTES", "METdxUP"),
+                                  METdyUP    = cms.InputTag("ShiftMETforTES", "METdyUP"),
+                                  METdxDOWN  = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
+                                  METdyDOWN  = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
+                                  METdxUP_EES   = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
+                                  METdyUP_EES   = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
+                                  METdxDOWN_EES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
+                                  METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES")
+)
+
+
+#if KEEPLOOSECOMB:
+#    process.bareZCand.cut = cms.string('mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId())') # Propagate also combinations of loose leptons (for debugging)
+#else:
+#    if FSRMODE == "RunII" : # Just keep combinations of tight leptons (passing ID, SIP and ISO)
+#        process.bareZCand.cut = cms.string("mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood') && daughter(0).masterClone.userFloat('passCombRelIsoPFFSRCorr') &&  daughter(1).masterClone.userFloat('passCombRelIsoPFFSRCorr')")
+#    else : # Just keep combinations of tight leptons (passing ID and SIP; iso cannot be required at this point, with the legacy FSR logic)
+#        process.bareZCand.cut = cms.string("mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood')")
+
+ZLEPTONSEL     = TWOGOODLEPTONS # Note: this is without ISO
+
+Z1PRESEL    = (ZLEPTONSEL + " && userFloat('goodMass') > 40 && userFloat('goodMass') < 120") # Note: this is without ISO
+
+BESTZ_AMONG = ( Z1PRESEL + "&&" TWOISOLEPTONS )
+
+TWOGOODISOLEPTONS = ( TWOGOODLEPTONS + "&&" + TWOISOLEPTONS )
+
 
 process.ZCand = cms.EDProducer("ZCandidateFiller",
-    src = cms.InputTag("bareZCand"),
+    src = cms.InputTag("SVZCand"),
     sampleType = cms.int32(SAMPLE_TYPE),
     setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
     bestZAmong = cms.string(BESTZ_AMONG),
@@ -765,11 +838,31 @@ process.ZCand = cms.EDProducer("ZCandidateFiller",
 process.bareLLCand = cms.EDProducer("CandViewShallowCloneCombiner",
     decay = cms.string('softLeptons softLeptons'),
     #cut = cms.string('deltaR(daughter(0).eta, daughter(0).phi, daughter(1).eta, daughter(1).phi)>0.02'), # protect against ghosts
-    cut = cms.string('deltaR(daughter(0).eta, daughter(0).phi, daughter(1).eta, daughter(1).phi)>0.02 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId())'), # protect against ghosts && same flavour
+    cut = cms.string("deltaR(daughter(0).eta, daughter(0).phi, daughter(1).eta, daughter(1).phi)>0.02 && " + TWOSFLEPTONS), # protect against ghosts && same flavour
     checkCharge = cms.bool(False)
 )
+
+process.SVLLCand = cms.EDProducer("ClassicSVfitInterface",
+                                  srcPairs   = cms.InputTag("bareLLCand"),
+                                  srcSig     = cms.InputTag("METSignificance", "METSignificance"),
+                                  srcCov     = cms.InputTag("METSignificance", "METCovariance"),
+                                  usePairMET = cms.bool(False),
+                                  srcMET     = srcMETTag,
+                                  computeForUpDownTES = cms.bool(True if IsMC else False),
+                                  computeForUpDownMET = cms.bool(True if IsMC else False),
+                                  METdxUP    = cms.InputTag("ShiftMETforTES", "METdxUP"),
+                                  METdyUP    = cms.InputTag("ShiftMETforTES", "METdyUP"),
+                                  METdxDOWN  = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
+                                  METdyDOWN  = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
+                                  METdxUP_EES   = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
+                                  METdyUP_EES   = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
+                                  METdxDOWN_EES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
+                                  METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES")
+)
+
+
 process.LLCand = cms.EDProducer("ZCandidateFiller",
-    src = cms.InputTag("bareLLCand"),
+    src = cms.InputTag("SVLLCand"),
     sampleType = cms.int32(SAMPLE_TYPE),
     setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
     bestZAmong = cms.string(BESTZ_AMONG),

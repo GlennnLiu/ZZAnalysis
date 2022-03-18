@@ -518,6 +518,8 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
     // define algorithm (set the debug level to 3 for testing)
     unsigned int verbosity = 0;
     
+    bool ComputeSV = false;
+
     double SVfitMass = -999.;
     double SVfitMassTauUp = -999.;
     double SVfitMassTauDown = -999.;
@@ -693,7 +695,8 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
       
       if ( algo.isValidSolution() )
       {
-        SVfitMass              = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(algo.getHistogramAdapter())->getMass(); // full mass of tau lepton pair in units of GeV
+        ComputeSV	       = true;
+	SVfitMass              = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(algo.getHistogramAdapter())->getMass(); // full mass of tau lepton pair in units of GeV
         SVfitTransverseMass    = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(algo.getHistogramAdapter())->getTransverseMass();
         SVpt                   = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(algo.getHistogramAdapter())->getPt();
         SVeta                  = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(algo.getHistogramAdapter())->getEta();
