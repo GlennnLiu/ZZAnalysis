@@ -901,6 +901,7 @@ process.ZlCand = cms.EDProducer("PATCandViewShallowCloneCombiner",
 ### ----------------------------------------------------------------------
 
 FOURGOODLEPTONS    =  ("userFloat('d0.GoodLeptons') && userFloat('d1.GoodLeptons')" +
+		       "&& userFloat('d0.isGoodTau') && userFloat('d1.isGoodTau')" +
                        "&& userFloat('d0.worstEleIso') <" + str(ELEISOCUT) +
                        "&& userFloat('d1.worstEleIso') <" + str(ELEISOCUT) +
                        "&& userFloat('d0.worstMuIso') <" + str(MUISOCUT) +

@@ -73,6 +73,7 @@ private:
   virtual void endJob(){};
 
   void getPairMass(const reco::Candidate* lp, const reco::Candidate* lm, FSRToLepMap& photons, float& mass, int& ID);
+  void getSVMass(const reco::Candidate* l1, const reco::Gandidate* l2, 
   void buildMELA();
   void computeMELABranches();
   void updateMELAClusters_Common();
@@ -356,7 +357,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     math::XYZTLorentzVector p2m(Z2Lm->p4());
 
     // Build the other SF/OS combination
-    float mZ1= Z1->mass();
+    float mZ1= Z1->userFloat("goodMass");
     float mZa, mZb;
     int ZaID, ZbID;
     getPairMass(Z1Lp,Z2Lm,FSRMap,mZa,ZaID);
