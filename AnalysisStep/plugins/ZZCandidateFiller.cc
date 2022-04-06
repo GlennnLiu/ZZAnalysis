@@ -822,7 +822,15 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
         }
       }
     }
-
+    
+    bool goodTaus=False;
+    if (myCand.daughter(0)->userFloat("isGoodTau") && myCand.daughter(1)->userFloat("isGoodTau"))
+	goodTaus=True;
+    
+    bool HLTMatch=False;
+    if (myCand.daughter(0)->userFloat("HLTMatch") || myCand.daughter(1)->userFloat("HLTMatch"))
+	HLTMatch=True;
+    
     //----------------------------------------------------------------------
     //--- Embed variables
     myCand.addUserFloat("candChannel",    candChannel);
@@ -855,6 +863,9 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
       myCand.addUserFloat("ZZMassRefitErr", ZZMassRefitErr);
       myCand.addUserFloat("ZZMassUnrefitErr", ZZMassUnrefitErr);
     }
+
+    myCand.addUserFloat("goodTaus", goodTaus);
+    myCand.addUserFloat("HLTMatch", HLTMatch);
 
     // Jet quantities
     myCand.addUserFloat("DiJetMass", DiJetMass);

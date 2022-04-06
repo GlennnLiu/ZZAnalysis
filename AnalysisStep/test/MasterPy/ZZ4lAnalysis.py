@@ -917,7 +917,7 @@ MLLALLCOMB        = "userFloat('mLL4')>4" # mll>4 on 4/4 AF/OS pairs;
 SMARTMALLCOMB     = "userFloat('passSmartMLL')" # Require swapped-lepton Z2' to be >12 IF Z1' is SF/OS and closer to 91.1876 than mZ1
 PT20_10           = ("userFloat('pt1')>20 && userFloat('pt2')>10") #20/10 on any of the 4 leptons
 M4l100            = "mass>100"
-
+HLTMATCH	  = "userFloat('HLTMatch')"
 
 
 
@@ -993,7 +993,8 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
                       PT20_10         + "&&" +
                       "mass>70"       + "&&" +
                       SMARTMALLCOMB + "&&" +
-                      "daughter('Z2').mass>12"
+		      HLTMATCH + "&&" +
+                      "daughter('Z2').userFloat('goodMass')>12"
                       )
 
     SR = BESTCAND_AMONG
