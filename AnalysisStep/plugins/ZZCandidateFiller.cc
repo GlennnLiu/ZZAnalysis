@@ -823,13 +823,17 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
       }
     }
     
-    bool goodTaus=False;
+    bool goodTaus=false;
     if (myCand.daughter(0)->userFloat("isGoodTau") && myCand.daughter(1)->userFloat("isGoodTau"))
-	goodTaus=True;
+	goodTaus=true;
     
-    bool HLTMatch=False;
-    if (myCand.daughter(0)->userFloat("HLTMatch") || myCand.daughter(1)->userFloat("HLTMatch"))
-	HLTMatch=True;
+    bool muHLTMatch=false;
+    bool eleHLTMatch=false;
+    if (myCand.daughter(0)->userFloat("muHLTMatch") || myCand.daughter(1)->userFloat("muHLTMatch"))
+	muHLTMatch=true;
+    if (myCand.daughter(0)->userFloat("eleHLTMatch") || myCand.daughter(1)->userFloat("eleHLTMatch"))
+	eleHLTMatch=true;
+
     
     //----------------------------------------------------------------------
     //--- Embed variables
@@ -865,7 +869,8 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     }
 
     myCand.addUserFloat("goodTaus", goodTaus);
-    myCand.addUserFloat("HLTMatch", HLTMatch);
+    myCand.addUserFloat("muHLTMatch", muHLTMatch);
+    myCand.addUserFloat("eleHLTMatch", eleHLTMatch);
 
     // Jet quantities
     myCand.addUserFloat("DiJetMass", DiJetMass);

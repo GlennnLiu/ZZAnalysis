@@ -50,6 +50,9 @@ class ZCandidateFiller : public edm::EDProducer {
   const CutSet<pat::CompositeCandidate> cuts;
   int FSRMode;
   bool embedDaughterFloats;
+
+  vector<string> muHLTPaths2_;
+  vector<string{ eleHLTPaths2_;
 };
 
 
@@ -69,6 +72,48 @@ ZCandidateFiller::ZCandidateFiller(const edm::ParameterSet& iConfig) :
   else {
     cout << "ZCandidateFiller: FSRMode " << FSRMode << " not supported" << endl;
     abort();
+  }
+  
+  if (sampleType == 2016)
+  {
+	muHLTPaths2_ = 
+	{
+	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*",//DiMu
+	"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*",
+	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*",
+	"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*",
+	};
+	eleHLTPaths2_ = 
+	{
+	"HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
+	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
+	"HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v*",
+	};
+  }
+  else if (sampleType == 2017)
+  {
+	muHLTPaths2_ =
+	{
+	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*",
+	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*",
+	};
+	eleHLTPaths2_ = 
+	{
+	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
+	"HLT_DoubleEle33_CaloIdL_MW_v*",
+	};
+  }
+  else if (sampleType == 2018)
+  {
+	muHLTPaths2_ = 
+	{
+	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*",
+	};
+	eleHLTPaths2_ = 
+	{
+	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
+	"HLT_DoubleEle25_CaloIdL_MW_v*",
+	};
   }
   
   produces<pat::CompositeCandidateCollection>();
@@ -261,7 +306,7 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     myCand.addUserFloat("isBestZ",  (i==bestZidx));
     myCand.addUserFloat("isBestZmm",(i==bestZmmidx));
     myCand.addUserFloat("isBestZee",(i==bestZeeidx));
-    myCnad.addUserFloat("isBestZtt",(i==bestZttidx));
+    myCand.addUserFloat("isBestZtt",(i==bestZttidx));
     myCand.addUserFloat("isBestInColl", (i==bestLLidx));
 
     //--- Embed flags (ie cuts specified in the "flags" pset)
@@ -283,6 +328,27 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     if (abs(id0)==13 && abs(id1)==15 && !myCand.userFloat("d1.isGood_Mu"))
         goodTau=false;
     myCand.addUserFloat("isGoodTau",goodTau);
+
+    //HLTMatch
+    //The candidate passes HLTMatch if at least one lepton daughter matches the single trigger or both matches to the double trigger
+    bool muHLTMatch;
+    bool eleHLTMatch;
+    muHLTMatch=false;
+    eleHLTMatch=false;
+    if (abs(id0)==13 && abs(id1)==13):
+	if (myCand.userFloat("d0.HLTMatch1") || myCand.userFloat("d1.HLTMatch1"))
+	    muHLTMatch=true;
+	for (size_t j=0; j<muHLTPaths2_.size(); ++j)
+	    if (myCand.userFloat("d0."+muHLTPaths2_[j]) && myCand.userFloat("d1."+muHLTPaths2_[j]))
+		muHLTMatch=true;
+    if (abs(id0)==11 && abs(id1)==11):
+        if (myCand.userFloat("d0.HLTMatch1") || myCand.userFloat("d1.HLTMatch1"))
+            eleHLTMatch=true;
+        for (size_t j=0; j<eleHLTPaths2_.size(); ++j)
+            if (myCand.userFloat("d0."+eleHLTPaths2_[j]) && myCand.userFloat("d1."+eleHLTPaths2_[j]))
+                eleHLTMatch=true;
+    myCand.addUserFLoat("muHLTMatch",muHLTMatch);
+    myCand.addUserFloat("eleHLTMatch",eleHLTMatch);
 
   }
   

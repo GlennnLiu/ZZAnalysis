@@ -531,7 +531,7 @@ process.cleanSoftElectrons = cms.EDProducer("PATElectronCleaner",
 
 TAUCUT       = "tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
 SOSOTAU      = "tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 10"
-GOODTAU      = SOSOTAU + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
+GOODTAU      = SOSOTAU + " && tauID('byMediumDeepTau2017v2p1VSjet') == 1 && tauID('byVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
 GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
 GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
 GOODTAU_TAU  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
@@ -909,15 +909,14 @@ FOURGOODLEPTONS    =  ("userFloat('d0.GoodLeptons') && userFloat('d1.GoodLeptons
                        ) #ZZ made of 4 tight leptons passing SIP and ISO
 
 
-Z1MASS            = "daughter('Z1').mass>40 && daughter('Z1').mass<120"
-Z2MASS            = "daughter('Z2').mass>4  && daughter('Z2').mass<120" # (was > 4 in Synch) to deal with m12 cut at gen level
+Z1MASS            = "daughter('Z1').userFloat('goodMass')>40 && daughter('Z1').userFloat('goodMass')<120"
+Z2MASS            = "daughter('Z2').userFloat('goodMass')>4  && daughter('Z2').userFloat('goodMass')<120" # (was > 4 in Synch) to deal with m12 cut at gen level
 #MLL3On4_12        = "userFloat('mZa')>12" # mll>12 on 3/4 pairs;
 #MLLALLCOMB        = "userFloat('mLL6')>4" # mll>4 on 6/6 AF/AS pairs;
 MLLALLCOMB        = "userFloat('mLL4')>4" # mll>4 on 4/4 AF/OS pairs;
 SMARTMALLCOMB     = "userFloat('passSmartMLL')" # Require swapped-lepton Z2' to be >12 IF Z1' is SF/OS and closer to 91.1876 than mZ1
 PT20_10           = ("userFloat('pt1')>20 && userFloat('pt2')>10") #20/10 on any of the 4 leptons
 M4l100            = "mass>100"
-HLTMATCH	  = "userFloat('HLTMatch')"
 
 
 
@@ -992,8 +991,7 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
                       MLLALLCOMB      + "&&" +
                       PT20_10         + "&&" +
                       "mass>70"       + "&&" +
-                      SMARTMALLCOMB + "&&" +
-		      HLTMATCH + "&&" +
+                      SMARTMALLCOMB   + "&&" +
                       "daughter('Z2').userFloat('goodMass')>12"
                       )
 
