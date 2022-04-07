@@ -51,8 +51,11 @@ class EleFiller : public edm::EDProducer {
   edm::EDGetTokenT<vector<Vertex> > vtxToken;
   TRandom3 rgen_;
 
-  vector<string> eleHLTPaths_;
-  vector<string> eleHLTFilters_;
+  vector<string> eleHLTPaths1_;
+  vector<string> eleHLTPaths2_;
+  vector<string> eleHLTFilters1_;
+  vector<string> eleHLTFilters2_;
+
 };
 
 
@@ -70,21 +73,27 @@ EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
 
   if (sampleType == 2016)
   {
-	eleHLTPaths_ = 
+	eleHLTPaths2_ = 
 	{
 	"HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
 	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
 	"HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v*",
+	};
+	eleHLTPaths1_ = 
+	{
 	"HLT_Ele25_eta2p1_WPTight_Gsf_v*",
 	"HLT_Ele27_WPTight_Gsf_v*",
 	"HLT_Ele27_eta2p1_WPLoose_Gsf_v*",
 	"HLT_Ele32_eta2p1_WPTight_Gsf_v*",
 	}
-	eleFilters_ =
+	eleFilters2_ =
 	{
 	"hltEle17Ele12CaloIdLTrackIdLIsoVLDZFilter",
 	"hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter",
 	"hltDiEle33CaloIdLGsfTrkIdVLDPhiUnseededFilter",
+	};
+	eleFilters1_ =
+	{
 	"hltEle25erWPTightGsfTrackIsoFilter",
 	"hltEle27WPTightGsfTrackIsoFilter",
 	"hltEle27erWPLooseGsfTrackIsoFilter",
@@ -93,18 +102,24 @@ EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
   }
   else if (sampleType == 2017)
   {
-	eleHLTPaths_ = 
+	eleHLTPaths2_ = 
 	{
 	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
 	"HLT_DoubleEle33_CaloIdL_MW_v*",
+	};
+	eleHLTPaths1_ =
+	{
 	"HLT_Ele35_WPTight_Gsf_v*",
 	"HLT_Ele38_WPTight_Gsf_v*",
 	"HLT_Ele40_WPTight_Gsf_v*",
 	}
-        eleFilters_ =
+        eleFilters2_ =
         {
 	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg",//"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
 	"hltDiEle33CaloIdLMWPMS2UnseededFilter",
+	};
+	eleFilters1_ =
+	{
 	"hltEle35noerWPTightGsfTrackIsoFilter",
 	"hltEle38noerWPTightGsfTrackIsoFilter",
 	"hltEle40noerWPTightGsfTrackIsoFilter",
@@ -112,16 +127,22 @@ EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
   }
   else if (sampleType == 2018)
   {
-	eleHLTPaths_ = 
+	eleHLTPaths2_ = 
 	{
 	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
 	"HLT_DoubleEle25_CaloIdL_MW_v*",
+	};
+	eleHLTPaths1_ =
+	{
 	"HLT_Ele32_WPTight_Gsf_v*",
 	}
-        eleFilters_ =
+        eleFilters2_ =
         {
 	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg",//"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
 	"hltDiEle25CaloIdLMWPMS2UnseededFilter",
+	};
+	eleFilters1_ =
+	{
 	"hltEle32noerWPTightGsfTrackIsoFilter",
         };
   }
@@ -235,32 +256,46 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     bool isCrack = l.isGap();
      
     //--- Trigger matching
-    bool HLTMatch = false;
+    bool HLTMatch1 = false;
+    bool HLTMatch2 = false;
+    vector<bool> eachPath1;
+    vector<bool> eachPath2;
+    for ( size_t j = 0; j < eleHLTPaths1_.size(); ++j) 
+       eachPath1.push_back(false);
+    for ( size_t j = 0; j < eleHLTPaths2_.size(); ++j)
+       eachPath2.push_back(false);
+
     pat::TriggerObjectStandAloneCollection obj= l.triggerObjectMatches();
     for ( size_t iTrigObj = 0; iTrigObj < obj.size(); ++iTrigObj ) {
        obj.at( iTrigObj ).unpackFilterLabels(iEvent,*triggerResults );
     }
     for ( size_t i = 0; i < obj.size(); ++i ) {
-         for (size_t j = 0; j < eleHLTPaths_.size(); ++j ) {
-	    if (eleHLTPaths_[j] == "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*") {
-		if (obj.at( i ).hasFilterLabel( eleHLTFilters_[j]+"1Filter" ) || obj.at( i ).hasFilterLabel( eleHLTFilters_[j]+"2Filter" )) {
+	 for (size_t j = 0; j < eleHLTPaths1_.size(); ++j) {
+	    if (obj.at( i ).hasFilterLabel( eleHLTFilters1_[j] )) {
+		HLTMatch1=true;
+		eachPath1[j]=true;
+	    }
+	 }
+         for (size_t j = 0; j < eleHLTPaths2_.size(); ++j ) {
+	    if (eleHLTPaths2_[j] == "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*") {
+		if (obj.at( i ).hasFilterLabel( eleHLTFilters2_[j]+"1Filter" ) || obj.at( i ).hasFilterLabel( eleHLTFilters2_[j]+"2Filter" )) {
 		    HLTMatch=true;
-		    l.addUserFloat(eleHLTPaths_[j],true);
+		    eachPath2[j]=true;
 		}
-		else
-		    l.addUserFloat(eleHLTPaths_[j],false);
 	    }
 	    else {
-                if (obj.at( i ).hasFilterLabel( eleHLTFilters_[j] )) {
+                if (obj.at( i ).hasFilterLabel( eleHLTFilters2_[j] )) {
                     HLTMatch=true;
-                    l.addUserFloat(eleHLTPaths_[j],true);
+                    eachPath2[j]=true;
                 }
-                else
-                    l.addUserFloat(eleHLTPaths_[j],false);
 	    }
          }
       }
 
+    for ( size_t j = 0; j < eleHLTPaths1_.size(); ++j)
+       l.addUserFloat(eleHLTPaths1_[j], eachPath1[j]);
+    for ( size_t j = 0; j < eleHLTPaths2_.size(); ++j)
+       l.addUserFloat(eleHLTPaths2_[j], eachPath2[j]);
 	 
      
     //-- Scale and smearing corrections are now stored in the miniAOD https://twiki.cern.ch/twiki/bin/view/CMS/EgammaMiniAODV2#Energy_Scale_and_Smearing

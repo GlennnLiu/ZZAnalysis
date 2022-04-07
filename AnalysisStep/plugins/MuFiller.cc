@@ -83,14 +83,14 @@ flags(iConfig.getParameter<edm::ParameterSet>("flags"))
    // Trigger matching
    if (sampleType == 2016)
    {
-	muHLTPaths1_ = 
+	muHLTPaths2_ = 
 	{
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*",//DiMu
 	"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*",
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*",
 	"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*",
 	};
-	muHLTPaths2_ =
+	muHLTPaths1_ =
 	{
 	"HLT_IsoMu20_v*",//SingleMu
 	"HLT_IsoTkMu20_v*",
@@ -99,14 +99,14 @@ flags(iConfig.getParameter<edm::ParameterSet>("flags"))
 	"HLT_IsoMu24_v*",
 	"HLT_IsoTkMu24_v*",
 	};
-	muHLTFilters1_ =
+	muHLTFilters2_ =
 	{
 	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4DzFiltered0p2",
 	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4DzFiltered0p2",
 	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4",
 	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4",
 	};
-	muHLTFilters2_ =
+	muHLTFilters1_ =
 	{
 	"hltL3crIsoL1sMu18L1f0L2f10QL3f20QL3trkIsoFiltered0p09",
 	"hltL3fL1sMu18L1f0Tkf20QL3trkIsoFiltered0p09",
@@ -118,40 +118,40 @@ flags(iConfig.getParameter<edm::ParameterSet>("flags"))
    }
    else if (sampleType == 2017)
    {
-        muHLTPaths1_ =
+        muHLTPaths2_ =
 	{
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*",
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*",
 	};
-	muHLTPaths2_ =
+	muHLTPaths1_ =
 	{
 	"HLT_IsoMu27_v*",
 	};
-	muHLTFilters1_ =
+	muHLTFilters2_ =
         {
 	"hltDiMuon178Mass3p8Filtered",
 	"hltDiMuon178Mass8Filtered",
 	};
-	muHLTFilters2_ =
+	muHLTFilters1_ =
 	{
 	"hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p09",
         };
    }
    else if (sampleType == 2018)
    {
-	muHLTPaths1_ = 
+	muHLTPaths2_ = 
 	{
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*",
 	};
-	muHLTPaths2_ =
+	muHLTPaths1_ =
 	{
 	"HLT_IsoMu24_v*",
 	};
-	muHLTFilters1_ =
+	muHLTFilters2_ =
         {
 	"hltDiMuon178Mass3p8Filtered",
 	};
-	muHLTFilters2_ =
+	muHLTFilters1_ =
 	{
 	"hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09",
         };
@@ -318,17 +318,13 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    if (obj.at( i ).hasFilterLabel( muHLTFilters1_[j] )) {
 		HLTMatch1=true;
 		eachPath1[j]=true;
-		//l.addUserFloat(muHLTPaths1_[j],true);
 	    }
-		//l.addUserFloat(muHLTPaths1_[j],false);
 	 }
 	 for (size_t j = 0; j < muHLTPaths2_.size(); j++) {
 	    if (obj.at( i ).hasFilterLabel( muHLTFilters2_[j] )) {
                 HLTMatch2=true;
 		eachPath2[j]=true;
-                //l.addUserFloat(muHLTPaths2_[j],true);
             }
-                //l.addUserFloat(muHLTPaths2_[j],false);
          }
       }
       
