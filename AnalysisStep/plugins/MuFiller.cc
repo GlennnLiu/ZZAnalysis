@@ -58,8 +58,10 @@ class MuFiller : public edm::EDProducer {
    MuonGBRForestReader *r;
    
    //Trigger matching
-   vector<string> muHLTPaths_;
-   vector<string> muHLTFilters_;
+   vector<string> muHLTPaths1_;//single mu
+   vector<string> muHLTPaths2_;//double mu
+   vector<string> muHLTFilters1_;
+   vector<string> muHLTFilters2_;
 };
 
 
@@ -81,25 +83,31 @@ flags(iConfig.getParameter<edm::ParameterSet>("flags"))
    // Trigger matching
    if (sampleType == 2016)
    {
-	muHLTPaths_ = 
+	muHLTPaths1_ = 
 	{
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*",//DiMu
 	"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*",
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*",
 	"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*",
+	};
+	muHLTPaths2_ =
+	{
 	"HLT_IsoMu20_v*",//SingleMu
 	"HLT_IsoTkMu20_v*",
 	"HLT_IsoMu22_v*",
 	"HLT_IsoTkMu22_v*",
 	"HLT_IsoMu24_v*",
-	"HLT_IsoTkMu24_v*"
+	"HLT_IsoTkMu24_v*",
 	};
-	muHLTFilters_ =
+	muHLTFilters1_ =
 	{
 	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4DzFiltered0p2",
 	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4DzFiltered0p2",
 	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4",
 	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4",
+	};
+	muHLTFilters2_ =
+	{
 	"hltL3crIsoL1sMu18L1f0L2f10QL3f20QL3trkIsoFiltered0p09",
 	"hltL3fL1sMu18L1f0Tkf20QL3trkIsoFiltered0p09",
 	"hltL3crIsoL1sMu20L1f0L2f10QL3f22QL3trkIsoFiltered0p09",
@@ -110,29 +118,41 @@ flags(iConfig.getParameter<edm::ParameterSet>("flags"))
    }
    else if (sampleType == 2017)
    {
-        muHLTPaths_ =
+        muHLTPaths1_ =
 	{
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*",
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*",
+	};
+	muHLTPaths2_ =
+	{
 	"HLT_IsoMu27_v*",
 	};
-	muHLTFilters_ =
+	muHLTFilters1_ =
         {
 	"hltDiMuon178Mass3p8Filtered",
 	"hltDiMuon178Mass8Filtered",
+	};
+	muHLTFilters2_ =
+	{
 	"hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p09",
         };
    }
    else if (sampleType == 2018)
    {
-	muHLTPaths_ = 
+	muHLTPaths1_ = 
 	{
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*",
+	};
+	muHLTPaths2_ =
+	{
 	"HLT_IsoMu24_v*",
 	};
-	muHLTFilters_ =
+	muHLTFilters1_ =
         {
 	"hltDiMuon178Mass3p8Filtered",
+	};
+	muHLTFilters2_ =
+	{
 	"hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09",
         };
    }
@@ -280,21 +300,42 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       
       //--- Trigger matching
-      bool HLTMatch = false;
+      bool HLTMatch1 = false;
+      bool HLTMathc2 = false;
+      vector<bool> eachPath1;
+      vector<bool> eachPath2;
+      for ( size_t j = 0; j < muHLTPaths1_.size(); ++j) 
+	 eachPath1.push_back(false);
+      for ( size_t j = 0; j < muHLTPaths2_.size(); ++j)
+         eachPath2.push_back(false);
+
       pat::TriggerObjectStandAloneCollection obj= l.triggerObjectMatches();
       for ( size_t iTrigObj = 0; iTrigObj < obj.size(); ++iTrigObj ) {
          obj.at( iTrigObj ).unpackFilterLabels(iEvent,*triggerResults );
       }
       for ( size_t i = 0; i < obj.size(); ++i ) {
-	 for (size_t j = 0; j < muHLTPaths_.size(); j++) {
-	    if (obj.at( i ).hasFilterLabel( muHLTFilters_[j] )) {
-		HLTMatch=true;
-		l.addUserFloat(muHLTPaths_[j],true);
+	 for (size_t j = 0; j < muHLTPaths1_.size(); j++) {
+	    if (obj.at( i ).hasFilterLabel( muHLTFilters1_[j] )) {
+		HLTMatch1=true;
+		eachPath1[j]=true;
+		//l.addUserFloat(muHLTPaths1_[j],true);
 	    }
-	    else
-		l.addUserFloat(muHLTPaths_[j],false);
+		//l.addUserFloat(muHLTPaths1_[j],false);
 	 }
+	 for (size_t j = 0; j < muHLTPaths2_.size(); j++) {
+	    if (obj.at( i ).hasFilterLabel( muHLTFilters2_[j] )) {
+                HLTMatch2=true;
+		eachPath2[j]=true;
+                //l.addUserFloat(muHLTPaths2_[j],true);
+            }
+                //l.addUserFloat(muHLTPaths2_[j],false);
+         }
       }
+      
+      for ( size_t j = 0; j < muHLTPaths1_.size(); ++j)
+         l.addUserFloat(muHLTPaths1_[j], eachPath1[j]);
+      for ( size_t j = 0; j < muHLTPaths2_.size(); ++j)
+         l.addUserFloat(muHLTPaths2_[j], eachPath2[j]);
 
       
       //--- Muon Timing
@@ -314,7 +355,8 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       l.addUserFloat("dz",dz);
       l.addUserFloat("BDT",BDT);
       l.addUserFloat("isBDT",isBDT);
-      l.addUserFloat("HLTMatch", HLTMatch);
+      l.addUserFloat("HLTMatch1", HLTMatch1);
+      l.addUserFloat("HLTMatch2", HLTMatch2);
       // l.addUserCand("MCMatch",genMatch); // FIXME
       l.addUserFloat("time",muontime);
       
