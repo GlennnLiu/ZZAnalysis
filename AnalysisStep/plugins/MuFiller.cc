@@ -301,7 +301,7 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       
       //--- Trigger matching
       bool HLTMatch1 = false;
-      bool HLTMathc2 = false;
+      bool HLTMatch2 = false;
       vector<bool> eachPath1;
       vector<bool> eachPath2;
       for ( size_t j = 0; j < muHLTPaths1_.size(); ++j) 

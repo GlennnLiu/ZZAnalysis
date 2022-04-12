@@ -43,6 +43,7 @@ class EleFiller : public edm::EDProducer {
   virtual void endJob(){};
 
   edm::EDGetTokenT<pat::ElectronRefVector> electronToken;
+  const edm::EDGetTokenT< edm::TriggerResults > triggerResultsToken_;
   int sampleType;
   int setup;
   const StringCutObjectSelector<pat::Electron, true> cut;
@@ -61,6 +62,7 @@ class EleFiller : public edm::EDProducer {
 
 EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
   electronToken(consumes<pat::ElectronRefVector>(iConfig.getParameter<edm::InputTag>("src"))),
+  triggerResultsToken_( consumes< edm::TriggerResults >( iConfig.getParameter< edm::InputTag >( "TriggerResults" ) ) ),
   sampleType(iConfig.getParameter<int>("sampleType")),
   setup(iConfig.getParameter<int>("setup")),
   cut(iConfig.getParameter<std::string>("cut")),
@@ -85,14 +87,14 @@ EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
 	"HLT_Ele27_WPTight_Gsf_v*",
 	"HLT_Ele27_eta2p1_WPLoose_Gsf_v*",
 	"HLT_Ele32_eta2p1_WPTight_Gsf_v*",
-	}
-	eleFilters2_ =
+	};
+	eleHLTFilters2_ =
 	{
 	"hltEle17Ele12CaloIdLTrackIdLIsoVLDZFilter",
 	"hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter",
 	"hltDiEle33CaloIdLGsfTrkIdVLDPhiUnseededFilter",
 	};
-	eleFilters1_ =
+	eleHLTFilters1_ =
 	{
 	"hltEle25erWPTightGsfTrackIsoFilter",
 	"hltEle27WPTightGsfTrackIsoFilter",
@@ -112,13 +114,13 @@ EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
 	"HLT_Ele35_WPTight_Gsf_v*",
 	"HLT_Ele38_WPTight_Gsf_v*",
 	"HLT_Ele40_WPTight_Gsf_v*",
-	}
-        eleFilters2_ =
+	};
+        eleHLTFilters2_ =
         {
 	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg",//"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
 	"hltDiEle33CaloIdLMWPMS2UnseededFilter",
 	};
-	eleFilters1_ =
+	eleHLTFilters1_ =
 	{
 	"hltEle35noerWPTightGsfTrackIsoFilter",
 	"hltEle38noerWPTightGsfTrackIsoFilter",
@@ -135,13 +137,13 @@ EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
 	eleHLTPaths1_ =
 	{
 	"HLT_Ele32_WPTight_Gsf_v*",
-	}
-        eleFilters2_ =
+	};
+        eleHLTFilters2_ =
         {
 	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg",//"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
 	"hltDiEle25CaloIdLMWPMS2UnseededFilter",
 	};
-	eleFilters1_ =
+	eleHLTFilters1_ =
 	{
 	"hltEle32noerWPTightGsfTrackIsoFilter",
         };
@@ -159,6 +161,9 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   // Get leptons and rho
   edm::Handle<pat::ElectronRefVector> electronHandle;
   iEvent.getByToken(electronToken, electronHandle);
+
+  edm::Handle< edm::TriggerResults > triggerResults;
+  iEvent.getByToken( triggerResultsToken_, triggerResults );
 
   edm::Handle<double> rhoHandle;
   iEvent.getByToken(rhoToken, rhoHandle);
@@ -279,13 +284,13 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
          for (size_t j = 0; j < eleHLTPaths2_.size(); ++j ) {
 	    if (eleHLTPaths2_[j] == "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*") {
 		if (obj.at( i ).hasFilterLabel( eleHLTFilters2_[j]+"1Filter" ) || obj.at( i ).hasFilterLabel( eleHLTFilters2_[j]+"2Filter" )) {
-		    HLTMatch=true;
+		    HLTMatch2=true;
 		    eachPath2[j]=true;
 		}
 	    }
 	    else {
                 if (obj.at( i ).hasFilterLabel( eleHLTFilters2_[j] )) {
-                    HLTMatch=true;
+                    HLTMatch2=true;
                     eachPath2[j]=true;
                 }
 	    }
@@ -337,7 +342,8 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     l.addUserFloat("BDT",BDT);    
     l.addUserFloat("isBDT",isBDT);
     l.addUserFloat("isCrack",isCrack);
-    l.addUserFloat("HLTMatch", HLTMatch);
+    l.addUserFloat("HLTMatch1", HLTMatch1);
+    l.addUserFloat("HLTMatch2", HLTMatch2);
     l.addUserFloat("missingHit", missingHit);
     l.addUserFloat("uncorrected_pt",uncorrected_pt);
     l.addUserFloat("scale_total_up",scale_total_up);

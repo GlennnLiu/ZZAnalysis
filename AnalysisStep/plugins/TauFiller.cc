@@ -703,6 +703,7 @@ TauFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     l.addUserFloat("trackRefPt",trackRefPt); 
     
     l.addUserFloat("passCombRelIsoPFFSRCorr",true);//Fake to pass bareZCand cut
+    l.addUserFloat("SIP",0);//Fake
 
     // fill all userfloats
     for (unsigned int iuf = 0; iuf < tauFloatDiscrims_.size(); iuf++)

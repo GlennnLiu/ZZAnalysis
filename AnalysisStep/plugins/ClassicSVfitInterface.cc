@@ -38,11 +38,19 @@
 #include <TauAnalysis/ClassicSVfit/interface/ClassicSVfitIntegrand.h>
 #include <TauAnalysis/ClassicSVfit/interface/MeasuredTauLepton.h>
 #include <TauAnalysis/ClassicSVfit/interface/svFitHistogramAdapter.h>
-
+/*
+#include <TauAnalysis/ClassicSVfit/src/ClassicSVfit.cc>
+#include <TauAnalysis/ClassicSVfit/src/MeasuredTauLepton.cc>
+#include <TauAnalysis/ClassicSVfit/src/ClassicSVfitIntegrand.cc>
+#include <TauAnalysis/ClassicSVfit/src/svFitHistogramAdapter.cc>
+#include <TauAnalysis/ClassicSVfit/src/svFitAuxFunctions.cc>
+#include <TauAnalysis/ClassicSVfit/src/SVfitIntegratorMarkovChain.cc>
+*/
 #include <ZZAnalysis/AnalysisStep/interface/CutSet.h>
 #include <ZZAnalysis/AnalysisStep/interface/LeptonIsoHelper.h>
 #include <ZZAnalysis/AnalysisStep/interface/DaughterDataHelpers.h>
 #include <TLorentzVector.h>
+
 
 #include <vector>
 #include <string>
@@ -966,6 +974,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
     //cout << "-----------------" << endl;
 
     // add user floats: SVfit mass, met properties, etc..  
+    pair.addUserFloat("ComputeSV", ComputeSV);
     pair.addUserFloat("SVfitMass", (float) SVfitMass);
     pair.addUserFloat("SVfitTransverseMass", (float) SVfitTransverseMass);
     pair.addUserFloat("SVfit_pt", (float) SVpt);
