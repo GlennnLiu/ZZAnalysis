@@ -605,6 +605,7 @@ process.softTaus = cms.EDProducer("TauFiller",
 
    ApplyTESCentralCorr = cms.bool(APPLYTESCORRECTION),
    flags = cms.PSet(
+	ID = cms.string(GOODTAU),
         isGood = cms.string(GOODTAU),
 	isGood_Mu  = cms.string(GOODTAU_MU),
         isGood_Ele = cms.string(GOODTAU_ELE),
@@ -909,8 +910,8 @@ FOURGOODLEPTONS    =  ("userFloat('d0.GoodLeptons') && userFloat('d1.GoodLeptons
                        ) #ZZ made of 4 tight leptons passing SIP and ISO
 
 
-Z1MASS            = "daughter('Z1').userFloat('goodMass')>40 && daughter('Z1').userFloat('goodMass')<120"
-Z2MASS            = "daughter('Z2').userFloat('goodMass')>4  && daughter('Z2').userFloat('goodMass')<120" # (was > 4 in Synch) to deal with m12 cut at gen level
+Z1MASS            = "daughter('Z1').masterClone.userFloat('goodMass')>40 && daughter('Z1').masterClone.userFloat('goodMass')<120"
+Z2MASS            = "daughter('Z2').masterClone.userFloat('goodMass')>4  && daughter('Z2').masterClone.userFloat('goodMass')<120" # (was > 4 in Synch) to deal with m12 cut at gen level
 #MLL3On4_12        = "userFloat('mZa')>12" # mll>12 on 3/4 pairs;
 #MLLALLCOMB        = "userFloat('mLL6')>4" # mll>4 on 6/6 AF/AS pairs;
 MLLALLCOMB        = "userFloat('mLL4')>4" # mll>4 on 4/4 AF/OS pairs;
@@ -992,7 +993,7 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
                       PT20_10         + "&&" +
                       "mass>70"       + "&&" +
                       SMARTMALLCOMB   + "&&" +
-                      "daughter('Z2').userFloat('goodMass')>12"
+                      "daughter('Z2').masterClone.userFloat('goodMass')>12"
                       )
 
     SR = BESTCAND_AMONG
@@ -1034,6 +1035,8 @@ process.bareZZCand= cms.EDProducer("CandViewShallowCloneCombiner",
 )
 process.ZZCand = cms.EDProducer("ZZCandidateFiller",
     src = cms.InputTag("bareZZCand"),
+    srcMET     = srcMETTag,
+    srcCov     = cms.InputTag("METSignificance", "METCovariance"),
     sampleType = cms.int32(SAMPLE_TYPE),
     setup = cms.int32(LEPTON_SETUP),
     superMelaMass = cms.double(SUPERMELA_MASS),
@@ -1065,17 +1068,21 @@ process.ZZCand = cms.EDProducer("ZZCandidateFiller",
 ### so we can use the same cuts as for the SR.
 ### ----------------------------------------------------------------------
 
-Z2MM = "abs(daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId())==169" #Z2 = mumu
-Z2EE = "abs(daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId())==121" #Z2 = ee
-Z2LL_SS = "daughter(1).daughter(0).pdgId()==daughter(1).daughter(1).pdgId()"       #Z2 = same-sign, same-flavour
-Z2LL_OS = "(daughter(1).daughter(0).pdgId + daughter(1).daughter(1).pdgId) == 0"   #Z2 = l+l-
-Z2MM_OS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()==-169" #Z2 = mu+mu-
-Z2MM_SS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()== 169" #Z2 = mu-mu-/mu+mu+
-Z2EE_OS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()==-121" #Z2 = e+e-
-Z2EE_SS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()== 121" #Z2 = e-e-/e+e+
-Z2ID    = "userFloat('d1.d0.ID')     && userFloat('d1.d1.ID')"                    #ID on LL leptons
-Z2SIP   = "userFloat('d1.d0.SIP')< 4 && userFloat('d1.d1.SIP')< 4"                #SIP on LL leptons
-CR_Z2MASS = "daughter(1).mass>4  && daughter(1).mass<120"                        #Mass on LL; cut at 4
+Z2MM = "abs(daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId())==169" 		#Z2 = mumu
+Z2EE = "abs(daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId())==121" 		#Z2 = ee
+Z2TT = "(abs(daughter(1).daughter(0).pdgId())==15 || abs(daughter(1).daughter(1).pdgId())==15)" #Z2 = tautau
+Z2LL = "(" + Z2MM + "||" + Z2EE + "||" + Z2TT + ")"						#Z2 = mumu, ee, tautau
+Z2LL_SS = Z2LL + " && daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()>0"	#Z2 = same-sign
+Z2LL_OS = Z2LL + " && daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()<0"   	#Z2 = l+l-
+Z2MM_OS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()==-169" 		#Z2 = mu+mu-
+Z2MM_SS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()== 169" 		#Z2 = mu-mu-/mu+mu+
+Z2EE_OS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()==-121" 		#Z2 = e+e-
+Z2EE_SS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()== 121" 		#Z2 = e-e-/e+e+
+Z2TT_OS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()<0"		#Z2 = etau, mutau, tautau, OS
+Z2TT_SS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()>0"		#Z2 = etau, mutau, tautau, SS
+Z2ID    = "userFloat('d1.d0.ID')     && userFloat('d1.d1.ID')"                    		#ID on LL leptons
+Z2SIP   = "userFloat('d1.d0.SIP')< 4 && userFloat('d1.d1.SIP')< 4"                		#SIP on LL leptons, probably need to be modified because taus don't have SIP.
+CR_Z2MASS = "daughter(1).userFloat('goodMass')>4  && daughter(1).userFloat('goodMass')<120"	#Mass on LL; cut at 4
 
 
 # Define cuts for selection of the candidates among which the best one is chosen.
@@ -1098,14 +1105,14 @@ elif SELSETUP == "allCutsAtOnce":
 elif SELSETUP == "allCutsAtOncePlusMZb":
     CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&&" + "mass>70" + "&&" + "daughter(1).mass>12" + "&&" + "userFloat('mZb')>12"
 elif SELSETUP == "allCutsAtOncePlusSmart":
-    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&&" + "mass>70" + "&&" + "daughter(1).mass>12" + "&&" + SMARTMALLCOMB
+    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&&" + "mass>70" + "&&" + "daughter(1).masterClone.userFloat('goodMass')>12" + "&&" + SMARTMALLCOMB
 
 
 # Base for the selection cut applied on the best candidate. This almost fully (except for M4l100) overlaps with the cuts defined above, except for startegies where the best candidate is chosen at the beginning (Legacy, allCutsAtOnceButMZ2).
 CR_BASESEL = (CR_Z2MASS + "&&" +              # mass cuts on LL
               MLLALLCOMB + "&&" +             # mass cut on all lepton pairs
               PT20_10    + "&&" +             # pT> 20/10 over all 4 l
-              "daughter(1).mass>12 &&" +      # mZ2 >12
+              "daughter(1).userFloat('goodMass')>12 &&" +      # mZ2 >12
               "mass>70" )                     # m4l cut
 
 ##### CR based on Z+2 opposite sign leptons that pass the loose selection #####
