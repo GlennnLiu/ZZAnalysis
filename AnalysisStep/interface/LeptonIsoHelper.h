@@ -12,6 +12,7 @@
 #include <DataFormats/PatCandidates/interface/Muon.h>
 #include <DataFormats/PatCandidates/interface/Electron.h>
 #include <DataFormats/PatCandidates/interface/Photon.h>
+#include <DataFormats/PatCandidates/interface/Tau.h>
 
 #include <DataFormats/ParticleFlowCandidate/interface/PFCandidate.h>
 
@@ -36,6 +37,8 @@ namespace LeptonIsoHelper {
   
   /// Generic version, assuming that Lep is a PATObject; calls one of the above
   float combRelIsoPF(int sampleType, int setup, double rho, const reco::Candidate* lep, float fsr=0, int correctionType=-1);
+
+  float combRelIsoPF(const pat::Tau& l);
 
   // Compute FSR isolation
   void fsrIso(const reco::PFCandidate* photon, edm::Handle<edm::View<pat::PackedCandidate> > pfcands, double& ptSumNe, double& ptSumCh, double& ptSumChByWorstPV);

@@ -23,8 +23,14 @@ namespace userdatahelpers {
   float getUserFloat(const reco::Candidate* c, const char* name);
 
   /// Test if the userFloat "name" from a reco::Candidate c exists
-  int hasUserFloat(const reco::Candidate* c, const char* name);
+  bool hasUserFloat(const reco::Candidate* c, const char* name);
 
+  /// Retrieve the userInt "name" from a reco::Candidate c
+  int getUserInt(const reco::Candidate* c, const char* name);
+
+  /// Test if the userFloat "name" from a reco::Candidate c exists
+  bool hasUserInt(const reco::Candidate* c, const char* name);
+  
   /// Retrieve matched photons stored as userData
   const PhotonPtrVector* getUserPhotons(const reco::Candidate* c);
 
@@ -67,6 +73,6 @@ namespace userdatahelpers {
 			std::vector<const reco::Candidate*>& fsr,
 			std::vector<short>& fsrIndex);
 
-
+  bool isAncestor(const reco::Candidate* ancestor, const reco::Candidate * particle);
 }
 #endif
