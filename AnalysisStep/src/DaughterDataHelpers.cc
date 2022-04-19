@@ -3,7 +3,8 @@
 #include <DataFormats/PatCandidates/interface/CompositeCandidate.h>
 #include <DataFormats/PatCandidates/interface/Muon.h>
 #include <DataFormats/PatCandidates/interface/Electron.h>
-
+#include <DataFormats/PatCandidates/interface/Photon.h>
+#include <DataFormats/PatCandidates/interface/Tau.h>
 
 using namespace std;
 using namespace reco;
@@ -41,7 +42,9 @@ float userdatahelpers::getUserFloat(const reco::Candidate* c, const char* name){
     return ele->userFloat(name);
   } else if (const pat::Photon* ele = dynamic_cast<const pat::Photon*>(c)) {
     return ele->userFloat(name);
-  } else if (const pat::CompositeCandidate* cc = dynamic_cast<const pat::CompositeCandidate*>(c)) {
+  } else if (const pat::Tau* tau = dynamic_cast<const pat::Tau*>(c)) {
+    return tau->userFloat(name);
+  }  else if (const pat::CompositeCandidate* cc = dynamic_cast<const pat::CompositeCandidate*>(c)) {
     return cc->userFloat(name);
   }
   edm::LogError("") << "userdatahelpers::getUserFloat: Unsupported daughter type";
@@ -49,7 +52,7 @@ float userdatahelpers::getUserFloat(const reco::Candidate* c, const char* name){
   return 0;
 }
 
-int userdatahelpers::hasUserFloat(const reco::Candidate* c, const char* name){
+bool userdatahelpers::hasUserFloat(const reco::Candidate* c, const char* name){
   if(c->hasMasterClone()) c = c->masterClone().get();
   if (const pat::Muon* mu = dynamic_cast<const pat::Muon*>(c)) {
     return mu->hasUserFloat(name);
@@ -57,12 +60,53 @@ int userdatahelpers::hasUserFloat(const reco::Candidate* c, const char* name){
     return ele->hasUserFloat(name);
   } else if (const pat::Photon* ele = dynamic_cast<const pat::Photon*>(c)) {
     return ele->hasUserFloat(name);
-  } else if (const pat::CompositeCandidate* cc = dynamic_cast<const pat::CompositeCandidate*>(c)) {
+  } else if (const pat::Tau* tau = dynamic_cast<const pat::Tau*>(c)) {
+    return tau->hasUserFloat(name);
+  }  else if (const pat::CompositeCandidate* cc = dynamic_cast<const pat::CompositeCandidate*>(c)) {
     return cc->hasUserFloat(name);
   }
   edm::LogError("") << "userdatahelpers::hasUserFloat: Unsupported daughter type";
 
-  return -1;
+  return false;
+}
+
+int userdatahelpers::getUserInt(const reco::Candidate* c, const char* name){
+  const reco::Candidate* d;
+  if(c->hasMasterClone()) d = c->masterClone().get();
+  else d = c;
+  if (const pat::Muon* mu = dynamic_cast<const pat::Muon*>(d)) {
+    return mu->userInt(name);
+  } else if (const pat::Electron* ele = dynamic_cast<const pat::Electron*>(d)) {
+    return ele->userInt(name);
+  } else if (const pat::Photon* ele = dynamic_cast<const pat::Photon*>(d)) {
+    return ele->userInt(name);
+  } else if (const pat::Tau* tau = dynamic_cast<const pat::Tau*>(d)) {
+    return tau->userInt(name);
+  } else if (const pat::CompositeCandidate* cc = dynamic_cast<const pat::CompositeCandidate*>(d)) {
+    return cc->userInt(name);
+  }
+  edm::LogError("") << "userdatahelpers::hasUserInt: Unsupported daughter type";
+  return 0;
+}
+
+bool  userdatahelpers::hasUserInt(const reco::Candidate* c, const char* name)
+{
+  const reco::Candidate* d;
+  if(c->hasMasterClone()) d = c->masterClone().get();
+  else d = c;
+  if (const pat::Muon* mu = dynamic_cast<const pat::Muon*>(d)) {
+    return mu->hasUserInt(name);
+  } else if (const pat::Electron* ele = dynamic_cast<const pat::Electron*>(d)) {
+    return ele->hasUserInt(name);
+  } else if (const pat::Photon* ele = dynamic_cast<const pat::Photon*>(d)) {
+    return ele->hasUserInt(name);
+  }  else if (const pat::Tau* tau = dynamic_cast<const pat::Tau*>(d)) {
+    return tau->hasUserInt(name);
+  } else if (const pat::CompositeCandidate* cc = dynamic_cast<const pat::CompositeCandidate*>(d)) {
+    return cc->hasUserInt(name);
+  }
+  edm::LogError("") << "userdatahelpers::hasUserInt: Unsupported daughter type";
+  return false;  
 }
 
 const PhotonPtrVector*  
@@ -211,3 +255,16 @@ userdatahelpers::getSortedZLeptons(const pat::CompositeCandidate& cand, vector<c
 
 }
 
+bool userdatahelpers::isAncestor(const reco::Candidate* ancestor, const reco::Candidate * particle)
+{
+//particle is already the ancestor
+    if(ancestor == particle ) return true;
+
+//otherwise loop on mothers, if any and return true if the ancestor is found
+    for(size_t i=0;i< particle->numberOfMothers();i++)
+    {
+	if(isAncestor(ancestor,particle->mother(i))) return true;
+    }
+//if we did not return yet, then particle and ancestor are not relatives
+    return false;
+}

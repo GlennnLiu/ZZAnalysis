@@ -205,6 +205,17 @@ float LeptonIsoHelper::combRelIsoPF(int sampleType, int setup, double rho, const
   return 0;
 }
 
+float LeptonIsoHelper::combRelIsoPF(const pat::Tau& l) {
+
+  float PFChargedHadIso   = l.tauID ("chargedIsoPtSum");
+  float PFNeutralHadIso   = l.tauID ("neutralIsoPtSum");
+  float PFPhotonIso       = 0;//l.photonIso();
+  float PFPUChargedHadIso = l.tauID ("puCorrPtSum");
+
+  return  (PFChargedHadIso + max(0., PFNeutralHadIso + PFPhotonIso - 0.5*PFPUChargedHadIso))/l.pt();
+
+}
+
 
 // Adapted from Hengne's implementation at: https://github.com/VBF-HZZ/UFHZZAnalysisRun2/blob/csa14/UFHZZ4LAna/interface/HZZ4LHelper.h#L3525
 void LeptonIsoHelper::fsrIso(const reco::PFCandidate* photon, edm::Handle<edm::View<pat::PackedCandidate> > pfcands, double& ptSumNe, double& ptSumCh, double & ptSumChByWorstPV) {
