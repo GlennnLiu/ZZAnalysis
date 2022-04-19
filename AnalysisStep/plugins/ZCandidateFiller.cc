@@ -52,7 +52,7 @@ class ZCandidateFiller : public edm::EDProducer {
   bool embedDaughterFloats;
 
   vector<string> muHLTPaths2_;
-  vector<string{ eleHLTPaths2_;
+  vector<string> eleHLTPaths2_;
 };
 
 
@@ -315,6 +315,9 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       myCand.addUserFloat(cut->first,int((*(cut->second))(myCand)));
     }
     
+    int id0 = myCand.daughter(0)->pdgId();
+    int id1 = myCand.daughter(1)->pdgId();
+
     //In terms of etau, mutau, tautau, special good and iso requirements are needed
     bool goodTau = true;
     if (abs(id0)==15 && abs(id1)==11 && !myCand.userFloat("d0.isGood_Ele"))
@@ -335,19 +338,21 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     bool eleHLTMatch;
     muHLTMatch=false;
     eleHLTMatch=false;
-    if (abs(id0)==13 && abs(id1)==13):
+    if (abs(id0)==13 && abs(id1)==13) {
 	if (myCand.userFloat("d0.HLTMatch1") || myCand.userFloat("d1.HLTMatch1"))
 	    muHLTMatch=true;
 	for (size_t j=0; j<muHLTPaths2_.size(); ++j)
 	    if (myCand.userFloat("d0."+muHLTPaths2_[j]) && myCand.userFloat("d1."+muHLTPaths2_[j]))
 		muHLTMatch=true;
-    if (abs(id0)==11 && abs(id1)==11):
+    }
+    if (abs(id0)==11 && abs(id1)==11) {
         if (myCand.userFloat("d0.HLTMatch1") || myCand.userFloat("d1.HLTMatch1"))
             eleHLTMatch=true;
         for (size_t j=0; j<eleHLTPaths2_.size(); ++j)
             if (myCand.userFloat("d0."+eleHLTPaths2_[j]) && myCand.userFloat("d1."+eleHLTPaths2_[j]))
                 eleHLTMatch=true;
-    myCand.addUserFLoat("muHLTMatch",muHLTMatch);
+    }
+    myCand.addUserFloat("muHLTMatch",muHLTMatch);
     myCand.addUserFloat("eleHLTMatch",eleHLTMatch);
 
   }

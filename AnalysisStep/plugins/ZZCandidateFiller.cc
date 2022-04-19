@@ -73,7 +73,7 @@ private:
   virtual void endJob(){};
 
   void getPairMass(const reco::Candidate* lp, const reco::Candidate* lm, FSRToLepMap& photons, float& mass, int& ID);
-  void getSVMass(const reco::Candidate* l1, const reco::Gandidate* l2, 
+//  void getSVMass(const reco::Candidate* l1, const reco::Candidate* l2, 
   void buildMELA();
   void computeMELABranches();
   void updateMELAClusters_Common();
@@ -85,6 +85,9 @@ private:
   void clearMELA();
 
   edm::EDGetTokenT<edm::View<reco::CompositeCandidate> > candidateToken;
+  edm::EDGetTokenT<View<pat::MET> > metToken;
+  edm::EDGetTokenT<math::Error<2>::type> metCovToken;
+
   const CutSet<pat::CompositeCandidate> preBestCandSelection;
   const CutSet<pat::CompositeCandidate> cuts;
   int sampleType;
@@ -111,7 +114,7 @@ private:
   Comparators::ComparatorTypes bestCandType;
   KinZfitter *kinZfitter;
   edm::EDGetTokenT<edm::View<pat::Jet> > jetToken;
-  edm::EDGetTokenT<pat::METCollection> metToken;
+//  edm::EDGetTokenT<pat::METCollection> metToken;
   edm::EDGetTokenT<edm::View<reco::Candidate> > softLeptonToken;
   edm::EDGetTokenT<edm::View<reco::CompositeCandidate> > ZCandToken;
    
@@ -141,7 +144,8 @@ ZZCandidateFiller::ZZCandidateFiller(const edm::ParameterSet& iConfig) :
   buildMELA();
 
   jetToken = consumes<edm::View<pat::Jet> >(edm::InputTag("cleanJets"));
-  metToken = consumes<pat::METCollection>(edm::InputTag("ShiftMETcentral"));//("slimmedMETs"));
+  metToken = consumes<edm::View<pat::MET> >(iConfig.getParameter<edm::InputTag>("srcMET"));//("slimmedMETs"));
+  metCovToken = consumes<math::Error<2>::type>(iConfig.getParameter<edm::InputTag>("srcCov"));
   softLeptonToken = consumes<edm::View<reco::Candidate> >(edm::InputTag("softLeptons"));
   ZCandToken = consumes<edm::View<reco::CompositeCandidate> >(edm::InputTag("ZCand"));
 
@@ -214,6 +218,16 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     PFMET = metHandle->front().pt();
     PFMETPhi = metHandle->front().phi();
   }
+  TVector2 ptmiss(metHandle->front().px(),metHandle->front().py());
+  
+  Handle<math::Error<2>::type> covHandle;
+  iEvent.getByToken (metCovToken, covHandle);
+  TMatrixD covMET(2, 2);
+  covMET[0][0] = (*covHandle)(0,0);
+  covMET[1][0] = (*covHandle)(1,0);
+  covMET[0][1] = covMET[1][0]; // (1,0) is the only one saved
+  covMET[1][1] = (*covHandle)(1,1);
+  
   // FIXME: May need to correct MET in the MC and use the corrected MET to calculate the VH MEs
 
   // Get leptons (in order to store extra leptons)
@@ -263,7 +277,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     int iZ1 = 0;
     int iZ2 = 1;
     if (ZRolesByMass) {
-      if(std::abs(myCand.daughter(0)->userFloat("goodMass")-ZmassValue)>=std::abs(myCand.daughter(1)->userFloat("goodMass")-ZmassValue)){
+      if(std::abs(myCand.userFloat("d0.goodMass")-ZmassValue)>=std::abs(myCand.userFloat("d1.goodMass")-ZmassValue)){
         swap(iZ1,iZ2);
         ZRoles = &rolesZ2Z1;
       }
@@ -325,8 +339,8 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     const reco::Candidate* z = myCand.daughter(zIdx);
     const reco::Candidate* d = z->daughter(dauIdx);
     float combRelIsoPFCorr = userdatahelpers::getUserFloat(d,"combRelIsoPFFSRCorr");
-    if (d->isMuon()) worstMuIso  = max(worstMuIso,  combRelIsoPFCorr);
-    else             worstEleIso = max(worstEleIso, combRelIsoPFCorr);
+    if (d->isMuon())		worstMuIso  = max(worstMuIso,  combRelIsoPFCorr);
+    else if (d->isElectron())	worstEleIso = max(worstEleIso, combRelIsoPFCorr);
       }
       string base = (zIdx==0?"d0.":"d1.");
       myCand.addUserFloat(base+"worstMuIso",worstMuIso);
@@ -357,7 +371,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     math::XYZTLorentzVector p2m(Z2Lm->p4());
 
     // Build the other SF/OS combination
-    float mZ1= Z1->userFloat("goodMass");
+    float mZ1= userdatahelpers::getUserFloat(Z1,"goodMass");
     float mZa, mZb;
     int ZaID, ZbID;
     getPairMass(Z1Lp,Z2Lm,FSRMap,mZa,ZaID);
@@ -703,6 +717,107 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     //----------------------------------------------------------------------
 
     //----------------------------------------------------------------------
+    //--- kinematic fit for ZZ containing taus
+    
+    float ZZKmass = -999;
+    float ZZKChi2 = -999;
+    if (doKinFit){
+    bool wrongFit=false;
+    bool checkFlavor=false;
+    TLorentzVector p_L1, p_L2, p_Tau1, p_Tau2;
+    if ( (abs(id11)==15 or abs(id12)==15) && abs(id21)!=15 && abs(id22)!=15 ){
+	checkFlavor=true;
+	p_L1.SetPxPyPzE(p21.x(),p21.y(),p21.z(),p21.t());
+	p_L2.SetPxPyPzE(p22.x(),p22.y(),p22.z(),p22.t());
+	p_Tau1.SetPxPyPzE(p11.x(),p11.y(),p11.z(),p11.t());
+	p_Tau2.SetPxPyPzE(p12.x(),p12.y(),p12.z(),p12.t());
+    }
+    else if ( (abs(id21)==15 or abs(id22)==15) && abs(id11)!=15 && abs(id12)!=15 ){
+	checkFlavor=true;
+	p_L1.SetPxPyPzE(p11.x(),p11.y(),p11.z(),p11.t());
+        p_L2.SetPxPyPzE(p12.x(),p12.y(),p12.z(),p12.t());
+        p_Tau1.SetPxPyPzE(p21.x(),p21.y(),p21.z(),p21.t());
+        p_Tau2.SetPxPyPzE(p22.x(),p22.y(),p22.z(),p22.t());
+    }
+    if (checkFlavor){
+	HHKinFit2::HHKinFitMasterHeavyHiggs kinFits = HHKinFit2::HHKinFitMasterHeavyHiggs(p_L1, p_L2, p_Tau1, p_Tau2, ptmiss, covMET, 0., 0.);
+	for (int i = 0; i<10; i++){
+	    double mZ2=(i+1)*0.1*ZmassValue;
+	    kinFits.addHypo(ZmassValue,mZ2);
+	    kinFits.addHypo(mZ2,ZmassValue);
+	}
+	try{ kinFits.fit();}
+	catch(HHKinFit2::HHInvMConstraintException &e){
+	    cout<<"INVME THIS EVENT WAS WRONG, INV MASS CONSTRAIN EXCEPTION"<<endl;
+            wrongFit=true;
+	}
+	catch (HHKinFit2::HHEnergyRangeException &e){
+	    cout<<"ERANGE THIS EVENT WAS WRONG, ENERGY RANGE EXCEPTION"<<endl;
+	    wrongFit=true;
+	}
+	catch(HHKinFit2::HHEnergyConstraintException &e){
+	    cout<<"ECON THIS EVENT WAS WRONG, ENERGY CONSTRAIN EXCEPTION"<<endl;
+	    wrongFit=true;
+	}
+	if (!wrongHHK){
+	    ZZKmass=kinFits.getMH();
+	    ZZKChi2=kinFits.getChi2();
+	}
+	else{
+	    ZZKmass=-333.;
+	    ZZKChi2=-333.;
+	}
+    }
+    }
+
+
+    //----------------------------------------------------------------------
+    //--- Get the mass by combining l1l2 + SVFit momentum
+    bool checkFlavor=false;
+    float SVfitMass=-999., SVpt=-999., SVeta=-999., SVphi=-999.;
+    TLorentzVector pZtt,pZll,pZZ;
+    if ( (abs(id11)==15 or abs(id12)==15) && abs(id21)!=15 && abs(id22)!=15 ){
+	if (userdatahelpers::getUserFloat(Z1,"ComputeSV")){
+	    pZtt.SetPtEtaPhiM(userdatahelpers::getUserFloat(Z1,"SVpt"),userdatahelpers::getUserFloat(Z1,"SVeta"),userdatahelpers::getUserFloat(Z1,"SVphi"),userdatahelpers::getUserFloat(Z1,"SVfitMass"));
+	    pZll.SetPtEtaPhiM(Z2->pt(),Z2->eta(),Z2->phi(),Z2->m());
+	    checkFlavor=true;
+	}
+	else{
+	    SVfitMass=-666.;
+	    SVpt=-666.;
+	    SVeta=-666.;
+	    SVphi=-666.;
+	}
+    }
+    else if ( (abs(id21)==15 or abs(id22)==15) && abs(id11)!=15 && abs(id12)!=15 ){
+	if (userdatahelpers::getUserFloat(Z2,"ComputeSV")){
+            pZtt.SetPtEtaPhiM(userdatahelpers::getUserFloat(Z2,"SVpt"),userdatahelpers::getUserFloat(Z2,"SVeta"),userdatahelpers::getUserFloat(Z2,"SVphi"),userdatahelpers::getUserFloat(Z2,"SVfitMass"));
+	    pZll.SetPtEtaPhiM(Z1->pt(),Z1->eta(),Z1->phi(),Z1->m());
+	    checkFlavor=true;
+        }
+        else{
+            SVfitMass=-666.;
+            SVpt=-666.;
+            SVeta=-666.;
+            SVphi=-666.;
+        }
+    }
+    else{
+	SVfitMass=-333.;
+        SVpt=-333.;
+        SVeta=-333.;
+        SVphi=-333.;
+    }
+    if (checkFlavor){
+	pZZ=pZtt+pZll;
+	SVfitMass=pZZ.M();
+	SVpt=pZZ.Pt();
+	SVeta=pZZ.Eta();
+	SVphi=pZZ.Phi();
+    }
+
+	
+    //----------------------------------------------------------------------
     //--- kinematic refitting using Z mass constraint
 
     float ZZMassRefit = 0.;
@@ -824,14 +939,14 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     }
     
     bool goodTaus=false;
-    if (myCand.daughter(0)->userFloat("isGoodTau") && myCand.daughter(1)->userFloat("isGoodTau"))
+    if (myCand.userFloat("d0.isGoodTau") && myCand.userFloat("d1.isGoodTau"))
 	goodTaus=true;
     
     bool muHLTMatch=false;
     bool eleHLTMatch=false;
-    if (myCand.daughter(0)->userFloat("muHLTMatch") || myCand.daughter(1)->userFloat("muHLTMatch"))
+    if (myCand.userFloat("d0.muHLTMatch") || myCand.userFloat("d1.muHLTMatch"))
 	muHLTMatch=true;
-    if (myCand.daughter(0)->userFloat("eleHLTMatch") || myCand.daughter(1)->userFloat("eleHLTMatch"))
+    if (myCand.userFloat("d0.eleHLTMatch") || myCand.userFloat("d1.eleHLTMatch"))
 	eleHLTMatch=true;
 
     
@@ -840,6 +955,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     myCand.addUserFloat("candChannel",    candChannel);
     myCand.addUserFloat("SIP4",           SIP4);
     myCand.addUserFloat("pt1",            ptS.at(3).first); // leading-pT
+    myCand.addUserFloat("pdgId1",	  ptS.at(3).second);
     myCand.addUserFloat("pt2",            ptS.at(2).first); // sub-leading pT
     myCand.addUserFloat("pdgId2",         ptS.at(2).second); // sub-leading pT
     myCand.addUserFloat("mZa",            mZa);
