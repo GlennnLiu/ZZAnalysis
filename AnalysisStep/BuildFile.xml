@@ -13,6 +13,7 @@
 <use name="roofit"/>
 <use name="CLHEP"/>
 <use name="rootrflx"/>
+<use name="TauAnalysis/ClassicSVfit"/>
 
 <use name="MelaAnalytics/CandidateLOCaster"/>
 <use name="MelaAnalytics/EventContainer"/>

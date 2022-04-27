@@ -52,6 +52,7 @@ private:
   edm::EDGetTokenT<edm::View<pat::Jet> > jetToken_;
   edm::EDGetTokenT<edm::View<pat::Muon> > muonToken_;
   edm::EDGetTokenT<edm::View<pat::Electron> > electronToken_;
+  edm::EDGetTokenT<edm::View<pat::Tau> > tauToken_;
   edm::EDGetTokenT<edm::View<pat::CompositeCandidate> > diBosonToken_;
   bool cleaningFromDiboson_;
  
@@ -59,6 +60,7 @@ private:
   StringCutObjectSelector<pat::Jet> preselectionJ_;
   StringCutObjectSelector<pat::Muon> preselectionMu_;
   StringCutObjectSelector<pat::Electron> preselectionEle_;
+  StringCutObjectSelector<pat::Tau> preselectionTau_;
   StringCutObjectSelector<pat::CompositeCandidate> preselectionVV_;
 
   bool cleanFSRFromLeptons_;
@@ -84,10 +86,12 @@ JetsWithLeptonsRemover::JetsWithLeptonsRemover(const edm::ParameterSet & iConfig
   : jetToken_     (consumes<edm::View<pat::Jet> >(iConfig.getParameter<edm::InputTag>("Jets")))
   , muonToken_    (consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("Muons")))
   , electronToken_(consumes<edm::View<pat::Electron> >(iConfig.getParameter<edm::InputTag>("Electrons")))
+  , tauToken_(comsumes<edm::View<pat::Tau> >(iConfig.getParameters<edm::InputTag>("Taus")))
   , diBosonToken_ (consumes<edm::View<pat::CompositeCandidate> >(iConfig.getParameter<edm::InputTag>("Diboson")))
   , preselectionJ_    (iConfig.getParameter<std::string>("JetPreselection"))
   , preselectionMu_   (iConfig.getParameter<std::string>("MuonPreselection"))
   , preselectionEle_  (iConfig.getParameter<std::string>("ElectronPreselection"))
+  , preselectionTau_  (iConfig.getParameter<std::string>("TauPreselection"))
   , preselectionVV_   (iConfig.getParameter<std::string>("DiBosonPreselection"))
   , cleanFSRFromLeptons_   (iConfig.getParameter<bool>("cleanFSRFromLeptons"))
   , activateDebugPrintOuts_ (iConfig.getUntrackedParameter<bool>("DebugPrintOuts",false))   
@@ -303,7 +307,8 @@ bool JetsWithLeptonsRemover::checkLeptonJet(const edm::Event & event, const pat:
   if(cleaningFromDiboson_ && isMatchingWithZZLeptons(event,jet)) return true;
   
   if(isMatchingWith<pat::Muon>    (muonToken_,     preselectionMu_,  event, jet) || 
-     isMatchingWith<pat::Electron>(electronToken_, preselectionEle_, event, jet)) return true;
+     isMatchingWith<pat::Electron>(electronToken_, preselectionEle_, event, jet)
+     isMatchingWith<pat::Tau>     (tauToken_,      preselectionTau_, event, jet)) return true;
   
   return false;
 }

@@ -57,7 +57,10 @@ declareDefault("BESTCANDCOMPARATOR", "byBestKD", globals())
 declareDefault("KEEPLOOSECOMB", False, globals())
 
 # Activate the Z kinematic refit (very slow)
-declareDefault("KINREFIT", False, globals())
+declareDefault("KINFITOLD", False, globals())
+
+# ZZ kinematic fit
+declareDefault("KINFIT", True, globals())
 
 # Activate paths for loose electron categories
 declareDefault("ADDLOOSEELE", False, globals())
@@ -991,7 +994,7 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
                       Z2MASS          + "&&" +
                       MLLALLCOMB      + "&&" +
                       PT20_10         + "&&" +
-                      "mass>70"       + "&&" +
+                      "userFLoat('goodMass')>70"       + "&&" +
                       SMARTMALLCOMB   + "&&" +
                       "daughter('Z2').masterClone.userFloat('goodMass')>12"
                       )
@@ -1044,7 +1047,8 @@ process.ZZCand = cms.EDProducer("ZZCandidateFiller",
     bestCandAmong = cms.PSet(isBestCand = cms.string(BESTCAND_AMONG)),
     bestCandComparator = cms.string(BESTCANDCOMPARATOR),
     ZRolesByMass = cms.bool(True),
-    doKinFit = cms.bool(KINREFIT),
+    doKinFit = cms.bool(KINFIT),
+    doKinFitOld = cms.bool(KINFITOLD),
     flags = cms.PSet(
         GoodLeptons =  cms.string(FOURGOODLEPTONS),
         Z2Mass  = cms.string(Z2MASS),
@@ -1105,7 +1109,7 @@ elif SELSETUP == "allCutsAtOnce":
 elif SELSETUP == "allCutsAtOncePlusMZb":
     CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&&" + "mass>70" + "&&" + "daughter(1).mass>12" + "&&" + "userFloat('mZb')>12"
 elif SELSETUP == "allCutsAtOncePlusSmart":
-    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&&" + "mass>70" + "&&" + "daughter(1).masterClone.userFloat('goodMass')>12" + "&&" + SMARTMALLCOMB
+    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&&" + "userFloat('goodMass')>70" + "&&" + "daughter(1).masterClone.userFloat('goodMass')>12" + "&&" + SMARTMALLCOMB
 
 
 # Base for the selection cut applied on the best candidate. This almost fully (except for M4l100) overlaps with the cuts defined above, except for startegies where the best candidate is chosen at the beginning (Legacy, allCutsAtOnceButMZ2).
@@ -1113,7 +1117,7 @@ CR_BASESEL = (CR_Z2MASS + "&&" +              # mass cuts on LL
               MLLALLCOMB + "&&" +             # mass cut on all lepton pairs
               PT20_10    + "&&" +             # pT> 20/10 over all 4 l
               "daughter(1).userFloat('goodMass')>12 &&" +      # mZ2 >12
-              "mass>70" )                     # m4l cut
+              "userFLoat('goodMass')>70" )                     # m4l cut
 
 ##### CR based on Z+2 opposite sign leptons that pass the loose selection #####
 
@@ -1171,7 +1175,8 @@ process.ZLLCand = cms.EDProducer("ZZCandidateFiller",
 
     ),
     ZRolesByMass = cms.bool(False),  # daughter('Z1') = daughter(0)
-    doKinFit = cms.bool(KINREFIT),
+    doKinFit = cms.bool(KINFIT),
+    doKinFitOld = cms.bool(KINFITOLD),
     flags = cms.PSet(
       SR = cms.string(SR),
       CRZLLss = cms.string(CR_BASESEL),             #combine with proper isBestCRZLLss for AA ss/os CRss
@@ -1618,10 +1623,12 @@ process.cleanJets = cms.EDProducer("JetsWithLeptonsRemover",
                                    Jets      = cms.InputTag("dressedJets"),
                                    Muons     = cms.InputTag("appendPhotons:muons"),
                                    Electrons = cms.InputTag("appendPhotons:electrons"),
+				   Taus	     = cms.InputTag("softTaus"),
                                    Diboson   = cms.InputTag(""),
                                    JetPreselection      = cms.string(""),
                                    MuonPreselection = cms.string("userFloat('isGood') && userFloat('passCombRelIsoPFFSRCorr')"),
                                    ElectronPreselection = cms.string("userFloat('isGood')"),
+				   TauPreselection = cms.string("userFloat('isGood')"),
                                    DiBosonPreselection  = cms.string(""),
                                    MatchingType = cms.string("byDeltaR"),
                                    cleanFSRFromLeptons = cms.bool(True),
@@ -1761,6 +1768,7 @@ process.ZZCandFilter = cms.EDFilter("CandViewCountFilter",
 process.Candidates = cms.Path(
        process.muons             +
        process.electrons         + process.cleanSoftElectrons +
+       process.taus		 +
        process.fsrPhotons        + process.boostedFsrPhotons +
        process.appendPhotons     +
        process.softLeptons       +
