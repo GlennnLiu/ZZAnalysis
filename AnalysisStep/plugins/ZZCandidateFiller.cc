@@ -742,7 +742,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     //----------------------------------------------------------------------
     //--- kinematic fit for ZZ containing taus
     
-    float ZZKmass = -999;
+    float ZZKMass = -999;
     float ZZKChi2 = -999;
     if (doKinFit){
     bool wrongFit=false;
@@ -783,16 +783,16 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 	    wrongFit=true;
 	}
 	if (!wrongFit){
-	    ZZKmass=kinFits.getMH();
+	    ZZKMass=kinFits.getMH();
 	    ZZKChi2=kinFits.getChi2();
 	}
 	else{
-	    ZZKmass=-333.;
+	    ZZKMass=-333.;
 	    ZZKChi2=-333.;
 	}
     }
 
-    myCand.addUserFloat("ZZKmass",ZZKmass);
+    myCand.addUserFloat("ZZKMass",ZZKMass);
     myCand.addUserFloat("ZZKChi2",ZZKChi2);
     }
 
@@ -851,10 +851,10 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     //----------------------------------------------------------------------
     //--- Decide which 4l mass to be used
     float goodMass;
-    if (ZZKmass <= 0)
+    if (ZZKMass <= 0)
 	goodMass=myCand.mass();
     else
-	goodMass=ZZKmass;
+	goodMass=ZZKMass;
     myCand.addUserFloat("goodMass",goodMass);
 	
     //----------------------------------------------------------------------

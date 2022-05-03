@@ -86,6 +86,7 @@ namespace {
   bool writeJets = true;     // Write jets in the tree. FIXME: make this configurable
   bool writePhotons = true; // Write photons in the tree. FIXME: make this configurable
   bool addKinRefit = true;
+  bool addZZKinfit = true;
   bool addVtxFit = false;
   bool addFSRDetails = false;
   bool addQGLInputs = true;
@@ -100,6 +101,7 @@ namespace {
   Int_t LumiNumber  = 0;
   Short_t NRecoMu  = 0;
   Short_t NRecoEle  = 0;
+  Short_t NRecoTau  = 0;
   Short_t Nvtx  = 0;
   Short_t NObsInt  = 0;
   Float_t NTrueInt  = 0;
@@ -153,6 +155,15 @@ namespace {
   Float_t ZZEta  = 0;
   Float_t ZZPhi  = 0;
   Float_t ZZjjPt = 0;
+  // ZZ kinematic fit
+  Float_t ZZKMass  = 0;
+  Float_t ZZKChi2  = 0;
+  // SV fit
+  Float_t ZZSVMass  = 0;
+  Float_t ZZSVPt  = 0;
+  Float_t ZZSVEta = 0;
+  Float_t ZZSVPhi = 0;
+
   Int_t CRflag  = 0;
   Float_t Z1Mass  = 0;
   Float_t Z1Pt  = 0;
@@ -176,6 +187,28 @@ namespace {
   Float_t TLE_dR_Z = -1; // Delta-R between a TLE and the Z it does not belong to.
   Float_t TLE_min_dR_3l = 999; // Minimum DR between a TLE and any of the other leptons
   Short_t evtPassMETTrigger = 0;
+
+  //ZZ kinematic fit
+  Float_t ZZKMass  = 0;
+  Float_t ZZKChi2  = 0;
+  // SV fit
+  Float_t ZZSVMass  = 0;
+  Float_t ZZSVPt  = 0;
+  Float_t ZZSVEta = 0;
+  Float_t ZZSVPhi = 0;
+
+  Float_t Z1SVMass = 0;
+  Float_t Z1SVMt = 0;
+  Float_t Z1SVPt = 0;
+  Float_t Z1SVEta = 0;
+  Float_t Z1SVPhi = 0;
+  Float_t Z1SVMassUnc = 0;
+  Float_t Z1SVMtUnc = 0;
+  Float_t Z1SVPtUnc = 0;
+  Float_t Z1SVEtaUnc = 0;
+  Float_t Z1SVPhiUnc = 0;
+  Float_t Z1SVMETRho = 0;
+  Float_t Z1SVMETPhi = 0;
 
   std::vector<float> LepPt;
   std::vector<float> LepEta;
