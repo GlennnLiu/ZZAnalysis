@@ -604,7 +604,7 @@ process.softTaus = cms.EDProducer("TauFiller",
    genCollection = cms.InputTag("prunedGenParticles"),
    vtxCollection = cms.InputTag("goodPrimaryVertices"),
    cut = cms.string(TAUCUT),
-   discriminator = cms.string(TAUDISCRIMINATOR),
+   discriminator = cms.string("byIsolationMVA3oldDMwoLTraw"),#TAUDISCRIMINATOR),
 
    ApplyTESCentralCorr = cms.bool(APPLYTESCORRECTION),
    flags = cms.PSet(
@@ -994,7 +994,7 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
                       Z2MASS          + "&&" +
                       MLLALLCOMB      + "&&" +
                       PT20_10         + "&&" +
-                      "userFLoat('goodMass')>70"       + "&&" +
+                      "userFloat('goodMass')>70"       + "&&" +
                       SMARTMALLCOMB   + "&&" +
                       "daughter('Z2').masterClone.userFloat('goodMass')>12"
                       )

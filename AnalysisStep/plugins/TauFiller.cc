@@ -701,7 +701,8 @@ TauFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     l.addUserInt("numParticlesIsoCone",numParticlesIsoCone);
     l.addUserFloat("leadChargedParticlePt",leadChargedParticlePt);
     l.addUserFloat("trackRefPt",trackRefPt); 
-    
+   
+    l.addUserFloat("combRelIsoPFFSRCorr",combRelIsoPF); 
     l.addUserFloat("passCombRelIsoPFFSRCorr",true);//Fake to pass bareZCand cut
     l.addUserFloat("SIP",0);//Fake
 

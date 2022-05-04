@@ -87,6 +87,7 @@ namespace {
   bool writePhotons = true; // Write photons in the tree. FIXME: make this configurable
   bool addKinRefit = true;
   bool addZZKinfit = true;
+  bool addSVfit = true;
   bool addVtxFit = false;
   bool addFSRDetails = false;
   bool addQGLInputs = true;
@@ -155,15 +156,7 @@ namespace {
   Float_t ZZEta  = 0;
   Float_t ZZPhi  = 0;
   Float_t ZZjjPt = 0;
-  // ZZ kinematic fit
-  Float_t ZZKMass  = 0;
-  Float_t ZZKChi2  = 0;
-  // SV fit
-  Float_t ZZSVMass  = 0;
-  Float_t ZZSVPt  = 0;
-  Float_t ZZSVEta = 0;
-  Float_t ZZSVPhi = 0;
-
+  
   Int_t CRflag  = 0;
   Float_t Z1Mass  = 0;
   Float_t Z1Pt  = 0;
@@ -209,6 +202,22 @@ namespace {
   Float_t Z1SVPhiUnc = 0;
   Float_t Z1SVMETRho = 0;
   Float_t Z1SVMETPhi = 0;
+  Float_t Z1GoodMass = 0;
+
+  Float_t Z2SVMass = 0;
+  Float_t Z2SVMt = 0;
+  Float_t Z2VPt = 0;
+  Float_t Z2SVEta = 0;
+  Float_t Z2SVPhi = 0;
+  Float_t Z2SVMassUnc = 0;
+  Float_t Z2SVMtUnc = 0;
+  Float_t Z2SVPtUnc = 0;
+  Float_t Z2SVEtaUnc = 0;
+  Float_t Z2SVPhiUnc = 0;
+  Float_t Z2SVMETRho = 0;
+  Float_t Z2SVMETPhi = 0;
+  Float_t Z2GoodMass = 0;
+
 
   std::vector<float> LepPt;
   std::vector<float> LepEta;
@@ -245,6 +254,21 @@ namespace {
   std::vector<float> LepSigma_Rho_Dn;
   std::vector<float> LepSigma_Phi_Up;
   std::vector<float> LepSigma_Phi_Dn;
+
+//tau specified
+  std::vector<float> TauDecayMode;
+  std::vector<float> TauTES_p_Up;
+  std::vector<float> TauTES_p_Dn;
+  std::vector<float> TauTES_m_Up;
+  std::vector<float> TauTES_m_Dn;
+  std::vector<float> TauTES_e_Up;
+  std::vector<float> TauTES_e_Dn;
+  std::vector<float> TauFES_p_Up;
+  std::vector<float> TauFES_p_Dn;
+  std::vector<float> TauFES_m_Up;
+  std::vector<float> TauFES_m_Dn;
+  std::vector<float> TauFES_e_Up;
+  std::vector<float> TauFES_e_Dn;
 
 
   std::vector<float> fsrPt;
@@ -1733,6 +1757,10 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     ZZPhi = cand.p4().phi();
     
     ZZjjPt = cand.userFloat("ZZjjPt");
+    
+    ZZGoodMass = cand.userFloat("goodMass");
+    eleHLTMatch = cand.userFloat("eleHLTMatch");
+    muHLTMatch  = cand.userFloat("muHLTMatch");
 
     if(addKinRefit){
       if (cand.hasUserFloat("ZZMassRefit")) {
@@ -1744,6 +1772,16 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     if(addVtxFit){
       ZZMassCFit = cand.userFloat("CFitM");
       ZZChi2CFit = cand.userFloat("CFitChi2");
+    }
+    if(addZZKinfit){
+      ZZKMass  = cand.userFloat("ZZKMass");
+      ZZKChi2  = cand.userFloat("ZZKChi2");
+    }
+    if(addSVfit){
+      ZZSVMass	= cand.userFloat("SVfitMass");
+      ZZSVPt	= cand.userFloat("SVpt");
+      ZZSVEta 	= cand.userFloat("SVeta");
+      ZZSVPhi 	= cand.userFloat("SVphi");
     }
 
     DiJetMass  = cand.userFloat("DiJetMass");
@@ -1788,10 +1826,32 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   Z1Mass = Z1->mass();
   Z1Pt =   Z1->pt();
   Z1Flav =  getPdgId(Z1->daughter(0)) * getPdgId(Z1->daughter(1));
+  Z1GoodMass = userdatahelpers::getUserFloat(Z1,"goodMass");
+
+  if(addSVfit && userdatahelpers::hasUserFloat(Z1,"ComputeSV")){
+    if(userdatahelpers::getUserFloat(Z1,"ComputeSV")){
+	Z1SVMass	= userdatahelpers::getUserFloat(Z1,"SVfitMass");
+	Z1SVPt		= userdatahelpers::getUserFloat(Z1,"SVfit_pt");
+	Z1SVEta		= userdatahelpers::getUserFloat(Z1,"SVfit_eta");
+	Z1SVPhi		= userdatahelpers::getUserFloat(Z1,"SVfit_phi");
+	
+	Z1SVMt		= userdatahelpers::getUserFloat(Z1,"SVfitTransverseMass");
+	Z1SVMassUnc 	= userdatahelpers::getUserFloat(Z1,"SVfitMassUnc");
+	Z1SVMtUnc 	= userdatahelpers::getUserFloat(Z1,"SVfitTransverseMassUnc");
+	Z1SVPtUnc	= userdatahelpers::getUserFloat(Z1,"SVfit_ptUnc");
+	Z1SVEtaUnc	= userdatahelpers::getUserFloat(Z1,"SVfit_etaUnc");
+	Z1SVPhiUnc	= userdatahelpers::getUserFloat(Z1,"SVfit_phiUnc");
+	Z1SVMETRho	= userdatahelpers::getUserFloat(Z1,"SVfit_METRho");
+	Z1SVMETPhi	= userdatahelpers::getUserFloat(Z1,"SVfit_METPhi");
+    }
+  }
  
   Z2Mass = Z2->mass();
   Z2Pt =   Z2->pt();
   Z2Flav = theChannel==ZL ? getPdgId(Z2) : getPdgId(Z2->daughter(0)) * getPdgId(Z2->daughter(1));
+  if(userdatahelpers::hasUserFloat(Z2,"goodMass"){
+    Z2GoodMass = userdatahelpers::getUserFloat(Z2,"goodMass");
+  }
 
   const reco::Candidate* non_TLE_Z = nullptr;
   size_t TLE_index = 999;
@@ -1811,11 +1871,11 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     bool candPass70Z2Loose = cand.userFloat("Z2Mass") &&
                              cand.userFloat("MAllComb") &&
                              cand.userFloat("pt1")>20 && cand.userFloat("pt2")>10. &&
-                             ZZMass>70.;
+                             ZZGoodMass>70.;
     bool candPassFullSel70 = cand.userFloat("SR");
     bool candPassFullSel   = cand.userFloat("FullSel");
     bool candIsBest = cand.userFloat("isBestCand");
-    bool passMz_zz = (Z1Mass>60. && Z1Mass<120. && Z2Mass>60. && Z2Mass<120.);   //FIXME hardcoded cut
+    bool passMz_zz = (Z1GoodMass>60. && Z1GoodMass<120. && Z2GoodMass>60. && Z2GoodMass<120.);   //FIXME hardcoded cut
 
     if (candIsBest) {
       //    sel = 10; //FIXME see above
@@ -1871,27 +1931,27 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     Lepdz   .push_back( userdatahelpers::getUserFloat(leptons[i],"dz") );
     LepTime .push_back( lepFlav==13 ? userdatahelpers::getUserFloat(leptons[i],"time") : 0. );
     LepisID .push_back( userdatahelpers::getUserFloat(leptons[i],"ID") );
-    LepBDT  .push_back( userdatahelpers::getUserFloat(leptons[i],"BDT") );
+    LepBDT  .push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"BDT") : -99. );
     LepisCrack.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"isCrack") : 0 );
     LepMissingHit.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"missingHit") : 0 );
-    LepScale_Total_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"scale_total_up") );
-    LepScale_Total_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"scale_total_dn") );
+    LepScale_Total_Up.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"scale_total_up") );
+    LepScale_Total_Dn.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"scale_total_dn") );
     LepScale_Stat_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_stat_up") : -99. );
     LepScale_Stat_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_stat_dn") : -99. );
     LepScale_Syst_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_syst_up") : -99. );
     LepScale_Syst_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_syst_dn") : -99. );
     LepScale_Gain_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_gain_up") : -99. );
     LepScale_Gain_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_gain_dn") : -99. );
-    LepSigma_Total_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"sigma_total_up") );
-    LepSigma_Total_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"sigma_total_dn") );
+    LepSigma_Total_Up.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"sigma_total_up") );
+    LepSigma_Total_Dn.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"sigma_total_dn") );
     LepSigma_Rho_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"sigma_rho_up") : -99. );
     LepSigma_Rho_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"sigma_rho_dn") : -99. );
     LepSigma_Phi_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"sigma_phi_up") : -99. );
     LepSigma_Phi_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"sigma_phi_dn") : -99. );
     LepChargedHadIso.push_back( userdatahelpers::getUserFloat(leptons[i],"PFChargedHadIso") );
     LepNeutralHadIso.push_back( userdatahelpers::getUserFloat(leptons[i],"PFNeutralHadIso") );
-    LepPhotonIso.push_back( userdatahelpers::getUserFloat(leptons[i],"PFPhotonIso") );
-	  LepPUIsoComponent.push_back( lepFlav==13 ? userdatahelpers::getUserFloat(leptons[i],"PFPUChargedHadIso") : 0. );
+    LepPhotonIso.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"PFPhotonIso") : -99. );
+    LepPUIsoComponent.push_back( lepFlav==13 ? userdatahelpers::getUserFloat(leptons[i],"PFPUChargedHadIso") : 0. );
     LepCombRelIsoPF.push_back( combRelIsoPF[i] );
     LepisLoose.push_back(userdatahelpers::hasUserFloat(leptons[i],"isLoose") == 1 ? userdatahelpers::getUserFloat(leptons[i],"isLoose") : -2);
 
