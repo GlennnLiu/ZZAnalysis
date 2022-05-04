@@ -16,6 +16,8 @@
 #include <FWCore/ParameterSet/interface/ParameterSet.h>
 #include <FWCore/Framework/interface/ESHandle.h>
 
+#include <DataFormats/Common/interface/TriggerResults.h>
+
 #include <ZZAnalysis/AnalysisStep/interface/CutSet.h>
 #include <ZZAnalysis/AnalysisStep/interface/LeptonIsoHelper.h>
 

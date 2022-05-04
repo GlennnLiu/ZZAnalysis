@@ -18,6 +18,7 @@
 
 #include <DataFormats/PatCandidates/interface/Muon.h>
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include <DataFormats/Common/interface/TriggerResults.h>
 
 #include <ZZAnalysis/AnalysisStep/interface/CutSet.h>
 #include <ZZAnalysis/AnalysisStep/interface/LeptonIsoHelper.h>

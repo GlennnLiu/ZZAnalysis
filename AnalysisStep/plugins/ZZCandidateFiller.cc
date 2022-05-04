@@ -719,8 +719,8 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
           cleanedJetsPt30Jec[ijet]->p4().x()*jec_ratio.at(ijet),
           cleanedJetsPt30Jec[ijet]->p4().y()*jec_ratio.at(ijet),
           cleanedJetsPt30Jec[ijet]->p4().z()*jec_ratio.at(ijet),
-          cleanedJetsPt30Jec[ijet]->p4().t()*jec_ratio.at(ijet)
-          );
+	  cleanedJetsPt30Jec[ijet]->p4().t()*jec_ratio.at(ijet)
+ 	  );
         SimpleParticleCollection_t stableTopDaughters; // Just a collection with one jet as the top
         stableTopDaughters.push_back(SimpleParticle_t(0, jet));
         mela->appendTopCandidate(&stableTopDaughters);
@@ -1034,7 +1034,10 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     myCand.addUserFloat("DiJetFisher", DiJetFisher);
     
     myCand.addUserFloat("ZZjjPt", ZZjjPt);
-
+    
+    // MET
+    myCand.addUserFloat("MET", PFMET);
+    myCand.addUserFloat("METPhi", PFMETPhi);
     // MELA branches
     pushMELABranches(myCand);
 

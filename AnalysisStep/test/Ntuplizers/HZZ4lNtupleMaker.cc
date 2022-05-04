@@ -147,6 +147,7 @@ namespace {
   Short_t nCleanedJetsPt30BTagged_bTagSFUp  = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSFDn  = 0;
   Short_t trigWord  = 0;
+ 
   Float_t ZZMass  = 0;
   Float_t ZZMassErr  = 0;
   Float_t ZZMassErrCorr  = 0;
@@ -156,7 +157,11 @@ namespace {
   Float_t ZZEta  = 0;
   Float_t ZZPhi  = 0;
   Float_t ZZjjPt = 0;
-  
+ 
+  Float_t ZZGoodMass  = 0;
+  Bool_t muHLTMatch  = true;
+  Bool_t eleHLTMatch  = true;
+ 
   Int_t CRflag  = 0;
   Float_t Z1Mass  = 0;
   Float_t Z1Pt  = 0;
@@ -206,7 +211,7 @@ namespace {
 
   Float_t Z2SVMass = 0;
   Float_t Z2SVMt = 0;
-  Float_t Z2VPt = 0;
+  Float_t Z2SVPt = 0;
   Float_t Z2SVEta = 0;
   Float_t Z2SVPhi = 0;
   Float_t Z2SVMassUnc = 0;
@@ -218,6 +223,9 @@ namespace {
   Float_t Z2SVMETPhi = 0;
   Float_t Z2GoodMass = 0;
 
+  //MET
+  Float_t MET = 0;
+  Float_t METPhi = 0;
 
   std::vector<float> LepPt;
   std::vector<float> LepEta;
@@ -1730,6 +1738,21 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   LepSigma_Phi_Up.clear();
   LepSigma_Phi_Dn.clear();
 
+  TauDecayMode.clear();
+  TauTES_p_Up.clear();
+  TauTES_p_Dn.clear();
+  TauTES_m_Up.clear();
+  TauTES_m_Dn.clear();
+  TauTES_e_Up.clear();
+  TauTES_e_Dn.clear();
+  TauFES_p_Up.clear();
+  TauFES_p_Dn.clear();
+  TauFES_m_Up.clear();
+  TauFES_m_Dn.clear();
+  TauFES_e_Up.clear();
+  TauFES_e_Dn.clear();
+
+ 
   TLE_dR_Z = -1;
   fsrPt.clear();
   fsrEta.clear();
@@ -1761,6 +1784,9 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     ZZGoodMass = cand.userFloat("goodMass");
     eleHLTMatch = cand.userFloat("eleHLTMatch");
     muHLTMatch  = cand.userFloat("muHLTMatch");
+
+    MET = cand.userFloat("MET");
+    METPhi = cand.userFloat("METPhi");
 
     if(addKinRefit){
       if (cand.hasUserFloat("ZZMassRefit")) {
@@ -1849,8 +1875,26 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   Z2Mass = Z2->mass();
   Z2Pt =   Z2->pt();
   Z2Flav = theChannel==ZL ? getPdgId(Z2) : getPdgId(Z2->daughter(0)) * getPdgId(Z2->daughter(1));
-  if(userdatahelpers::hasUserFloat(Z2,"goodMass"){
+  if(userdatahelpers::hasUserFloat(Z2,"goodMass")){
     Z2GoodMass = userdatahelpers::getUserFloat(Z2,"goodMass");
+  }
+
+  if(addSVfit && userdatahelpers::hasUserFloat(Z2,"ComputeSV")){
+    if(userdatahelpers::getUserFloat(Z2,"ComputeSV")){
+	Z2SVMass	= userdatahelpers::getUserFloat(Z2,"SVfitMass");
+	Z2SVPt		= userdatahelpers::getUserFloat(Z2,"SVfit_pt");
+	Z2SVEta		= userdatahelpers::getUserFloat(Z2,"SVfit_eta");
+	Z2SVPhi		= userdatahelpers::getUserFloat(Z2,"SVfit_phi");
+	
+	Z2SVMt		= userdatahelpers::getUserFloat(Z2,"SVfitTransverseMass");
+	Z2SVMassUnc 	= userdatahelpers::getUserFloat(Z2,"SVfitMassUnc");
+	Z2SVMtUnc 	= userdatahelpers::getUserFloat(Z2,"SVfitTransverseMassUnc");
+	Z2SVPtUnc	= userdatahelpers::getUserFloat(Z2,"SVfit_ptUnc");
+	Z2SVEtaUnc	= userdatahelpers::getUserFloat(Z2,"SVfit_etaUnc");
+	Z2SVPhiUnc	= userdatahelpers::getUserFloat(Z2,"SVfit_phiUnc");
+	Z2SVMETRho	= userdatahelpers::getUserFloat(Z2,"SVfit_METRho");
+	Z2SVMETPhi	= userdatahelpers::getUserFloat(Z2,"SVfit_METPhi");
+    }
   }
 
   const reco::Candidate* non_TLE_Z = nullptr;
@@ -1934,16 +1978,16 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     LepBDT  .push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"BDT") : -99. );
     LepisCrack.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"isCrack") : 0 );
     LepMissingHit.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"missingHit") : 0 );
-    LepScale_Total_Up.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"scale_total_up") );
-    LepScale_Total_Dn.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"scale_total_dn") );
+    LepScale_Total_Up.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"scale_total_up") : -99. );
+    LepScale_Total_Dn.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"scale_total_dn") : -99. );
     LepScale_Stat_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_stat_up") : -99. );
     LepScale_Stat_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_stat_dn") : -99. );
     LepScale_Syst_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_syst_up") : -99. );
     LepScale_Syst_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_syst_dn") : -99. );
     LepScale_Gain_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_gain_up") : -99. );
     LepScale_Gain_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_gain_dn") : -99. );
-    LepSigma_Total_Up.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"sigma_total_up") );
-    LepSigma_Total_Dn.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"sigma_total_dn") );
+    LepSigma_Total_Up.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"sigma_total_up") : -99. );
+    LepSigma_Total_Dn.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"sigma_total_dn") : -99. );
     LepSigma_Rho_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"sigma_rho_up") : -99. );
     LepSigma_Rho_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"sigma_rho_dn") : -99. );
     LepSigma_Phi_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"sigma_phi_up") : -99. );
@@ -1955,6 +1999,21 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     LepCombRelIsoPF.push_back( combRelIsoPF[i] );
     LepisLoose.push_back(userdatahelpers::hasUserFloat(leptons[i],"isLoose") == 1 ? userdatahelpers::getUserFloat(leptons[i],"isLoose") : -2);
 
+    if(lepFlav==15){
+	TauDecayMode.push_back( userdatahelpers::getUserFloat(leptons[i],"TauDecayMode") );
+	TauTES_p_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"px_TauUp")/leptons[i]->px() );
+	TauTES_p_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"px_TauDown")/leptons[i]->px() );
+        TauTES_m_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"m_TauUp")/leptons[i]->mass() );
+        TauTES_m_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"m_TauDown")/leptons[i]->mass() );
+        TauTES_e_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"e_TauUp")/leptons[i]->energy() );
+        TauTES_e_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"e_TauDown")/leptons[i]->energy() );
+	TauFES_p_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"px_EleUp")/leptons[i]->px() );
+        TauFES_p_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"px_EleDown")/leptons[i]->px() );
+        TauFES_m_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"m_EleUp")/leptons[i]->mass() );
+        TauFES_m_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"m_EleDown")/leptons[i]->mass() );
+        TauFES_e_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"e_EleUp")/leptons[i]->energy() );
+        TauFES_e_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"e_EleDown")/leptons[i]->energy() );
+    }
   }
 
   // FSR
@@ -2000,7 +2059,8 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
 
     //Fill the info on the extra leptons
     for (int iExtraLep=1; iExtraLep<=(int)nExtraLep; iExtraLep++){
-      TString extraString;extraString.Form("ExtraLep%d",iExtraLep);
+      TString extraString;
+      extraString.Form("ExtraLep%d",iExtraLep);
       if (cand.hasUserCand(extraString.Data())){
         //for(int iextra=0;iextra<4;iextra++)varExtra[iextra].Prepend(extraString.Data());
         reco::CandidatePtr candPtr=cand.userCand(extraString.Data());
@@ -2429,10 +2489,12 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("ZZEta",ZZEta, false);
   myTree->Book("ZZPhi",ZZPhi, false);
   myTree->Book("ZZjjPt",ZZjjPt, false);
+  myTree->Book("ZZGoodMass",ZZGoodMass, false);
+  myTree->Book("eleHLTMatch",eleHLTMatch, false);
+  myTree->Book("muHLTMatch",muHLTMatch, false);
   myTree->Book("CRflag",CRflag, false);
-  myTree->Book("Z1Mass",Z1Mass, false);
-  myTree->Book("Z1Pt",Z1Pt, false);
-  myTree->Book("Z1Flav",Z1Flav, false);
+  myTree->Book("MET",MET, false);
+  myTree->Book("METPhi",METPhi, false);
 
   //Kin refitted info
   if (addKinRefit) {
@@ -2444,11 +2506,57 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("ZZMassCFit",ZZMassCFit, false);
     myTree->Book("ZZChi2CFit",ZZChi2CFit, false);
   }
+  if (addZZKinfit){
+    myTree->Book("ZZKMass",ZZKMass, false);
+    myTree->Book("ZZKChi2",ZZKChi2, false);
+  }
+  if (addSVfit){
+    myTree->Book("ZZSVMass",ZZSVMass, false);
+    myTree->Book("ZZSVPt",ZZSVPt, false);
+    myTree->Book("ZZSVEta",ZZSVEta, false);
+    myTree->Book("ZZSVPhi",ZZSVPhi, false);
+  }
+
+  //Z1 variables
+  myTree->Book("Z1Mass",Z1Mass, false);
+  myTree->Book("Z1GoodMass",Z1GoodMass, false);
+  myTree->Book("Z1Pt",Z1Pt, false);
+  myTree->Book("Z1Flav",Z1Flav, false);
+  if (addSVfit){
+    myTree->Book("Z1SVMass",Z1SVMass, false);
+    myTree->Book("Z1SVMt",Z1SVMt, false);
+    myTree->Book("Z1SVPt",Z1SVPt, false);
+    myTree->Book("Z1SVEta",Z1SVEta, false);
+    myTree->Book("Z1SVPhi",Z1SVPhi, false);
+    myTree->Book("Z1SVMassUnc",Z1SVMassUnc, false);
+    myTree->Book("Z1SVMtUnc",Z1SVMtUnc, false);
+    myTree->Book("Z1SVPtUnc",Z1SVPtUnc, false);
+    myTree->Book("Z1SVEtaUnc",Z1SVEtaUnc, false);
+    myTree->Book("Z1SVPhiUnc",Z1SVPhiUnc, false);
+    myTree->Book("Z1SVMETRho",Z1SVMETRho, false);
+    myTree->Book("Z1SVMETPhi",Z1SVMETPhi, false);
+  }
 
   //Z2 variables
   myTree->Book("Z2Mass",Z2Mass, false);
+  myTree->Book("Z2GoodMass",Z2GoodMass, false);
   myTree->Book("Z2Pt",Z2Pt, false);
   myTree->Book("Z2Flav",Z2Flav, false);
+  if (addSVfit){
+    myTree->Book("Z2SVMass",Z2SVMass, false);
+    myTree->Book("Z2SVMt",Z2SVMt, false);
+    myTree->Book("Z2SVPt",Z2SVPt, false);
+    myTree->Book("Z2SVEta",Z2SVEta, false);
+    myTree->Book("Z2SVPhi",Z2SVPhi, false);
+    myTree->Book("Z2SVMassUnc",Z2SVMassUnc, false);
+    myTree->Book("Z2SVMtUnc",Z2SVMtUnc, false);
+    myTree->Book("Z2SVPtUnc",Z2SVPtUnc, false);
+    myTree->Book("Z2SVEtaUnc",Z2SVEtaUnc, false);
+    myTree->Book("Z2SVPhiUnc",Z2SVPhiUnc, false);
+    myTree->Book("Z2SVMETRho",Z2SVMETRho, false);
+    myTree->Book("Z2SVMETPhi",Z2SVMETPhi, false);
+  }
+
   myTree->Book("costhetastar",costhetastar, false);
   myTree->Book("helphi",helphi, false);
   myTree->Book("helcosthetaZ1",helcosthetaZ1, false);
@@ -2498,6 +2606,20 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("LepSigma_Rho_Dn",LepSigma_Rho_Dn, false);
   myTree->Book("LepSigma_Phi_Up",LepSigma_Phi_Up, false);
   myTree->Book("LepSigma_Phi_Dn",LepSigma_Phi_Up, false);
+
+  myTree->Book("TauDecayMode",TauDecayMode, false);
+  myTree->Book("TauTES_p_Up",TauTES_p_Up, false);
+  myTree->Book("TauTES_p_Dn",TauTES_p_Dn, false);
+  myTree->Book("TauTES_m_Up",TauTES_m_Up, false);
+  myTree->Book("TauTES_m_Dn",TauTES_m_Dn, false);
+  myTree->Book("TauTES_e_Up",TauTES_e_Up, false);
+  myTree->Book("TauTES_e_Dn",TauTES_e_Dn, false);
+  myTree->Book("TauFES_p_Up",TauFES_p_Up, false);
+  myTree->Book("TauFES_p_Dn",TauFES_p_Dn, false);
+  myTree->Book("TauFES_m_Up",TauFES_m_Up, false);
+  myTree->Book("TauFES_m_Dn",TauFES_m_Dn, false);
+  myTree->Book("TauFES_e_Up",TauFES_e_Up, false);
+  myTree->Book("TauFES_e_Dn",TauFES_e_Dn, false);
 
   myTree->Book("fsrPt",fsrPt, false);
   myTree->Book("fsrEta",fsrEta, false);

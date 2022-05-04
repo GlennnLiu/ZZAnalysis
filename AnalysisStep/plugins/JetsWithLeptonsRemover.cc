@@ -21,6 +21,7 @@
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include <ZZAnalysis/AnalysisStep/interface/PhotonFwd.h>
@@ -86,7 +87,7 @@ JetsWithLeptonsRemover::JetsWithLeptonsRemover(const edm::ParameterSet & iConfig
   : jetToken_     (consumes<edm::View<pat::Jet> >(iConfig.getParameter<edm::InputTag>("Jets")))
   , muonToken_    (consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("Muons")))
   , electronToken_(consumes<edm::View<pat::Electron> >(iConfig.getParameter<edm::InputTag>("Electrons")))
-  , tauToken_(comsumes<edm::View<pat::Tau> >(iConfig.getParameters<edm::InputTag>("Taus")))
+  , tauToken_(consumes<edm::View<pat::Tau> >(iConfig.getParameter<edm::InputTag>("Taus")))
   , diBosonToken_ (consumes<edm::View<pat::CompositeCandidate> >(iConfig.getParameter<edm::InputTag>("Diboson")))
   , preselectionJ_    (iConfig.getParameter<std::string>("JetPreselection"))
   , preselectionMu_   (iConfig.getParameter<std::string>("MuonPreselection"))
@@ -307,7 +308,7 @@ bool JetsWithLeptonsRemover::checkLeptonJet(const edm::Event & event, const pat:
   if(cleaningFromDiboson_ && isMatchingWithZZLeptons(event,jet)) return true;
   
   if(isMatchingWith<pat::Muon>    (muonToken_,     preselectionMu_,  event, jet) || 
-     isMatchingWith<pat::Electron>(electronToken_, preselectionEle_, event, jet)
+     isMatchingWith<pat::Electron>(electronToken_, preselectionEle_, event, jet) ||
      isMatchingWith<pat::Tau>     (tauToken_,      preselectionTau_, event, jet)) return true;
   
   return false;

@@ -18,7 +18,7 @@ declareDefault("LEPTON_SETUP", 2016, globals())
 # Can differ from SAMPLE_TYPE for samples that are rescaled to a different sqrts.
 declareDefault("SAMPLE_TYPE", LEPTON_SETUP, globals())
 
-declareYear("YEAR", LEPTON_SETUP, globals())
+declareDefault("YEAR", LEPTON_SETUP, globals())
 
 # Control global tag to be used for 2018 data to distinguish between ReReco (period A, B, C) and PromptReco (period D)
 declareDefault("DATA_TAG", "ReReco", globals())
@@ -449,6 +449,7 @@ process.bareSoftElectrons = cms.EDFilter("PATElectronRefSelector",
 
 process.softElectrons = cms.EDProducer("EleFiller",
    src    = cms.InputTag("bareSoftElectrons"),
+   TriggerResults = cms.InputTag('TriggerResults','','HLT'),
    sampleType = cms.int32(SAMPLE_TYPE),
    setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
    cut = cms.string("pt>7 && abs(eta) < 2.5 && userFloat('dxy')<0.5 && userFloat('dz')<1"),
@@ -587,7 +588,7 @@ process.cleanTaus = cms.EDProducer("PATTauCleaner",
 APPLYTESCORRECTION = APPLYTESCORRECTION if IsMC else False # always false if data
 
 
-year = "2016Legacy"
+TESyear = "2016Legacy"
 
 #if PERIOD=='postVFP':
 #    TESyear = 'UL2016_postVFP'
@@ -715,7 +716,7 @@ if KEEPLOOSECOMB:
     KEEPLOOSECOMB_CUT = 'mass > 0 && ' + TWOSFLEPTONS # Propagate also combinations of loose leptons (for debugging); just require same-flavour
 else:
     if FSRMODE == "RunII" : # Just keep combinations of tight leptons (passing ID, SIP and ISO)
-        KEEPLOOSECOMB_CUT = "mass > 0 && " + TWOSFLEPTONS + "daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood') && daughter(0).masterClone.userFloat('passCombRelIsoPFFSRCorr') &&  daughter(1).masterClone.userFloat('passCombRelIsoPFFSRCorr')"
+        KEEPLOOSECOMB_CUT = "mass > 0 && " + TWOSFLEPTONS + " && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood') && daughter(0).masterClone.userFloat('passCombRelIsoPFFSRCorr') &&  daughter(1).masterClone.userFloat('passCombRelIsoPFFSRCorr')"
     else :
         print "KEEPLOOSECOMB == False && FSRMODE =! RunII", FSRMODE, "is no longer supported"
         sys.exit()
@@ -819,7 +820,7 @@ ZLEPTONSEL     = TWOGOODLEPTONS # Note: this is without ISO
 
 Z1PRESEL    = (ZLEPTONSEL + " && userFloat('goodMass') > 40 && userFloat('goodMass') < 120") # Note: this is without ISO
 
-BESTZ_AMONG = ( Z1PRESEL + "&&" TWOISOLEPTONS )
+BESTZ_AMONG = ( Z1PRESEL + "&&" + TWOISOLEPTONS )
 
 TWOGOODISOLEPTONS = ( TWOGOODLEPTONS + "&&" + TWOISOLEPTONS )
 
@@ -904,23 +905,23 @@ process.ZlCand = cms.EDProducer("PATCandViewShallowCloneCombiner",
 ###                Embed additional user variables into final collections
 ### ----------------------------------------------------------------------
 
-FOURGOODLEPTONS    =  ("userFloat('d0.GoodLeptons') && userFloat('d1.GoodLeptons')" +
+FOURGOODLEPTONS    =  ("( userFloat('d0.GoodLeptons') && userFloat('d1.GoodLeptons')" +
 		       "&& userFloat('d0.isGoodTau') && userFloat('d1.isGoodTau')" +
                        "&& userFloat('d0.worstEleIso') <" + str(ELEISOCUT) +
                        "&& userFloat('d1.worstEleIso') <" + str(ELEISOCUT) +
                        "&& userFloat('d0.worstMuIso') <" + str(MUISOCUT) +
-                       "&& userFloat('d1.worstMuIso') <" + str(MUISOCUT)
-                       ) #ZZ made of 4 tight leptons passing SIP and ISO
+                       "&& userFloat('d1.worstMuIso') <" + str(MUISOCUT) + ")"
+                       ) #ZZ made of 4 tight leptons passing SIP and ISO 
 
-
-Z1MASS            = "daughter('Z1').masterClone.userFloat('goodMass')>40 && daughter('Z1').masterClone.userFloat('goodMass')<120"
-Z2MASS            = "daughter('Z2').masterClone.userFloat('goodMass')>4  && daughter('Z2').masterClone.userFloat('goodMass')<120" # (was > 4 in Synch) to deal with m12 cut at gen level
+Z1MASS            = "( daughter('Z1').masterClone.userFloat('goodMass')>40 && daughter('Z1').masterClone.userFloat('goodMass')<120 )"
+Z2MASS            = "( daughter('Z2').masterClone.userFloat('goodMass')>4  && daughter('Z2').masterClone.userFloat('goodMass')<120 )" # (was > 4 in Synch) to deal with m12 cut at gen level
 #MLL3On4_12        = "userFloat('mZa')>12" # mll>12 on 3/4 pairs;
 #MLLALLCOMB        = "userFloat('mLL6')>4" # mll>4 on 6/6 AF/AS pairs;
 MLLALLCOMB        = "userFloat('mLL4')>4" # mll>4 on 4/4 AF/OS pairs;
 SMARTMALLCOMB     = "userFloat('passSmartMLL')" # Require swapped-lepton Z2' to be >12 IF Z1' is SF/OS and closer to 91.1876 than mZ1
-PT20_10           = ("userFloat('pt1')>20 && userFloat('pt2')>10") #20/10 on any of the 4 leptons
+PT20_10           = "( userFloat('pt1')>20 && userFloat('pt2')>10 )" #20/10 on any of the 4 leptons
 M4l100            = "mass>100"
+OSSF		  = "( daughter('Z1').masterClone.userFloat('OSSF') && daughter('Z2').masterClone.userFloat('OSSF') )"
 
 
 
@@ -994,6 +995,7 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
                       Z2MASS          + "&&" +
                       MLLALLCOMB      + "&&" +
                       PT20_10         + "&&" +
+		      OSSF	      + "&&" +
                       "userFloat('goodMass')>70"       + "&&" +
                       SMARTMALLCOMB   + "&&" +
                       "daughter('Z2').masterClone.userFloat('goodMass')>12"
