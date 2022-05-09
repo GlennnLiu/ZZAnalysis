@@ -118,7 +118,7 @@ process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
-
+process.options.SkipEvent = cms.untracked.vstring('ProductNotFound')
 
 ### ----------------------------------------------------------------------
 ### Source
@@ -533,16 +533,27 @@ process.cleanSoftElectrons = cms.EDProducer("PATElectronCleaner",
 
 #------- TAU LEPTONS -------
 
-TAUCUT       = "tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
+TAUCUT       = ""#"tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
 SOSOTAU      = "tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 10"
 GOODTAU      = SOSOTAU + " && tauID('byMediumDeepTau2017v2p1VSjet') == 1 && tauID('byVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
 GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
 GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
 GOODTAU_TAU  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
 
+import RecoTauTag.RecoTau.tools.runTauIdMVA as tauIdConfig
+
+updatedTauName = "slimmedTausNewID" #name of pat::Tau collection with new tau-Ids
+
+
+tauIdEmbedder = tauIdConfig.TauIDEmbedder(process, cms, debug = True,
+                    updatedTauName = updatedTauName,
+                    toKeep = ["deepTau2017v2p1", "2017v2"]  #["2017v1", "dR0p32017v2"]
+)
+
+tauIdEmbedder.runTauID()
 
 process.bareTaus = cms.EDFilter("PATTauRefSelector",
-    src = cms.InputTag("slimmedTaus"),
+    src = cms.InputTag("slimmedTausNewID"),
     cut = cms.string(TAUCUT)
     )
 
@@ -620,7 +631,7 @@ process.softTaus = cms.EDProducer("TauFiller",
    )
 
 
-process.taus=cms.Sequence(process.bareTaus + process.softTaus)
+process.taus=cms.Sequence(process.rerunMvaIsolationSequence + process.slimmedTausNewID + process.bareTaus + process.softTaus)
 
 
 ### ----------------------------------------------------------------------
@@ -1164,6 +1175,8 @@ process.bareZLLCand= cms.EDProducer("CandViewShallowCloneCombiner",
 )
 process.ZLLCand = cms.EDProducer("ZZCandidateFiller",
     src = cms.InputTag("bareZLLCand"),
+    srcMET     = srcMETTag,
+    srcCov     = cms.InputTag("METSignificance", "METCovariance"),
     sampleType = cms.int32(SAMPLE_TYPE),
     setup = cms.int32(LEPTON_SETUP),
     superMelaMass = cms.double(SUPERMELA_MASS),

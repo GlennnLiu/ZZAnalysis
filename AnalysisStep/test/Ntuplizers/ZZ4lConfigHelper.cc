@@ -70,23 +70,23 @@ ZZ4lConfigHelper::passTrigger(const edm::Event & event, edm::Handle<edm::Trigger
 
   bool passDiMu  = passFilter(event, trigRes, "triggerDiMu");
   bool passDiEle = passFilter(event, trigRes, "triggerDiEle");
-  bool passMuEle  = passFilter(event, trigRes, "triggerMuEle"); 
-  if ((!isMC_) && theSetup == 2011 ) { // follow changes in trigger menu in data 2011 (see wiki)
-    int irun=event.id().run(); 
-    if (irun>=175973) {
-      passMuEle  = passFilter(event, trigRes, "triggerMuEle3");
-    } else if (irun>=167914) {
-      passMuEle  = passFilter(event, trigRes, "triggerMuEle2");
-    }
-  }
-  bool passTriEle = false;
-  if (theSetup == 2012 || theSetup >= 2015) {
-    passTriEle = passFilter(event, trigRes, "triggerTriEle");
-  }
-  bool passTriMu = false;
+  //bool passMuEle  = passFilter(event, trigRes, "triggerMuEle"); 
+  //if ((!isMC_) && theSetup == 2011 ) { // follow changes in trigger menu in data 2011 (see wiki)
+  //  int irun=event.id().run(); 
+  //  if (irun>=175973) {
+  //    passMuEle  = passFilter(event, trigRes, "triggerMuEle3");
+  //  } else if (irun>=167914) {
+  //    passMuEle  = passFilter(event, trigRes, "triggerMuEle2");
+  //  }
+  //}
+  //bool passTriEle = false;
+  //if (theSetup == 2012 || theSetup >= 2015) {
+  //  passTriEle = passFilter(event, trigRes, "triggerTriEle");
+  //}
+  //bool passTriMu = false;
   bool passSingleEle = false;
   if (theSetup >= 2015) {
-    passTriMu = passFilter(event, trigRes, "triggerTriMu");
+    //passTriMu = passFilter(event, trigRes, "triggerTriMu");
     passSingleEle = passFilter(event, trigRes, "triggerSingleEle");
   }
   bool passSingleMu = false;
@@ -99,12 +99,11 @@ ZZ4lConfigHelper::passTrigger(const edm::Event & event, edm::Handle<edm::Trigger
 
   // Check all triggers together if anyTrigger is specified (or for CRs)
   if (anyTrigger || theChannel==ZLL || theChannel==ZL || theChannel==ZZ) {
-      if ((PD=="" && (passDiEle || passDiMu || passMuEle || passTriEle || passTriMu || passSingleEle || passSingleMu)) ||
-	  ((PD=="DoubleEle"||PD=="DoubleEG" ||PD=="EGamma" ) && (passDiEle || passTriEle)) ||
-	  ((PD=="DoubleMu" ||PD=="DoubleMuon") && (passDiMu || passTriMu) && !passDiEle && !passTriEle) ||
-	  ((PD=="MuEG"     ||PD=="MuonEG"    ) && passMuEle && !passDiMu && !passTriMu && !passDiEle && !passTriEle) ||
-	  ((PD=="SingleElectron" || PD=="EGamma") && passSingleEle && !passMuEle && !passDiMu && !passTriMu && !passDiEle && !passTriEle) ||
-	  (PD=="SingleMuon" && passSingleMu && !passSingleEle && !passMuEle && !passDiMu && !passTriMu && !passDiEle && !passTriEle)
+      if ((PD=="" && (passDiEle || passDiMu || passSingleEle || passSingleMu)) ||
+	  ((PD=="DoubleEle"||PD=="DoubleEG" ||PD=="EGamma" ) && (passDiEle)) ||
+	  ((PD=="DoubleMu" ||PD=="DoubleMuon") && (passDiMu) && !passDiEle) ||
+	  ((PD=="SingleElectron" || PD=="EGamma") && passSingleEle && !passDiMu && !passDiEle) ||
+	  (PD=="SingleMuon" && passSingleMu && !passSingleEle && !passDiMu && !passDiEle)
 	  ) {
 	evtPassTrigger = true;
       } 
@@ -119,9 +118,9 @@ ZZ4lConfigHelper::passTrigger(const edm::Event & event, edm::Handle<edm::Trigger
   if (evtPassTrigger) set_bit_16(trigworld,0);
   if (passDiMu) set_bit_16(trigworld,1);
   if (passDiEle) set_bit_16(trigworld,2);
-  if (passMuEle) set_bit_16(trigworld,3);
-  if (passTriEle) set_bit_16(trigworld,4);
-  if (passTriMu) set_bit_16(trigworld,5);
+  //if (passMuEle) set_bit_16(trigworld,3);
+  //if (passTriEle) set_bit_16(trigworld,4);
+  //if (passTriMu) set_bit_16(trigworld,5);
   if (passSingleEle) set_bit_16(trigworld,6);
   if (passSingleMu) set_bit_16(trigworld,7);
   
