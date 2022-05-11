@@ -261,8 +261,11 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       myCand.addUserFloat("d1.combRelIsoPFFSRCorr",myCand.userFloat("d1.combRelIsoPF"));
     }
 
-    if (myCand.userFloat("ComputeSV"))
+    if (myCand.hasUserFloat("ComputeSV")){
+      if (myCand.userFloat("ComputeSV")){
 	myCand.addUserFloat("goodMass",myCand.userFloat("SVfitMass"));
+      }
+    }
     else
 	myCand.addUserFloat("goodMass",myCand.mass());
     

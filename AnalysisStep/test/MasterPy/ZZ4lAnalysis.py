@@ -1788,8 +1788,9 @@ process.Candidates = cms.Path(
        process.appendPhotons     +
        process.softLeptons       +
        process.cleanJets         +
+       process.METSequence	 +
 # Build 4-lepton candidates
-       process.bareZCand         + process.ZCand     +
+       process.bareZCand         + process.SVZCand	 + process.ZCand     +
        process.bareZZCand        + process.ZZCand
     )
 
@@ -1799,13 +1800,13 @@ process.Candidates = cms.Path(
 #process.CRPath = cms.Path(process.CR)   # trilep+4lep CRs
 
 process.CRZl = cms.Sequence(
-       process.bareZCand         + process.ZCand     +
+       process.bareZCand         + process.SVZCand       + process.ZCand     +
        process.ZlCand
    )
 
 process.CR = cms.Sequence(
-       process.bareZCand         + process.ZCand     +
-       process.bareLLCand        + process.LLCand    +
+       process.bareZCand         + process.SVZCand       + process.ZCand     +
+       process.bareLLCand        + process.SVLLCand	 + process.LLCand    +
        process.bareZLLCand       + process.ZLLCand   +
        process.ZlCand
    )

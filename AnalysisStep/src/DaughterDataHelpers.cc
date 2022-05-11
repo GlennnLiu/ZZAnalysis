@@ -127,6 +127,8 @@ userdatahelpers::getUserPhotons(const reco::Candidate* c){
     if (ele->hasUserData("FSRCandidates")){
       return ele->userData<PhotonPtrVector>("FSRCandidates");
     } else return 0;
+  } else if (abs(c->pdgId())==15) {
+    return 0;
   } else {
     cout << "ERROR: userdatahelpers::getUserPhotons" << endl;
     abort();

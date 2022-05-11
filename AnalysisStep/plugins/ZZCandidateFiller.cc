@@ -235,7 +235,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
   // Get MET
   float PFMET = 0.;
   float PFMETPhi = 0.;
-  Handle<pat::METCollection> metHandle;
+  Handle<edm::View<pat::MET> > metHandle;
   iEvent.getByToken(metToken, metHandle);
   if(metHandle.isValid()){
     PFMET = metHandle->front().pt();
