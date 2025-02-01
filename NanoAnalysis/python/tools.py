@@ -33,6 +33,14 @@ def insertAfter(sequence, moduleName, module) :
             sequence.insert(im+1, module)
             return
 
+# Remove a module in a sequence
+def removeModule(sequence, moduleName) :
+    if type(moduleName)!=str :
+        raise ValueError("insertAfter: moduleName should be a string")
+    for im, m in enumerate(sequence) :
+        if type(m).__name__ == moduleName :
+            del sequence[im]
+        
 # Get the four leptons of a ZZ or ZLL candidate
 def getLeptons(aCand, event) :
     idxs = [aCand.Z1l1Idx, aCand.Z1l2Idx, aCand.Z2l1Idx, aCand.Z2l2Idx]

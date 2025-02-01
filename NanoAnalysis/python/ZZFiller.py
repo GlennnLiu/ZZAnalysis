@@ -69,26 +69,26 @@ class ZZFiller(Module):
 
         self.candsToStore = StoreOption.BestCandOnly # Only store the best candidate for the SR
 #        self.candsToStore = StoreOption.AllWithRelaxedMuId # Use this for ID optimization studies
-
-        # Pre-selection of leptons used to reduce combinatorial when building Z and LL candidates.
-        # Normally it is the full ID + iso if only the SR is considered, or the relaxed ID if CRs are also filled,
-        # but can be relaxed further to also build loose candidates for ID studies (see below).
-        # Note that the actual lepton selection cuts for SR and CR are applied later; this preselection only affects what
-        # leptons are considered in making the combinatorial (ie processing speed)
-        if self.addSIPCR or self.addOSCR or self.addSSCR :
-            self.leptonPresel = (lambda l : l.ZZRelaxedIdNoSIP) # minimal selection good for all CRs: no SIP, no ID, no iso
-        else : # SR only
-            self.leptonPresel = (lambda l : l.ZZFullSel)
-
         self.muonIDs=[]
         self.muonIDVars=[]
+
+        # Pre-selection of leptons used to reduce combinatorial when building Z and LL candidates.
+        # Note that the actual lepton selection cuts for SR and CR are applied later; this preselection only affects what
+        # leptons are considered in making the combinatorial (ie processing speed)
         
-        # Use relaxed muon preselection for muon ID studies: fully relax muon ID. Electron ID is unchanged.
-        if self.candsToStore == StoreOption.AllWithRelaxedMuId :
-            if self.addSIPCR or self.addOSCR or self.addSSCR :
-                self.leptonPresel = (lambda l : (abs(l.pdgId)==13 and l.pt>5 and abs(l.eta) < 2.4) or (abs(l.pdgId)==11 and l.ZZRelaxedIdNoSIP))
-            else : 
-                self.leptonPresel = (lambda l : (abs(l.pdgId)==13 and l.pt>5 and abs(l.eta) < 2.4) or (abs(l.pdgId)==11 and l.ZZFullSel))
+        if self.candsToStore != StoreOption.AllWithRelaxedMuId :
+            # Normal case: is the full ID + iso if only the SR is considered, or the relaxed ID if CRs are also filled.
+            if self.addSIPCR or self.addOSCR or self.addSSCR or self.addZLCR:
+                self.leptonPresel = (lambda l : l.ZZRelaxedIdNoSIP) # minimal selection good for all CRs: no SIP, no ID, no iso
+            else : # SR only
+                self.leptonPresel = (lambda l : l.ZZFullSel)
+        else :
+            # Use relaxed muon preselection for muon ID studies: fully relax muon ID.
+            # Electron ID is unchanged; FullSel electrons are preselected in this case, so the effect of cut variations can be studied for muons only.
+            # for this reason, CRs cannot be properly built.
+            if self.addSIPCR or self.addOSCR or self.addSSCR or self.addZLCR:
+                raise Exception("WARNING: CRs are not supported when StoreOption = AllWithRelaxedMuId")
+            self.leptonPresel = (lambda l : (abs(l.pdgId)==13 and l.pt>5 and abs(l.eta) < 2.4) or (abs(l.pdgId)==11 and l.ZZFullSel))
             
             # Add flags for muon ID studies. Each Flag will be set to true for a candidate if all of its muons pass the specified ID.
             self.muonIDs=[dict(name="ZZFullSel", sel=lambda l : l.ZZFullId and l.passIso), # Standard ZZ selection; this is used for setting default bestCandIdx
@@ -108,14 +108,16 @@ class ZZFiller(Module):
 
             # Add variable to store the worst value of a given quantity among the 4 leptons of a candidate, for optimization studies.
             # Worst is intended as lowest value (as for an MVA), unless the variable's name starts with "max".
-            self.muonIDVars=[dict(name="maxsip3d", sel=lambda l : l.sip3d if (abs(l.dxy)<0.5 and abs(l.dz) < 1) else 999.), # dxy, dz cuts included with SIP
+            self.muonIDVars=[dict(name="maxdxy", sel=lambda l : l.dxy),
+                             dict(name="maxdz", sel=lambda l : l.dz),
+                             dict(name="maxsip3d", sel=lambda l : l.sip3d),
                              dict(name="maxpfRelIso03FsrCorr", sel=lambda l : l.pfRelIso03FsrCorr), # FSR-corrected iso, DR=0.3
                              dict(name="maxpfRelIso03_all", sel=lambda l : l.pfRelIso03_all),
                              dict(name="maxpfRelIso04_all", sel=lambda l : l.pfRelIso04_all),
                              dict(name="maxminiPFRelIso_all", sel=lambda l : l.miniPFRelIso_all), # miniIso
-                             dict(name="mvaLowPt", sel=lambda l : l.mvaLowPt if (l.looseId and l.sip3d<4. and l.dxy<0.5 and l.dz < 1) else -2.), # additional presel is required, cf: https://github.com/cms-sw/cmssw/blob/90f498af750cf4271c0a988fef352b0698012a40/PhysicsTools/PatAlgos/plugins/PATMuonProducer.cc#L762-L764
-#                             dict(name="promptMVA", sel=lambda l : l.promptMVA if (l.looseId and l.sip3d<4. and l.dxy<0.5 and l.dz < 1) else -2.), # former mvaTTH. adding H4l preselection for consistencty with mvaLowPt; this is looser than the original recommendation (https://twiki.cern.ch/twiki/bin/viewauth/CMS/LeptonMVA). Variable retrained in v14 (and renamed)
-                             dict(name="mvaMuID", sel=lambda l : l.mvaMuID if (l.looseId and l.sip3d<4. and l.dxy<0.5 and l.dz < 1) else -2.), # muon MVA from 22-001. FIXME: Was retrained in v14; using H4l preselection for consistency, see above
+                             dict(name="mvaLowPt", sel=lambda l : l.mvaLowPt), # additional presel (l.looseId and l.sip3d<4. and l.dxy<0.5 and l.dz < 1) is required, cf: https://github.com/cms-sw/cmssw/blob/90f498af750cf4271c0a988fef352b0698012a40/PhysicsTools/PatAlgos/plugins/PATMuonProducer.cc#L762-L764
+#                             dict(name="promptMVA", sel=lambda l : l.mvaTTH), # should add H4l preselection for consistencty with mvaLowPt; this is looser than the original recommendation (https://twiki.cern.ch/twiki/bin/viewauth/CMS/LeptonMVA). Was retrained and renamed "promptMVA" in v14
+#                             dict(name="mvaMuID", sel=lambda l : l.mvaMuID), # muon MVA from 22-001. Note: Was retrained in v14; using H4l preselection for consistency, see above
                              ]
         if self.runMELA :
             sqrts=13.;
@@ -338,7 +340,7 @@ class ZZFiller(Module):
                 # Check that only one candidate is selected in each event for the 2 CRs of the OS method?
                 # Actually not needed, at the overlap is accounted for in the method
 #                if best2P2FCRIdx >= 0 and best3P1FCRIdx >= 0 :
-#                    print ('WARNING: event {}:{}:{} has CR candidates in both 2P2F and 3P1F regions'.format(event.run,event.luminosityBlock,event.event))   #FIXME choose the best among the two
+#                    print ('WARNING: event {}:{}:{} has CR candidates in both 2P2F and 3P1F regions'.format(event.run,event.luminosityBlock,event.event))
 
                 # Store only ZLL candidates that belong to at least 1 CR
                 for iZLL, ZLL in enumerate(ZLLsTemp) :
@@ -610,7 +612,9 @@ class ZZFiller(Module):
     ### Comparators to select the best candidate in the event. Return -1 if a is better than b, +1 otherwise
     # Choose by abs(MZ1-MZ), or sum(PT) if same Z1
     def bestCandByZ1Z2(self,a,b): 
-        if abs(a.Z1.M-b.Z1.M) < 1e-4 : # same Z1: choose the candidate with highest-pT Z2 leptons
+        if abs(a.Z1.M-b.Z1.M) < 1e-4 : # same Z1: choose the candidate with highest-pT Z2 leptons.
+            #FIXME replace the line above by a check by indices: 
+            #if a.Z1.l1Idx = b.Z1.l1Idx and a.Z1.l2Idx = b.Z1.l2Idx : #Note that leptons are ordered (1=+, 2=-), there is no need to check the alternative pairing:
             if a.Z2.sumpt() > b.Z2.sumpt() :
                 return -1
             else :
@@ -623,7 +627,10 @@ class ZZFiller(Module):
 
     # Choose by DbkgKin
     def bestCandByDbkgKin(self,a,b): 
-        if abs((a.p4).M() - (b.p4).M())<1e-4 and a.finalState()==b.finalState() and (a.finalState() == 28561 or a.finalState()==14641) : # Equivalent: same masss (tolerance 100 keV) and same FS -> same leptons and FSR
+        if abs((a.p4).M() - (b.p4).M())<1e-4 and a.finalState()==b.finalState() and (a.finalState() == 28561 or a.finalState()==14641) : # Equivalent: same masss (tolerance 100 keV) and same FS -> different permutation of the same leptons. Note that this can only happen in SR, not in CRs where the Z1 is always the best Z in the event.
+            # FIXME Replace the line above with a check by indices. 
+            # if set([a.Z1.l1Idx, a.Z1.l2Idx, a.Z2.l1Idx, a.Z2.l2Idx]) == \
+            #    set([b.Z1.l1Idx, b.Z1.l2Idx, b.Z2.l1Idx, b.Z2.l2Idx])) :
             return self.bestCandByZ1Z2(a,b)
         if a.KD > b.KD : return -1 # choose by best dbkgkin
         else: return 1
@@ -703,23 +710,23 @@ class ZZFiller(Module):
             p_QQB_BKG_MCFM = 1. # FIXME: fix for error with message: "TUtil::CheckPartonMomFraction: At least one of the parton momentum fractions is greater than 1."
         ZZ = self.ZZCand(Z1, Z2, p_GG_SIG_ghg2_1_ghz1_1_JHUGen, p_QQB_BKG_MCFM)
 
-        # Set flags for IDs passed by all leptons of candidate (muon only for the time being), which are 
-        # used for studies on ID tuning
+        # Set flags for IDs passed by all muons of candidate, and worst values of selection variables for the candidate's muons, for studies on muon ID optimization.
+        # For electrons, we rely on the fact that they are preselected as passing ZZFullSel (leptonPresel) when option AllWithRelaxedMuId is set.
         if fillIDVars:
             passId = [True]*len(self.muonIDs)
             for iID, ID in enumerate(self.muonIDs) :
                 for ilep in range(4):
-                    if abs(zzleps[ilep].pdgId)==13 and not ID["sel"](zzleps[ilep]) :
+                    if abs(zzleps[ilep].pdgId)==13 and not ID["sel"](zzleps[ilep]) : # electrons are already preselected, see above
                         passId[iID] = False
                         continue
             ZZ.passId = passId
 
-            # Set worst value of specified selection variables (muon only, for the time being)
+            # Set worst value of selection variable among all candidate's muons
             worstVar = [99.]*len(self.muonIDVars)
             for iVar, var in enumerate(self.muonIDVars):
                 if var["name"].startswith("max") : worstVar[iVar] = -1.
                 for iilep in range(4) :
-                    if abs(zzleps[iilep].pdgId)==11 : continue
+                    if abs(zzleps[iilep].pdgId)==11 : continue # electrons are already preselected, see above
                     else :
                         if var["name"].startswith("max") :
                             worstVar[iVar] = max(worstVar[iVar], var["sel"](zzleps[iilep]))                                    

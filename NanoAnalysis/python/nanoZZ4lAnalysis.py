@@ -191,7 +191,7 @@ if IsMC:
 
     post_sequence.append(mcTruthAnalyzer(dump=False)) # Gen final state etc.
 
-    if ADD_ALLEVENTS: # Add modules that produce the variables to be stored for all events at the beginni
+    if ADD_ALLEVENTS: # Add modules that produce the variables to be stored for all events at the beginning
         from ZZAnalysis.NanoAnalysis.genFiller import *
         from ZZAnalysis.NanoAnalysis.cloneBranches import *
         pre_sequence = [puWeight(LEPTON_SETUP, DATA_TAG),
@@ -303,6 +303,7 @@ p = PostProcessor(".", fileNames,
 print("Sequence to be run:")
 for mod in p.modules:
     print(" ", mod.__class__.__name__)
+print ("", flush=True)
 
 ### Run command should be issued by the calling scripy
 # p.run()
