@@ -4,7 +4,7 @@
 #
 # Usage:
 # haddData.py [folder]
-# [folder] = location of  (default: "AAAAOK")
+# [folder] = location of  (default: current directory)
 # Merged data are placed in a folder Data[year]/
 # in the CURRENT directory (not uder [folder]!)
 
@@ -17,7 +17,7 @@ import glob
 if len(sys.argv) > 1 :
     jobpath = str(sys.argv[1])
 else: 
-    jobpath = "AAAOK"
+    jobpath = "."
 
 # Check if the specified file is a nanoAOD file.
 def checkNano(file):
@@ -44,7 +44,7 @@ if len(chunks) :
     os.system('cd '+jobpath+'; mkdir -p Chunks; mv *_Chunk* Chunks')
 
 
-dataYears = ["2016","2017","2018","2022","2023"]
+dataYears = ["2016","2017","2018","2022","2023", "2024", "2025"]
 
 mergedYears = []
 isNano = False
@@ -66,7 +66,7 @@ for year in dataYears :
         print ("hadding files:", haddCmd)
         os.system(haddCmd)
 
-if len(mergedYears) :
+if len(mergedYears)>1 :
     # ... still have merge different years into a single file 
     dest = "AllData"
     os.system('mkdir -p '+dest)    

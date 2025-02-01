@@ -62,6 +62,6 @@ def getEleBDTCut(era, dataTag, nanoVersion, useUncorrPt=False) :
             return eleBDTCut_RunIII_ULTraining_def
 
     # Fallback: combination not supported
-    raise ValueError('getEleBDTCut: era '+ str(era)+', dataTag ' + dataTag + ', nanoVersion ' + nanoVersion + ' not supported')
+    raise ValueError('getEleBDTCut: era '+ str(era)+', dataTag ' + dataTag + ', nanoVersion ' + str(nanoVersion) + ' not supported')
 
 
