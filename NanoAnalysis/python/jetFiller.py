@@ -62,13 +62,16 @@ class jetFiller(Module):
             jet_lepPtF[ij] /= jet.pt
             if jet_lepPtF[ij] > self.EFthreshold :                
                 mask[ij] = True
+            else : 
                 if jet.pt > 30 : nCleanedJetsPt30 += 1
                 #FIXME: add jesUp, jesDn
                 
                 # Note: we cannot rely on the fact that the jet collection is sorted by pt since JES can change this.  
                 if jet.pt > leadingJetPt:
+                    subleadingJetPt = leadingJetPt
+                    subleadingJetIdx = leadingJetIdx
                     leadingJetPt = jet.pt
-                    leadingJetIdx = ij 
+                    leadingJetIdx = ij
                 elif jet.pt > subleadingJetPt :
                     subleadingJetPt = jet.pt
                     subleadingJetIdx = ij
