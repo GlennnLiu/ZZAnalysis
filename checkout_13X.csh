@@ -65,10 +65,10 @@ sed -i '/SimTracker\/Records/d' KinZfitter/HelperFunction/BuildFile.xml
 sed -i '/SimTracker\/Records/d' KinZfitter/KinZfitter/BuildFile.xml
 sed -i '/#include "RooMinuit.h"/d' KinZfitter/KinZfitter/interface/KinZfitter.h
 
-#Fix some memory ownership issues (unreleased)
+#Fix some memory issues (#47289 queued CMSSW_15_0_X))
 git cms-addpkg PhysicsTools/NanoAODTools
-git fetch https://github.com/namapane/cmssw.git nanoAOD_memfix
-git cherry-pick ed6112b942d
+git fetch https://github.com/namapane/cmssw.git NAT-dev2:namapane_NAT-dev2
+git cherry-pick aa9ecbd04d6 98f8692142f
 
 if [[ $CMSSW_VERSION == CMSSW_13_3_* ]]; then
  #Pick the fix from #43536 (haddNano.py); in release since 13_0_18, 14_0_2, 14_1_0; it was not backported to 13_3_X
