@@ -7,18 +7,10 @@ from functools import cmp_to_key
 from ROOT import Mela, SimpleParticle_t, SimpleParticleCollection_t, TVar, TLorentzVector
 from ctypes import c_float
 
-class StoreOption:
-    # Enum used to define which candidates should be stored in the ZZCand collection.
-    # BestCandOnly = only the best SR candidate in the event is retained. This is normally the default for production jobs.
-    # AllCands   = keep all SR candidates passing the full selection and analysis cuts (including permutations of leptons).
-    # AllWithRelaxedMuId = keep any SR candidate that can be made, even if leptons don't pass ID cuts (useful for ID cut optimization studies).
-    # Note: This does not affect the ZLLCand collection; for each CR that is activated, only the best candidate is stored.
-    BestCandOnly, AllCands, AllWithRelaxedMuId = range(0,3)
-
 
 class ZZFiller(Module):
 
-    def __init__(self, runMELA, bestCandByMELA, isMC, year, data_tag, processCR=False, addZL=False, filter='Cands', debug=False):
+    def __init__(self, runMELA, bestCandByMELA, isMC, year, data_tag, processCR=False, addZL=False, filter='Cands', candsToStore='BestCandOnly', debug=False):
         """Build candidates:
         -ZZCand: SR candidates. The index of the best ZZ candidate in each event is stored as bestCandIdx
         -ZLLCand: CR candidates (SS, 3P1F, 2P2F, SIP CRs, with indices: ZZLLbestSSIdx, ZLLbest3P1FIdx, ZLLbest2P2FIdx, ZLLbestSIPCRIdx)
@@ -32,12 +24,17 @@ class ZZFiller(Module):
           data_tag: subperiod or processing, e.g. "pre_EE" (currently unused)
           addZL: add ZL CR
           filter: criteria to keep or skip events:
-                  'Cands' = store only events with at least one ZZ, ZLL, or ZL candidate are kept
-                  'Z' = store any event that has at least one good Z candidate (passing the analysis Z selection criteria, and 12<mll<120)
-                  '3L_20_10' = filter on events with 3 good leptons, pt1>20, pt2>10; useful for trigger studies
-                  'NoFilter' = don't skip events
+                  'Cands' = keep only events with at least one ZZ, ZLL, or ZL candidate are kept
+                  'Z' = keep any event that has at least one good Z candidate (passing the analysis Z selection criteria, and 12<mll<120)
+                  '3L_20_10' = keep all events with 3 good leptons, pt1>20, pt2>10; useful for trigger studies
+                  'NoFilter' = don't filter events
+          candsToStore: which candidates should be stored in the ZZCand collection:
+                  'BestCandOnly' = only the best SR candidate in the event is saved (default)
+                  'AllCands' = keep all SR candidates passing the full selection and analysis cuts (including permutations of leptons).
+                  'AllWithRelaxedMuId' = keep any SR candidate that can be made, even if leptons don't pass ID cuts (useful for ID cut optimization studies).
+                   Note that this option does not affect the ZLLCand collection: for each CR that is activated, only the best candidate is stored.
         """
-        print("***ZZFiller: isMC:", isMC, "year:", year, "data_tag:", data_tag, "bestCandByMELA:", bestCandByMELA, "filter:", filter, "- This module filters events.",  flush=True)
+        print("***ZZFiller: isMC:", isMC, "year:", year, "data_tag:", data_tag, "bestCandByMELA:", bestCandByMELA, "filter:", filter, "candsToStore:", candsToStore, ("- This module filters events." if filter!='NoFilter' else ""),  flush=True)
         self.writeHistFile = False
         self.isMC = isMC
         self.year = year
@@ -54,7 +51,7 @@ class ZZFiller(Module):
 
         self.DATA_TAG = data_tag
 
-        # Translate filter string into an enum, for efficiency
+        # Translate option strings into enums, for efficiency
         self.noFilter, self.filterOnCands, self.filterOnZ, self.filter_3L_20_10 = range(0,4)
         filters = {'NoFilter':self.noFilter,
                    'Cands':self.filterOnCands,
@@ -64,11 +61,19 @@ class ZZFiller(Module):
             self.filterType = filters[filter]
         except :
             raise ValueError("ZZFiller: filter =", filter, "not supported")
+
+        self.BestCandOnly, self.AllCands, self.AllWithRelaxedMuId =  range(0,3)
+        storeOptions = {'BestCandOnly':self.BestCandOnly,
+                        'AllCands':self.AllCands,
+                        'AllWithRelaxedMuId':self.AllWithRelaxedMuId}
+        try:
+            self.candsToStore = storeOptions[candsToStore]
+        except :
+            raise ValueError("ZZFiller: candsToStore =", candsToStore, "not supported")
+
         self.DEBUG = debug
         self.ZmassValue = 91.1876;
 
-        self.candsToStore = StoreOption.BestCandOnly # Only store the best candidate for the SR
-#        self.candsToStore = StoreOption.AllWithRelaxedMuId # Use this for ID optimization studies
         self.muonIDs=[]
         self.muonIDVars=[]
 
@@ -76,7 +81,7 @@ class ZZFiller(Module):
         # Note that the actual lepton selection cuts for SR and CR are applied later; this preselection only affects what
         # leptons are considered in making the combinatorial (ie processing speed)
         
-        if self.candsToStore != StoreOption.AllWithRelaxedMuId :
+        if self.candsToStore != self.AllWithRelaxedMuId :
             # Normal case: is the full ID + iso if only the SR is considered, or the relaxed ID if CRs are also filled.
             if self.addSIPCR or self.addOSCR or self.addSSCR or self.addZLCR:
                 self.leptonPresel = (lambda l : l.ZZRelaxedIdNoSIP) # minimal selection good for all CRs: no SIP, no ID, no iso
@@ -87,13 +92,13 @@ class ZZFiller(Module):
             # Electron ID is unchanged; FullSel electrons are preselected in this case, so the effect of cut variations can be studied for muons only.
             # for this reason, CRs cannot be properly built.
             if self.addSIPCR or self.addOSCR or self.addSSCR or self.addZLCR:
-                raise Exception("WARNING: CRs are not supported when StoreOption = AllWithRelaxedMuId")
+                raise Exception("WARNING: CRs are not supported when candsToStore==AllWithRelaxedMuId")
             self.leptonPresel = (lambda l : (abs(l.pdgId)==13 and l.pt>5 and abs(l.eta) < 2.4) or (abs(l.pdgId)==11 and l.ZZFullSel))
             
             # Add flags for muon ID studies. Each Flag will be set to true for a candidate if all of its muons pass the specified ID.
             self.muonIDs=[dict(name="ZZFullSel", sel=lambda l : l.ZZFullId and l.passIso), # Standard ZZ selection; this is used for setting default bestCandIdx
-                          dict(name="ZZRelaxedIDNoSIP",sel=lambda l : l.pt>5 and abs(l.eta)<2.4 and (l.isGlobal or (l.isTracker and l.nStations>0))),# ZZ relaxed mu ID without dxy, dz, SIP cuts (for optimization). Note: this is looser than nanoAOD presel.
-                          dict(name="ZZFullIDNoSIP",   sel=lambda l : l.pt>5 and abs(l.eta)<2.4 and (l.isGlobal or (l.isTracker and l.nStations>0)) and (l.isPFcand or (l.highPtId>0 and l.pt>200.))),# ZZ full ID without dxy, dz, SIP, and isolation cuts (for optimization)                      
+                          dict(name="ZZRelaxedIDOnly",sel=lambda l : l.pt>5 and abs(l.eta)<2.4 and (l.isGlobal or (l.isTracker and l.nStations>0))),# ZZ relaxed mu ID without dxy, dz, SIP, isolation cuts (for optimization). Note: this is looser than nanoAOD presel.
+                          dict(name="ZZFullIDOnly",   sel=lambda l : l.pt>5 and abs(l.eta)<2.4 and (l.isGlobal or (l.isTracker and l.nStations>0)) and (l.isPFcand or (l.highPtId>0 and l.pt>200.))),# ZZ full ID without dxy, dz, SIP, and isolation cuts (for optimization)
                           dict(name="looseId", sel=lambda l : l.looseId),   # POG CutBasedIdLoose
                           dict(name="mediumId", sel=lambda l : l.mediumId), # POG CutBasedIdMedium
                           dict(name="mediumPromptId", sel=lambda l : l.mediumPromptId), # POG CutBasedIdMediumPrompt (=mediumId + tighter dxy, dz cuts)
@@ -108,9 +113,9 @@ class ZZFiller(Module):
 
             # Add variable to store the worst value of a given quantity among the 4 leptons of a candidate, for optimization studies.
             # Worst is intended as lowest value (as for an MVA), unless the variable's name starts with "max".
-            self.muonIDVars=[dict(name="maxdxy", sel=lambda l : l.dxy),
-                             dict(name="maxdz", sel=lambda l : l.dz),
-                             dict(name="maxsip3d", sel=lambda l : l.sip3d),
+            self.muonIDVars=[dict(name="maxdxy", sel=lambda l : abs(l.dxy)),
+                             dict(name="maxdz", sel=lambda l : abs(l.dz)),
+                             dict(name="maxsip3d", sel=lambda l : abs(l.sip3d)),
                              dict(name="maxpfRelIso03FsrCorr", sel=lambda l : l.pfRelIso03FsrCorr), # FSR-corrected iso, DR=0.3
                              dict(name="maxpfRelIso03_all", sel=lambda l : l.pfRelIso03_all),
                              dict(name="maxpfRelIso04_all", sel=lambda l : l.pfRelIso04_all),
@@ -240,8 +245,8 @@ class ZZFiller(Module):
                 return False
         
         Zs = [] # all Z cands, used to build SR and CRs
-        SRZs = [] # Selected Zs, to be written out
-        bestZIdx = -1 # index of the best Z in the event, among SRZs
+        selZs = [] # Selected Zs, to be written out
+        bestZIdx = -1 # index of the best Z in the event, among selZs
         ZZs = []
         bestCandIdx = -1
         ZLLs = [] 
@@ -297,10 +302,17 @@ class ZZFiller(Module):
                         if self.DEBUG: print('Z={:.4g} pt1={:.3g} pt2={:.3g} fsr1={} fsr2={} SR={} 1F={} 2F={} SS={} SSSIP={}'.format(zmass, l1.pt, l2.pt, l1.fsrPhotonIdx,  l2.fsrPhotonIdx, isSR, is1FCR, is2FCR, isSSCR, isSIPCR))
                         if (zmass>12. and zmass<120.):
                             Zs.append(aZ)
-                            if aZ.isSR : # those that will be written in the event
-                                if (bestZIdx<0 or abs(zmass-self.ZmassValue)<abs(SRZs[bestZIdx].M-self.ZmassValue)) :
-                                    bestZIdx = len(SRZs)
-                                SRZs.append(aZ)
+                            if self.candsToStore == self.AllWithRelaxedMuId : # For ID studies, store any OS Z made with preselected leptons
+                                if aZ.isOSSF :
+                                    selZs.append(aZ)
+                            else : # Default: store only Zs passing the SR lepton selection
+                                if aZ.isSR :
+                                    selZs.append(aZ)
+
+                            # Choose best Z among SR Zs and store index wihin the selZs list
+                            if aZ.isSR :
+                                if (bestZIdx<0 or abs(zmass-self.ZmassValue)<abs(selZs[bestZIdx].M-self.ZmassValue)) :
+                                    bestZIdx = len(selZs)-1
                                 
 
         ### Build ZZ and ZLL combinations passing the ZZ selection
@@ -361,7 +373,7 @@ class ZZFiller(Module):
                     if self.DEBUG: print("ZLL:", iZLL, ZLL.p4.M(), ZLL.Z1.M, ZLL.Z2.M, ZLL.Z2.sumpt(), ZLL.finalState(), ZLL.p_GG_SIG_ghg2_1_ghz1_1_JHUGen, ZLL.p_QQB_BKG_MCFM, ZLL.KD,
                                          "2P2F:", int(iZLL==best2P2FCRIdx), "3P1F:", int(iZLL==best3P1FCRIdx), "SS:", int(iZLL == bestSSCRIdx), "SIP:", int(iZLL == bestSIPCRIdx))
                     
-            if self.candsToStore == StoreOption.BestCandOnly : # keep only the best cand as single element of the ZZ collection
+            if self.candsToStore == self.BestCandOnly : # keep only the best cand as single element of the ZZ collection
                 if bestCandIdx >= 0 :
                     ZZs = [ZZs[bestCandIdx]]
                     bestCandIdx = 0
@@ -371,8 +383,8 @@ class ZZFiller(Module):
         ### Z+L CR, for fake rate. This is considered only for events with a Z + exactly 1 additional lepton passing the relaxed selection.
         ### This ensures that there is no overlap with the SR and OS, 3P1F and 2P2F CRs (there can be an overlap with the SIP CR
         ### as that keeps leptons failing SIP)
-        if self.addZLCR and bestZIdx >= 0 and SRZs[bestZIdx].M > 40 and SRZs[bestZIdx].M < 120:
-            aZ = SRZs[bestZIdx]
+        if self.addZLCR and bestZIdx >= 0 and selZs[bestZIdx].M > 40 and selZs[bestZIdx].M < 120:
+            aZ = selZs[bestZIdx]
             for i,aL in enumerate(leps):
                 # Search for additional lepton, with ghost suppression DR cut
                 if i != aZ.l1Idx and i!= aZ.l2Idx and aL.ZZRelaxedId and \
@@ -392,22 +404,22 @@ class ZZFiller(Module):
                         
         ### Filter events with no candidates
         if self.filterType == self.filterOnCands and len(ZZs) == 0 and len(ZLLs) == 0 and ZLCand_lIdx < 0: return False
-        if self.filterType == self.filterOnZ and len(SRZs) == 0 : return False
+        if self.filterType == self.filterOnZ and len(selZs) == 0 : return False
 
         ### Now fill the variables to be stored as output
         # Fill selected Zs
-        ZCand_mass = [0.]*len(SRZs)
-        ZCand_pt = [0.]*len(SRZs)
-        ZCand_eta = [0.]*len(SRZs)
-        ZCand_rapidity = [0.]*len(SRZs)
-        ZCand_phi = [0.]*len(SRZs)
-        ZCand_flav = [0.]*len(SRZs)
-        ZCand_l1Idx = [-1]*len(SRZs)
-        ZCand_l2Idx = [-1]*len(SRZs)
-        ZCand_fsr1Idx = [-1]*len(SRZs)
-        ZCand_fsr2Idx = [-1]*len(SRZs)
+        ZCand_mass = [0.]*len(selZs)
+        ZCand_pt = [0.]*len(selZs)
+        ZCand_eta = [0.]*len(selZs)
+        ZCand_rapidity = [0.]*len(selZs)
+        ZCand_phi = [0.]*len(selZs)
+        ZCand_flav = [0.]*len(selZs)
+        ZCand_l1Idx = [-1]*len(selZs)
+        ZCand_l2Idx = [-1]*len(selZs)
+        ZCand_fsr1Idx = [-1]*len(selZs)
+        ZCand_fsr2Idx = [-1]*len(selZs)
 
-        for iZ, aZ in enumerate(SRZs) :
+        for iZ, aZ in enumerate(selZs) :
             ZCand_mass[iZ] = aZ.p4.M()
             ZCand_pt[iZ] = aZ.p4.Pt()
             ZCand_eta[iZ] = aZ.p4.Eta()

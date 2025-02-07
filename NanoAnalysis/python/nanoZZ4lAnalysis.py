@@ -58,6 +58,15 @@ FILTER_EVENTS = getConf("FILTER_EVENTS", 'Cands') # Filter to be applied on even
                                                   # '3L_20_10' = any event with  with 3 good leptons, pt1>20, pt2>10 (useful for trigger studies)
                                                   # 'NoFilter' = no additional filtering (besides trigger, PV filter)
 
+CANDSTOSTORE = getConf("CANDSTOSTORE", 'BestCandOnly') # which candidates should be stored in the ZZCand collection:
+                                                  # 'BestCandOnly' = only the best SR candidate in the event is saved (default)
+                                                  # 'AllCands' = keep all SR candidates passing the full selection and analysis cuts
+                                                  #   (including permutations of leptons).
+                                                  # 'AllWithRelaxedMuId' = keep any SR candidate that can be made, even if leptons
+                                                  #   don't pass ID cuts (useful for ID cut optimization studies).
+                                                  # Note that this option does not affect the ZLLCand collection: for each
+                                                  # CR that is activated, only the best candidate is stored.
+                                                  
 ### Definition of analysis cuts
 cuts = dict(
     ### lepton ID cuts
@@ -151,6 +160,7 @@ reco_sequence = [lepFiller(cuts, LEPTON_SETUP), # FSR and FSR-corrected iso; fla
                           processCR=PROCESS_CR,
                           addZL=PROCESS_ZL,
                           filter=FILTER_EVENTS,
+                          candsToStore=CANDSTOSTORE,
                           debug=DEBUG), # Build ZZ candidates; choose best candidate; filter events with candidates
                  jetFiller(), # Jets cleaning with leptons
                  ZZExtraFiller(IsMC, LEPTON_SETUP, DATA_TAG, PROCESS_CR), # Additional variables to selected candidates
@@ -247,12 +257,13 @@ branchsel_out = ['drop *',
                  'keep Jet*',
                  'keep nCleanedJet*',
                  'keep FsrPhoton*',
-                 'keep HLT_Ele*',
-                 'keep HLT_DoubleEle*',
-                 'keep HLT_Mu*',
-                 'keep HLT_DiMu*',
-                 'keep HLT_TripleMu*',
-                 'keep HLT_IsoMu*',
+                 # individual HLT bits are different in different data periods/eras and this causes some problems with merging data files
+                 # 'keep HLT_Ele*',
+                 # 'keep HLT_DoubleEle*',
+                 # 'keep HLT_Mu*',
+                 # 'keep HLT_DiMu*',
+                 # 'keep HLT_TripleMu*',
+                 # 'keep HLT_IsoMu*',
                  'keep HLT_passZZ*',
                  'keep best*', # best candidate indices
                  'keep Z*', # Z, ZZ, ZLL candidates
@@ -271,6 +282,7 @@ if IsMC:
                           'keep HTXS_Higgs*',
                           'keep HTXS_njets30',
                           'keep Pileup*',
+                          'keep GenJet*',
                           #'keep LHE*',
                           #'keep Generator*',
                           #'keep PV*',
