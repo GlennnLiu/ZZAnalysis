@@ -74,9 +74,6 @@ class ZZFiller(Module):
         self.DEBUG = debug
         self.ZmassValue = 91.1876;
 
-        self.muonIDs=[]
-        self.muonIDVars=[]
-
         # Pre-selection of leptons used to reduce combinatorial when building Z and LL candidates.
         # Note that the actual lepton selection cuts for SR and CR are applied later; this preselection only affects what
         # leptons are considered in making the combinatorial (ie processing speed)
@@ -94,36 +91,7 @@ class ZZFiller(Module):
             if self.addSIPCR or self.addOSCR or self.addSSCR or self.addZLCR:
                 raise Exception("WARNING: CRs are not supported when candsToStore==AllWithRelaxedMuId")
             self.leptonPresel = (lambda l : (abs(l.pdgId)==13 and l.pt>5 and abs(l.eta) < 2.4) or (abs(l.pdgId)==11 and l.ZZFullSel))
-            
-            # Add flags for muon ID studies. Each Flag will be set to true for a candidate if all of its muons pass the specified ID.
-            self.muonIDs=[dict(name="ZZFullSel", sel=lambda l : l.ZZFullId and l.passIso), # Standard ZZ selection; this is used for setting default bestCandIdx
-                          dict(name="ZZRelaxedIDOnly",sel=lambda l : l.pt>5 and abs(l.eta)<2.4 and (l.isGlobal or (l.isTracker and l.nStations>0))),# ZZ relaxed mu ID without dxy, dz, SIP, isolation cuts (for optimization). Note: this is looser than nanoAOD presel.
-                          dict(name="ZZFullIDOnly",   sel=lambda l : l.pt>5 and abs(l.eta)<2.4 and (l.isGlobal or (l.isTracker and l.nStations>0)) and (l.isPFcand or (l.highPtId>0 and l.pt>200.))),# ZZ full ID without dxy, dz, SIP, and isolation cuts (for optimization)
-                          dict(name="looseId", sel=lambda l : l.looseId),   # POG CutBasedIdLoose
-                          dict(name="mediumId", sel=lambda l : l.mediumId), # POG CutBasedIdMedium
-                          dict(name="mediumPromptId", sel=lambda l : l.mediumPromptId), # POG CutBasedIdMediumPrompt (=mediumId + tighter dxy, dz cuts)
-                          dict(name="tightId", sel=lambda l : l.tightId), # POG CutBasedIdTight
-                          dict(name="highPtId", sel=lambda l : l.highPtId>0), # >0 = POG tracker high pT; 2 = global high pT, which includes the former
-                          dict(name="isPFcand", sel=lambda l : l.isPFcand),
-                          dict(name="isGlobal", sel=lambda l : l.isGlobal),  # Note: this is looser than nanoAOD presel.
-                          dict(name="isTracker", sel=lambda l : l.isTracker),# Note: this is looser than nanoAOD presel.
-                          dict(name="isTrackerArb", sel=lambda l : l.isTracker and l.nStations>0), # Arbitrated tracker muon. Note: this is looser than nanoAOD presel.
-                          dict(name="inTimeMuon", sel=lambda l : l.inTimeMuon), # 
-                          ]
 
-            # Add variable to store the worst value of a given quantity among the 4 leptons of a candidate, for optimization studies.
-            # Worst is intended as lowest value (as for an MVA), unless the variable's name starts with "max".
-            self.muonIDVars=[dict(name="maxdxy", sel=lambda l : abs(l.dxy)),
-                             dict(name="maxdz", sel=lambda l : abs(l.dz)),
-                             dict(name="maxsip3d", sel=lambda l : abs(l.sip3d)),
-                             dict(name="maxpfRelIso03FsrCorr", sel=lambda l : l.pfRelIso03FsrCorr), # FSR-corrected iso, DR=0.3
-                             dict(name="maxpfRelIso03_all", sel=lambda l : l.pfRelIso03_all),
-                             dict(name="maxpfRelIso04_all", sel=lambda l : l.pfRelIso04_all),
-                             dict(name="maxminiPFRelIso_all", sel=lambda l : l.miniPFRelIso_all), # miniIso
-                             dict(name="mvaLowPt", sel=lambda l : l.mvaLowPt), # additional presel (l.looseId and l.sip3d<4. and l.dxy<0.5 and l.dz < 1) is required, cf: https://github.com/cms-sw/cmssw/blob/90f498af750cf4271c0a988fef352b0698012a40/PhysicsTools/PatAlgos/plugins/PATMuonProducer.cc#L762-L764
-#                             dict(name="promptMVA", sel=lambda l : l.mvaTTH), # should add H4l preselection for consistencty with mvaLowPt; this is looser than the original recommendation (https://twiki.cern.ch/twiki/bin/viewauth/CMS/LeptonMVA). Was retrained and renamed "promptMVA" in v14
-#                             dict(name="mvaMuID", sel=lambda l : l.mvaMuID), # muon MVA from 22-001. Note: Was retrained in v14; using H4l preselection for consistency, see above
-                             ]
         if self.runMELA :
             sqrts=13.;
             if year>=2022 :
@@ -179,12 +147,7 @@ class ZZFiller(Module):
         self.out.branch("ZZCand_Z1l2Idx", "S", lenVar="nZZCand", title="Index of 2nd Z1 daughter in the Electron+Muon merged collection")
         self.out.branch("ZZCand_Z2l1Idx", "S", lenVar="nZZCand", title="Index of 1st Z2 daughter in the Electron+Muon merged collection")
         self.out.branch("ZZCand_Z2l2Idx", "S", lenVar="nZZCand", title="Index of 2nd Z2 daughter in the Electron+Muon merged collection")
-        for ID in self.muonIDs :
-            self.out.branch("ZZCand_mu"+ID["name"], "O", lenVar="nZZCand")
-        for var in self.muonIDVars :
-            self.out.branch("ZZCand_mu"+var["name"], "F", lenVar="nZZCand")
-        self.out.branch("bestCandIdx", "S", title="Seleced ZZ candidate in the event")
-
+        self.out.branch("bestCandIdx", "S", title="Index of seleced ZZCand candidate in the event")
 
         if self.addSSCR or self. addOSCR or self.addSIPCR :
             self.out.branch("nZLLCand", "I", title="Z+LL control region candidates")
@@ -460,9 +423,7 @@ class ZZFiller(Module):
         ZZCand_Z2l2Idx = [-1]*len(ZZs)
         ZZCand_KD = [0.]*len(ZZs)
         ZZCand_Z2sumpt = [0.]*len(ZZs)
-        ZZCand_passID    = [[] for il in range(len(self.muonIDs))]
-        ZZCand_worstVar  = [[] for il in range(len(self.muonIDVars))]
-        
+
         for iZZ, ZZ in enumerate(ZZs) :
             ZZCand_mass[iZZ] = ZZ.p4.M()
             ZZCand_massPreFSR[iZZ] = ZZ.massPreFSR()
@@ -480,10 +441,6 @@ class ZZFiller(Module):
             ZZCand_Z2l2Idx[iZZ] = ZZ.Z2.l2Idx
             ZZCand_KD[iZZ] = ZZ.KD
             ZZCand_Z2sumpt[iZZ] = ZZ.Z2.sumpt()
-            for iID, ID in enumerate(self.muonIDs) :
-                ZZCand_passID[iID].append(ZZ.passId[iID])
-            for iVar, var in enumerate(self.muonIDVars) :
-                ZZCand_worstVar[iVar].append(ZZ.worstVar[iVar])
 
         self.out.fillBranch("ZZCand_mass", ZZCand_mass)
         self.out.fillBranch("ZZCand_massPreFSR", ZZCand_massPreFSR)
@@ -501,10 +458,6 @@ class ZZFiller(Module):
         self.out.fillBranch("ZZCand_Z1l2Idx", ZZCand_Z1l2Idx)
         self.out.fillBranch("ZZCand_Z2l1Idx", ZZCand_Z2l1Idx)
         self.out.fillBranch("ZZCand_Z2l2Idx", ZZCand_Z2l2Idx)
-        for iID, ID in enumerate(self.muonIDs) :
-            self.out.fillBranch("ZZCand_mu"+ID["name"], ZZCand_passID[iID])
-        for iVar, var in enumerate(self.muonIDVars) :
-            self.out.fillBranch("ZZCand_mu"+var["name"], ZZCand_worstVar[iVar])
 
         self.out.fillBranch("bestCandIdx", bestCandIdx)
 
@@ -721,29 +674,4 @@ class ZZFiller(Module):
             print ("ERROR", p_GG_SIG_ghg2_1_ghz1_1_JHUGen, p_QQB_BKG_MCFM)
             p_QQB_BKG_MCFM = 1. # FIXME: fix for error with message: "TUtil::CheckPartonMomFraction: At least one of the parton momentum fractions is greater than 1."
         ZZ = self.ZZCand(Z1, Z2, p_GG_SIG_ghg2_1_ghz1_1_JHUGen, p_QQB_BKG_MCFM)
-
-        # Set flags for IDs passed by all muons of candidate, and worst values of selection variables for the candidate's muons, for studies on muon ID optimization.
-        # For electrons, we rely on the fact that they are preselected as passing ZZFullSel (leptonPresel) when option AllWithRelaxedMuId is set.
-        if fillIDVars:
-            passId = [True]*len(self.muonIDs)
-            for iID, ID in enumerate(self.muonIDs) :
-                for ilep in range(4):
-                    if abs(zzleps[ilep].pdgId)==13 and not ID["sel"](zzleps[ilep]) : # electrons are already preselected, see above
-                        passId[iID] = False
-                        continue
-            ZZ.passId = passId
-
-            # Set worst value of selection variable among all candidate's muons
-            worstVar = [99.]*len(self.muonIDVars)
-            for iVar, var in enumerate(self.muonIDVars):
-                if var["name"].startswith("max") : worstVar[iVar] = -1.
-                for iilep in range(4) :
-                    if abs(zzleps[iilep].pdgId)==11 : continue # electrons are already preselected, see above
-                    else :
-                        if var["name"].startswith("max") :
-                            worstVar[iVar] = max(worstVar[iVar], var["sel"](zzleps[iilep]))                                    
-                        else :
-                            worstVar[iVar] = min(worstVar[iVar], var["sel"](zzleps[iilep]))
-            ZZ.worstVar = worstVar
-
         return ZZ
