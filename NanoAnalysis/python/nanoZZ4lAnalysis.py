@@ -8,7 +8,7 @@ import os
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 
-from ZZAnalysis.NanoAnalysis.tools import setConf, getConf, insertBefore
+from ZZAnalysis.NanoAnalysis.tools import setConf, getConf, insertBefore, insertAfter
 from ZZAnalysis.NanoAnalysis.getEleBDTCut import *
 from ZZAnalysis.NanoAnalysis.triggerAndSkim import * # Trigger requirements are defined here
 from ZZAnalysis.NanoAnalysis.lepFiller import *
@@ -210,6 +210,7 @@ if IsMC:
                         cloneBranches(treeName='AllEvents',
                                       varlist=['run', 'luminosityBlock', 'event',
                                                'GenDressedLepton_*',
+                                               #'LHEPart*',
                                                'FidDressedLeps_*',
                                                'FidZ*',
                                                'LHE*Weight',
@@ -235,6 +236,10 @@ else : # Data
 
 
 ZZSequence = pre_sequence + reco_sequence + post_sequence
+
+if CANDSTOSTORE == 'AllWithRelaxedMuId' : # Add extra variables for ID studies
+    from ZZAnalysis.NanoAnalysis.ZZIDStudies import *
+    insertAfter(ZZSequence, 'ZZFiller', ZZIDStudies())
 
 ### Branches to be read and written to output
 branchsel_in = ['drop FatJet_*',
@@ -293,6 +298,7 @@ if IsMC:
                               'keep FidDressedLeps_*',
                               'keep FidZ*',
                               'keep passedFiducial',
+                              #'keep LHEPart*'
                               ])
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor

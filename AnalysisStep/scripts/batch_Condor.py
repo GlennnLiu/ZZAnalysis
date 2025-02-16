@@ -3,7 +3,6 @@ from __future__ import print_function
 from past.builtins import execfile
 
 import sys
-import imp
 import copy
 import os
 import shutil
@@ -253,9 +252,10 @@ class MyBatchManager:
                                 dest="force", default=False,
                                 help="Don't ask any questions, just over-write")
 
-        self.parser_.add_option("-n", "--negate", action="store_true",
-                                dest="negate", default=False,
-                                help="create jobs, but does not submit the jobs.")
+        # Currently unused option
+        # self.parser_.add_option("-n", "--negate", action="store_true",
+        #                         dest="negate", default=False,
+        #                         help="create jobs, but does not submit the jobs.")
 
         self.parser_.add_option("-q", "--queue", dest="jobflavour",
                                 help="Max duration (the shorter, the quicker the job will start.Default: 'tomorrow' for mini; 'longlunch' for nano.  Cf. https://batchdocs.web.cern.ch/local/submit.html",
@@ -274,8 +274,8 @@ class MyBatchManager:
                                 default=None)
 
         self.parser_.add_option("-i", "--input", dest="cfgFileName",
-                                help="input cfg",
-                                default="analyzer_batch.py")
+                                help="input cfg; default: analyzer_batch.py for miniAOD jobs; none for nanoAOD jobs",
+                                default="")
 
         self.parser_.add_option("-d", "--debug", action="store_true",
                                 dest="verbose",default =False,
@@ -386,7 +386,9 @@ class MyBatchManager:
 
        # Set requirements
        inputType='miniAOD'
-       if 'nanoaod' in (splitComponents[value].files)[0].casefold() :
+       variables = splitComponents[value].variables
+       if ('JOBTYPE' in variables and variables['JOBTYPE'].casefold() == 'nanoaod') or \
+           'nanoaod' in (splitComponents[value].files)[0].casefold() : 
            inputType='nanoAOD'
        if self.jobmem == None:
            if batchManager.options_.jobmem != None :
@@ -465,10 +467,10 @@ class MyBatchManager:
        
        variables = splitComponents[value].variables
        pyFragments = splitComponents[value].pyFragments
-       
-       variables['IsMC'] = True
-       if 'PD' in variables and not variables['PD'] == '': variables['IsMC'] = False
-       #else: variables['PD'] = ""
+
+       if not 'IsMC' in variables: 
+           variables['IsMC'] = True
+           if 'PD' in variables and not variables['PD'] == '': variables['IsMC'] = False
 
        if batchManager.options_.verbose:
            print('value ',value)
@@ -476,7 +478,6 @@ class MyBatchManager:
        
        variables['SAMPLENAME'] = splitComponents[value].samplename
        variables['XSEC'] = splitComponents[value].xsec 
-       #variables = {'IsMC':IsMC, 'PD':PD, 'MCFILTER':MCFILTER, 'SUPERMELA_MASS':SUPERMELA_MASS, 'SAMPLENAME':SAMPLENAME, 'XSEC':XSEC, 'SKIM_REQUIRED':SKIM_REQUIRED}
 
        template_name = variables['SAMPLENAME'] + 'run_template_cfg.py'
        print('\tSaving template as %s/%s'%(os.path.basename(self.outputDir_), template_name))
@@ -486,8 +487,13 @@ class MyBatchManager:
 
        cfgFile = open('%s/%s'%(self.outputDir_, template_name),'w')
 
-       if inputType=="miniAOD" : 
-           execfile(cfgFileName,variables)
+       if inputType=="miniAOD":
+           if cfgFileName == '' : # note this is a global variable, cannot be overwritten
+               cfgFileName_ = 'analyzer_batch.py'
+           else :
+               cfgFileName_ = cfgFileName
+
+           execfile(cfgFileName_,variables)
        
            process = variables.get('process') 
            process.source = splitComponents[value].source
@@ -527,9 +533,13 @@ class MyBatchManager:
                 else : pval = str(val)
                 cfgFile.write('setConf("'+var+'",'+pval+')\n')
             cfgFile.write('setConf("files",REPLACE_WITH_FILES)\n')
-            cfgFile.write('from ZZAnalysis.NanoAnalysis.nanoZZ4lAnalysis import *\n')
-            cfgFile.write('p.run()\n')
-       
+            if cfgFileName == '' : # Default: run nanoAODTools
+                cfgFile.write('from ZZAnalysis.NanoAnalysis.nanoZZ4lAnalysis import *\n')
+                cfgFile.write('p.run()\n')
+            else :
+                icfg = open(cfgFileName)
+                cfgFile.write(icfg.read())
+                icfg.close()
        cfgFile.close()
 
 
@@ -542,6 +552,7 @@ class Component(object):
 
         if prefix=="source.fileNames" : #take the files that are specified in the process.source.fileNames in the input .py
             handle = open(cfgFileName, 'r')
+            import imp
             cfo = imp.load_source("pycfg", cfgFileName, handle)
             handle.close()
             self.source = copy.deepcopy(cfo.process.source)
