@@ -1,0 +1,47 @@
+from __future__ import print_function
+from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
+from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
+
+class jetIdUpdate(Module):
+    def __init__(self):
+        print("***jetIdUpdate", flush=True)
+
+    def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
+        self.out = wrappedOutputTree
+        self.out.branch("Jet_jetId_new", "I", lenVar="nJet", title="Corrected Jet ID based on manual recipe for NanoAODv12")
+
+    def analyze(self, event):
+        jets = Collection(event, 'Jet')
+        new_jetId = []
+
+        for ijet, jet in enumerate(jets):
+            # Initialize Jet ID flags
+            Jet_passJetIdTight = False
+            Jet_passJetIdTightLepVeto = False
+
+            # Jet-passJetIdTight based on eta conditions
+            if abs(jet.eta) <= 2.7:
+                Jet_passJetIdTight = bool(jet.jetId & (1 << 1))
+            elif 2.7 < abs(jet.eta) <= 3.0:
+                Jet_passJetIdTight = bool(jet.jetId & (1 << 1)) and (jet.neHEF < 0.99)
+            elif abs(jet.eta) > 3.0:
+                Jet_passJetIdTight = bool(jet.jetId & (1 << 1)) and (jet.neEmEF < 0.4)
+
+            # Jet-passJetIdTightLepVeto based on additional lepton veto conditions
+            if abs(jet.eta) <= 2.7:
+                Jet_passJetIdTightLepVeto = Jet_passJetIdTight and (jet.muEF < 0.8) and (jet.chEmEF < 0.8)
+            else:
+                Jet_passJetIdTightLepVeto = Jet_passJetIdTight
+
+            # Determine the new jet ID
+            if Jet_passJetIdTight and not Jet_passJetIdTightLepVeto:
+                new_jetId.append(2)
+            elif Jet_passJetIdTight and Jet_passJetIdTightLepVeto:
+                new_jetId.append(6)
+            else:
+                new_jetId.append(0)
+
+        # Fill the new jet ID branch
+        self.out.fillBranch("Jet_jetId_new", new_jetId)
+
+        return True
