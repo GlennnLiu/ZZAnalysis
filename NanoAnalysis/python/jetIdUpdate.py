@@ -8,13 +8,19 @@ class jetIdUpdate(Module):
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
-        self.out.branch("Jet_jetId_new", "I", lenVar="nJet", title="Corrected Jet ID based on manual recipe for NanoAODv12")
+        # Rename the original Jet_jetId branch
+        self.out.branch("Jet_jetIdOriginal", "I", lenVar="nJet", title="Original Jet ID from NanoAOD")
+        # Define the new corrected Jet_jetId branch
+        self.out.branch("Jet_jetId", "I", lenVar="nJet", title="Corrected Jet ID based on manual recipe for NanoAODv12")
 
     def analyze(self, event):
         jets = Collection(event, 'Jet')
         new_jetId = []
+        original_jetId = []
 
         for ijet, jet in enumerate(jets):
+            original_jetId.append(jet.jetId)
+
             # Initialize Jet ID flags
             Jet_passJetIdTight = False
             Jet_passJetIdTightLepVeto = False
@@ -41,7 +47,8 @@ class jetIdUpdate(Module):
             else:
                 new_jetId.append(0)
 
-        # Fill the new jet ID branch
-        self.out.fillBranch("Jet_jetId_new", new_jetId)
+        # Fill the original and new jet ID branches
+        self.out.fillBranch("Jet_jetIdOriginal", original_jetId)
+        self.out.fillBranch("Jet_jetId", new_jetId)
 
         return True
