@@ -1,12 +1,17 @@
 #!/bin/tcsh
-# Search for missing root files
-# parameter to be specified: mf = move failed jobs
-#                            lf = link failed jobs (then you can run cleanup.csh; resubmit_Condor.csh in AAAFAIL)
-#                            quiet = do not list jobs that are still running
-
-#set echo
+# #set echo
 
 set opt=$1
+
+if ( $opt == "help" ) then
+    echo "Scan production chunks and archive completed ones."
+    echo "Options:"
+    echo " quiet = do not list jobs that are still running"
+    echo " dry = only print, do not move chunks"
+    echo " mf = move failed jobs to AAAFAIL"
+    echo " lf = link failed jobs (then you can run cleanup.csh; resubmit_Condor.csh in AAAFAIL)"
+    exit
+endif
 
 if ( $#argv >= 2 ) then
   set gooddir=$2
@@ -75,8 +80,10 @@ foreach chunk ( *Chunk* )
 
  # Archive succesful jobs, or report failure
  if ( $fail == "false" ) then
-  mkdir -p $gooddir
-  mv $chunk $gooddir/
+  if ( $opt != "dry" ) then 
+    mkdir -p $gooddir
+    mv $chunk $gooddir/
+  endif
  else
   set description=""
    if ( $exitStatus == 0 ) then

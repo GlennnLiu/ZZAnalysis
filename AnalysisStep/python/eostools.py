@@ -172,7 +172,8 @@ def datasetToSource( prefix, dataset, fileprefix=''):
     recursive=True #FIXME: this is needed for central production, but care is needed if other stuff is present in the EOS path
 
     data=listFiles(dataset, prefix, recursive)
-
+    if data == None:
+        raise ValueError(f'ERROR: No file found in {dataset}')
     rootre = re.compile('.*root')
     files = [fileprefix+f for f in data if rootre.match(f)]
 

@@ -577,9 +577,9 @@ class ZZFiller(Module):
     ### Comparators to select the best candidate in the event. Return -1 if a is better than b, +1 otherwise
     # Choose by abs(MZ1-MZ), or sum(PT) if same Z1
     def bestCandByZ1Z2(self,a,b): 
-        if abs(a.Z1.M-b.Z1.M) < 1e-4 : # same Z1: choose the candidate with highest-pT Z2 leptons.
-            #FIXME replace the line above by a check by indices: 
-            #if a.Z1.l1Idx = b.Z1.l1Idx and a.Z1.l2Idx = b.Z1.l2Idx : #Note that leptons are ordered (1=+, 2=-), there is no need to check the alternative pairing:
+        if a.Z1.l1Idx == b.Z1.l1Idx and a.Z1.l2Idx == b.Z1.l2Idx :
+            # Same Z1, choose by sum of Z2 pTs.
+            # Note that leptons are ordered (1=+, 2=-), there is no need to check the alternative pairing
             if a.Z2.sumpt() > b.Z2.sumpt() :
                 return -1
             else :
@@ -592,10 +592,10 @@ class ZZFiller(Module):
 
     # Choose by DbkgKin
     def bestCandByDbkgKin(self,a,b): 
-        if abs((a.p4).M() - (b.p4).M())<1e-4 and a.finalState()==b.finalState() and (a.finalState() == 28561 or a.finalState()==14641) : # Equivalent: same masss (tolerance 100 keV) and same FS -> different permutation of the same leptons. Note that this can only happen in SR, not in CRs where the Z1 is always the best Z in the event.
-            # FIXME Replace the line above with a check by indices. 
-            # if set([a.Z1.l1Idx, a.Z1.l2Idx, a.Z2.l1Idx, a.Z2.l2Idx]) == \
-            #    set([b.Z1.l1Idx, b.Z1.l2Idx, b.Z2.l1Idx, b.Z2.l2Idx])) :
+        if set([a.Z1.l1Idx, a.Z1.l2Idx, a.Z2.l1Idx, a.Z2.l2Idx]) == \
+           set([b.Z1.l1Idx, b.Z1.l2Idx, b.Z2.l1Idx, b.Z2.l2Idx]) :
+            # Equivalent: same masss (tolerance 100 keV) and same FS -> different permutation of the same leptons.
+            # Note that this can only happen in SR, not in CRs where the Z1 is always the best Z in the event.
             return self.bestCandByZ1Z2(a,b)
         if a.KD > b.KD : return -1 # choose by best dbkgkin
         else: return 1

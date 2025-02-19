@@ -207,7 +207,7 @@ executable              = $(directory)/batchScript.sh
 arguments               = {mainDir}/$(directory) $(ClusterId)$(ProcId)
 output                  = log/$(ClusterId).$(ProcId).out
 error                   = log/$(ClusterId).$(ProcId).err
-log                     = log/$(ClusterId).log
+log                     = log/$(ClusterId).$(ProcId).log
 Initialdir              = $(directory)
 request_memory          = '''+str(batchManager.jobmem)+'''
 #Possible values: longlunch, workday, tomorrow, etc.; cf. https://batchdocs.web.cern.ch/local/submit.html
@@ -399,7 +399,7 @@ class MyBatchManager:
                    self.max_materialize = 0
                else :
                    self.jobmem = '3000M'
-                   self.max_materialize = 50
+                   self.max_materialize = 150
 
        if self.jobflavour == None:
            if batchManager.options_.jobflavour != None:
