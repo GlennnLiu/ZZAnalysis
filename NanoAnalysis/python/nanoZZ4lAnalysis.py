@@ -14,7 +14,6 @@ from ZZAnalysis.NanoAnalysis.triggerAndSkim import * # Trigger requirements are 
 from ZZAnalysis.NanoAnalysis.lepFiller import *
 from ZZAnalysis.NanoAnalysis.jetFiller import *
 from ZZAnalysis.NanoAnalysis.ZZFiller import *
-from ZZAnalysis.NanoAnalysis.jetIdUpdate import *
 from ZZAnalysis.NanoAnalysis.ZZExtraFiller import *
 from ZZAnalysis.NanoAnalysis.weightFiller import weightFiller
 
@@ -184,6 +183,7 @@ if APPLYELECORR and LEPTON_SETUP >=2022 :
 
 # Update of JetId from manual recipe for NanoAOD v12
 if NANOVERSION == 12:
+    from ZZAnalysis.NanoAnalysis.jetIdUpdate import *
     insertBefore(reco_sequence, 'jetFiller', jetIdUpdate())
 
 # Add jet corrections for Run 3
