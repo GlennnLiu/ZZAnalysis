@@ -180,6 +180,12 @@ if APPLYMUCORR :
 if APPLYELECORR and LEPTON_SETUP >=2022 :
     from ZZAnalysis.NanoAnalysis.modules.eleScaleResProducer import getEleScaleRes
     insertBefore(reco_sequence, 'lepFiller', getEleScaleRes(LEPTON_SETUP, DATA_TAG, IsMC, overwritePt=True))
+
+# Update of JetId from manual recipe for NanoAOD v12
+if NANOVERSION == 12:
+    from ZZAnalysis.NanoAnalysis.jetIdUpdate import *
+    insertBefore(reco_sequence, 'jetFiller', jetIdUpdate())
+
 # Add jet corrections for Run 3
 if APPLYJETCORR and LEPTON_SETUP >=2022 :
     from ZZAnalysis.NanoAnalysis.modules.jetJERC import getJetCorrected
