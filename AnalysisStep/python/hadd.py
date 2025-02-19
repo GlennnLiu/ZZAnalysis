@@ -113,6 +113,12 @@ def haddChunks(idir, removeDestDir, cleanUp=False, destdir=None ):
     if len(chunks)==0:
         print('warning: no chunk found.')
         return
+    if cleanUp:
+        chunkDir = 'Chunks'
+        if os.path.isdir(chunkDir):
+            raise ValueError(f'ERROR: {chunkDir} already present, please move it away')
+            # shutil.rmtree(chunkDir)
+        os.mkdir(chunkDir)
     for i, (comp, cchunks) in enumerate(chunks.items(), start=1):
         odir = '/'.join( [destdir, comp] )
         print()
@@ -124,14 +130,8 @@ def haddChunks(idir, removeDestDir, cleanUp=False, destdir=None ):
             if os.path.isdir( odir ):
                 shutil.rmtree(odir)
         haddRec(odir, cchunks)
-    if cleanUp:
-        chunkDir = 'Chunks'
-        if os.path.isdir('Chunks'):
-            shutil.rmtree(chunkDir)
-        os.mkdir(chunkDir)
-        print(chunks)
-        for comp, chunks in chunks.items():
-            for chunk in chunks:
+        if cleanUp:
+            for chunk in cchunks:
                 shutil.move(chunk, chunkDir)
         
 if __name__ == '__main__':
