@@ -12,7 +12,8 @@ from __future__ import print_function
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 #from PhysicsTools.NanoAODTools.postprocessing.tools import deltaR
-from ROOT import LeptonSFHelper
+from ROOT import LeptonSFHelper, TUtil
+from ctypes import c_float
 
 class ZZExtraFiller(Module):
     def __init__(self, isMC, year, data_tag, processCR):
@@ -71,10 +72,19 @@ class ZZExtraFiller(Module):
             nExtraLeps[iCand] = len(extraLeps)
             nExtraZs[iCand] = len(extraZs)
 
+            theCandLeps = [self.leps[i] for i in theCandLepIdxs] 
             if self.isMC:
-                theCandLeps = [self.leps[i] for i in theCandLepIdxs] 
                 wDataMC[iCand] = self.getDataMCWeight(theCandLeps)
-        
+
+            # Kinematic angles 
+            costhetastar = helcosthetaZ1 = helcosthetaZ2 = helphi = phistarZ1 = c_float(0.)
+            dressedLepsp4 = [l.p4() for l in theCandLeps] # FIXME must add FSR if present
+            TUtil.computeAngles(costhetastar, helcosthetaZ1, helcosthetaZ2, helphi, phistarZ1,
+                                dressedLepsp4[0], theCandLeps[0].pdgId,
+                                dressedLepsp4[1], theCandLeps[1].pdgId,
+                                dressedLepsp4[2], theCandLeps[2].pdgId,
+                                dressedLepsp4[3], theCandLeps[3].pdgId)
+           
         self.out.fillBranch(collName+"_nExtraLep", nExtraLeps)
         self.out.fillBranch(collName+"_nExtraZ", nExtraZs)
         if self.isMC:
