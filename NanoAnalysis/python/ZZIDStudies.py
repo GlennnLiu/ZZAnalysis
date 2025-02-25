@@ -123,6 +123,6 @@ class ZZIDStudies (Module):
                            ZExtraMu2Idx = i
 
         self.out.fillBranch("ZExtraMu1Idx", ZExtraMu1Idx)
-        self.out.fillBranch("ZExtraMu1Idx", ZExtraMu2Idx)
+        self.out.fillBranch("ZExtraMu2Idx", ZExtraMu2Idx)
         
         return True
