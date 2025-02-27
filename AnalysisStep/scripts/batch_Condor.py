@@ -285,6 +285,9 @@ class MyBatchManager:
                                 default="",
                                 help="full path of /eos/user area to transfer output files, in the respective PROD/Chunk subfolders. Note that log files will still be sent back to the submission folder.",)
 
+        self.parser_.add_option("-a", "--add-variables", dest="variables",
+                                default="",
+                                help='Additional variables to be set, possibly overriding the value set in the csv (eg: -a "bestCandByMELA=False;runMELA=False")',)
 
         (self.options_,self.args_) = self.parser_.parse_args()
 
@@ -346,7 +349,25 @@ class MyBatchManager:
 
         # Default values for the following are set later, depending on mini/nano
         self.jobmem = None 
-        self.jobflavour = None 
+        self.jobflavour = None
+
+        # Extract additional variables specified with -a
+        self.addVariables = {}
+        if self.options_.variables != "" :
+            vars = [s.strip() for s in self.options_.variables.split(";")]
+            for v in vars:
+              bareelement = [s.strip() for s in v.split("=")]
+              if len(bareelement) == 2:
+                if isFloat(bareelement[1]):
+                  try:
+                    int(bareelement[1])==float(bareelement[1]) # int(float number) will return ValueError
+                    self.addVariables[bareelement[0]] = int(bareelement[1]) # avoid turning integers to floats
+                  except ValueError:
+                    self.addVariables[bareelement[0]] = float(bareelement[1])
+                else:
+                  self.addVariables[bareelement[0]] = checkBool(bareelement[1])
+              else:
+                self.addVariables[bareelement[0]] = bareelement[0]
 
     def mkdir( self, dirname ):
        mkdir = 'mkdir -p %s' % dirname
@@ -465,7 +486,7 @@ class MyBatchManager:
        scriptFile.close()
        os.system('chmod +x %s' % scriptFileName)
        
-       variables = splitComponents[value].variables
+       variables = splitComponents[value].variables | batchManager.addVariables
        pyFragments = splitComponents[value].pyFragments
 
        if not 'IsMC' in variables: 

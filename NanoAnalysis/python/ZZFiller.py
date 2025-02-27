@@ -96,9 +96,18 @@ class ZZFiller(Module):
             sqrts=13.;
             if year>=2022 :
                 sqrts=13.6
+            # Import MELA, suppress its verbose Fortran output
+            import sys, os
+            devnull = os.open(os.devnull, os.O_WRONLY)
+            stdout_fd = sys.stdout.fileno()
+            saved_stdout = os.dup(stdout_fd)
+            os.dup2(devnull, stdout_fd)
             self.mela = Mela(sqrts, 125, TVar.ERROR)
             self.mela.setCandidateDecayMode(TVar.CandidateDecay_ZZ)
-            print("", flush=True) # avoids MELA init messages to mix with job output 
+            os.dup2(saved_stdout, stdout_fd)
+            os.close(devnull)
+            os.close(saved_stdout)
+            print(f"ZZFiller: created Mela({sqrts:.1f},125,TVar.CandidateDecay_ZZ)", flush=True)
 
         # Example of adding control histograms (requires self.writeHistFile = True)
         # def beginJob(self,histFile=None, histDirName=None):
