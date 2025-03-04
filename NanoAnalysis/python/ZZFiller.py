@@ -4,13 +4,15 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collect
 from PhysicsTools.HeppyCore.utils.deltar import deltaR
 
 from functools import cmp_to_key
-from ROOT import Mela, SimpleParticle_t, SimpleParticleCollection_t, TVar, TLorentzVector
+# from ROOT import Mela, SimpleParticle_t, SimpleParticleCollection_t, TVar, TLorentzVector
+from ROOT import TLorentzVector
 from ctypes import c_float
+import Mela
 
 
 class ZZFiller(Module):
 
-    def __init__(self, runMELA, bestCandByMELA, isMC, year, data_tag, processCR=False, addZL=False, filter='Cands', candsToStore='BestCandOnly', debug=False):
+    def __init__(self, runMELA, bestCandByMELA, MELA, isMC, year, data_tag, processCR=False, addZL=False, filter='Cands', candsToStore='BestCandOnly',  debug=False):
         """Build candidates:
         -ZZCand: SR candidates. The index of the best ZZ candidate in each event is stored as bestCandIdx
         -ZLLCand: CR candidates (SS, 3P1F, 2P2F, SIP CRs, with indices: ZZLLbestSSIdx, ZLLbest3P1FIdx, ZLLbest2P2FIdx, ZLLbestSIPCRIdx)
@@ -20,6 +22,7 @@ class ZZFiller(Module):
           runMELA: compute MELA KD
           bestCandByMELA: True = select best candidate by KD; False = with best Z1/highest-pTsum Z2 
           year: data taking year        
+          MELA: The MELA object passed from nanoZZ4lAnalysis.py 
           processCR: add ZLLCand CR collections
           data_tag: subperiod or processing, e.g. "pre_EE" (currently unused)
           addZL: add ZL CR
@@ -93,21 +96,22 @@ class ZZFiller(Module):
             self.leptonPresel = (lambda l : (abs(l.pdgId)==13 and l.pt>5 and abs(l.eta) < 2.4) or (abs(l.pdgId)==11 and l.ZZFullSel))
 
         if self.runMELA :
-            sqrts=13.;
-            if year>=2022 :
-                sqrts=13.6
-            # Import MELA, suppress its verbose Fortran output
-            import sys, os
-            devnull = os.open(os.devnull, os.O_WRONLY)
-            stdout_fd = sys.stdout.fileno()
-            saved_stdout = os.dup(stdout_fd)
-            os.dup2(devnull, stdout_fd)
-            self.mela = Mela(sqrts, 125, TVar.ERROR)
-            self.mela.setCandidateDecayMode(TVar.CandidateDecay_ZZ)
-            os.dup2(saved_stdout, stdout_fd)
-            os.close(devnull)
-            os.close(saved_stdout)
-            print(f"ZZFiller: created Mela({sqrts:.1f},125,TVar.CandidateDecay_ZZ)", flush=True)
+            # sqrts=13.;
+            # if year>=2022 :
+            #     sqrts=13.6
+            # # Import MELA, suppress its verbose Fortran output
+            # import sys, os
+            # devnull = os.open(os.devnull, os.O_WRONLY)
+            # stdout_fd = sys.stdout.fileno()
+            # saved_stdout = os.dup(stdout_fd)
+            # os.dup2(devnull, stdout_fd)
+            # self.mela = Mela(sqrts, 125, TVar.ERROR)
+            # self.mela.setCandidateDecayMode(TVar.CandidateDecay_ZZ)
+            # os.dup2(saved_stdout, stdout_fd)
+            # os.close(devnull)
+            # os.close(saved_stdout)
+            # print(f"ZZFiller: created Mela({sqrts:.1f},125,TVar.CandidateDecay_ZZ)", flush=True)
+            self.mela = MELA
 
         # Example of adding control histograms (requires self.writeHistFile = True)
         # def beginJob(self,histFile=None, histDirName=None):
@@ -665,19 +669,29 @@ class ZZFiller(Module):
         p_GG_SIG_ghg2_1_ghz1_1_JHUGen = 0.
         p_QQB_BKG_MCFM = 1.
         if self.runMELA:
-            daughters = SimpleParticleCollection_t()
-            daughters.push_back(SimpleParticle_t(Z1.l1.pdgId, Z1.l1DressedP4))
-            daughters.push_back(SimpleParticle_t(Z1.l2.pdgId, Z1.l2DressedP4))
-            daughters.push_back(SimpleParticle_t(Z2.l1.pdgId, Z2.l1DressedP4))
-            daughters.push_back(SimpleParticle_t(Z2.l2.pdgId, Z2.l2DressedP4))
-            self.mela.setInputEvent(daughters, 0, 0, 0)
-            self.mela.setProcess(TVar.HSMHiggs, TVar.JHUGen, TVar.ZZGG)
-            res = c_float(0.)
-            self.mela.computeP(res,True)
-            p_GG_SIG_ghg2_1_ghz1_1_JHUGen = res.value
-            self.mela.setProcess(TVar.bkgZZ, TVar.MCFM, TVar.ZZQQB)
-            self.mela.computeP(res,True)
-            p_QQB_BKG_MCFM = res.value
+            daughters = Mela.SimpleParticleCollection_t()
+            daughters.add_particle(Mela.SimpleParticle_t(Z1.l1.pdgId, Z1.l1DressedP4.Px(), Z1.l1DressedP4.Py(), Z1.l1DressedP4.Pz(), Z1.l1DressedP4.E()))
+            daughters.add_particle(Mela.SimpleParticle_t(Z1.l2.pdgId, Z1.l2DressedP4.Px(), Z1.l2DressedP4.Py(), Z1.l2DressedP4.Pz(), Z1.l2DressedP4.E()))
+            daughters.add_particle(Mela.SimpleParticle_t(Z2.l1.pdgId, Z2.l1DressedP4.Px(), Z2.l1DressedP4.Py(), Z2.l1DressedP4.Pz(), Z2.l1DressedP4.E()))
+            daughters.add_particle(Mela.SimpleParticle_t(Z2.l2.pdgId, Z2.l2DressedP4.Px(), Z2.l2DressedP4.Py(), Z2.l2DressedP4.Pz(), Z2.l2DressedP4.E()))
+            self.mela.setInputEvent(daughters, None, None, 0)
+            self.mela.setProcess(Mela.Process.HSMHiggs, Mela.MatrixElement.JHUGen, Mela.Production.ZZGG)
+
+
+            # res = c_float(0.)
+            # self.mela.computeP(res,True)
+            # p_GG_SIG_ghg2_1_ghz1_1_JHUGen = res.value
+
+            p_GG_SIG_ghg2_1_ghz1_1_JHUGen = self.mela.computeP(True)
+
+
+            self.mela.setProcess(Mela.Process.bkgZZ, Mela.MatrixElement.MCFM, Mela.Production.ZZQQB)
+
+            #self.mela.computeP(res,True)
+            #p_QQB_BKG_MCFM = res.value
+
+            p_QQB_BKG_MCFM = self.mela.computeP(True)
+
             self.mela.resetInputEvent()
         if (p_GG_SIG_ghg2_1_ghz1_1_JHUGen+p_QQB_BKG_MCFM == 0.) :
             print ("ERROR", p_GG_SIG_ghg2_1_ghz1_1_JHUGen, p_QQB_BKG_MCFM)
