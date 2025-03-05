@@ -223,12 +223,13 @@ if IsMC:
         from ZZAnalysis.NanoAnalysis.genFiller import *
         from ZZAnalysis.NanoAnalysis.cloneBranches import *
         pre_sequence = [puWeight(LEPTON_SETUP, DATA_TAG),
-                        weights,
+                        weights, 
+                        LHEFiller(),
+                        genAngProbFiller(m),
                         genFiller(dump=False),
                         cloneBranches(treeName='AllEvents',
                                       varlist=['run', 'luminosityBlock', 'event',
                                                'GenDressedLepton_*',
-                                               #'LHEPart*',
                                                'FidDressedLeps_*',
                                                'FidZ*',
                                                'LHE*Weight',
@@ -238,8 +239,7 @@ if IsMC:
                                                'ggH_NNLOPS_Weight',
                                                'overallEventWeight',
                                                'Pileup_nTrueInt'
-                                               'LHEPart*',
-                                               'gen*'
+                                               'LHEPart*'
                                                ],
                                       #Stop further processing for events that don't have 4 reco leps
                                       continueFor = postPresel
@@ -308,7 +308,7 @@ if IsMC:
                           'keep HTXS_njets30',
                           'keep Pileup*',
                           'keep LHE*',
-                          'keep gen*',
+                          'keep LHEPart*',
                           #'keep Generator*',
                           #'keep PV*',
                         ])
@@ -319,7 +319,6 @@ if IsMC:
                               'keep FidZ*',
                               'keep passedFiducial',
                               'keep LHEPart*',
-                              'keep gen*',
                               ])
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
