@@ -224,8 +224,6 @@ if IsMC:
         from ZZAnalysis.NanoAnalysis.cloneBranches import *
         pre_sequence = [puWeight(LEPTON_SETUP, DATA_TAG),
                         weights, 
-                        LHEFiller(),
-                        genAngProbFiller(m),
                         genFiller(dump=False),
                         cloneBranches(treeName='AllEvents',
                                       varlist=['run', 'luminosityBlock', 'event',
@@ -245,6 +243,9 @@ if IsMC:
                                       continueFor = postPresel
                                       ),
                         ] + pre_sequence
+        if NANOVERSION >= 15: 
+            insertBefore(pre_sequence, 'cloneBranches', LHEFiller())
+            insertBefore(pre_sequence, 'cloneBranches', genAngProbFiller(m))
 
     else : # Add them at the end, so that they are run only for selected events
         post_sequence.extend([puWeight(LEPTON_SETUP,DATA_TAG),
@@ -307,8 +308,7 @@ if IsMC:
                           'keep HTXS_Higgs*',
                           'keep HTXS_njets30',
                           'keep Pileup*',
-                          'keep LHE*',
-                          'keep LHEPart*',
+                        #  'keep LHEPart*',
                           #'keep Generator*',
                           #'keep PV*',
                         ])

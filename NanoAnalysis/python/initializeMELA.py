@@ -9,7 +9,7 @@ def initializeMELA(runMELA, year):
         stdout_fd = sys.stdout.fileno()
         saved_stdout = os.dup(stdout_fd)
         os.dup2(devnull, stdout_fd)
-        m = Mela.Mela(13.6, 125, Mela.VerbosityLevel.ERROR) 
+        m = Mela.Mela(sqrts, 125, Mela.VerbosityLevel.ERROR) 
         m.setCandidateDecayMode(Mela.CandidateDecayMode.CandidateDecay_ZZ)  
         os.dup2(saved_stdout, stdout_fd)
         os.close(devnull)

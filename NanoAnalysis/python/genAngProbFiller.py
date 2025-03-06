@@ -1,10 +1,3 @@
-### 
-# -Jet-Lepton cross-cleaning. Should be called after JES/JEC modules.
-# TODO:
-# - to be implemented
-# - Add b-tagging info (?)
-###
-
 from __future__ import print_function
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
@@ -13,14 +6,15 @@ import Mela
 
 
 class genAngProbFiller(Module):
-    # def __init__(self, sampleType = "ggH"):
+    """Calculates angles and proabilities with LHE-level information. 
+    MELA = Pointer to MELA passed from nanoZZ4lAnalysis.py 
+    """
+    
     def __init__(self, MELA):
         print("***genAngProbFiller", flush=True)
         self.MELA = MELA
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
-        
-        #self.out.branch("LHEPart_MELAStatus", "S") #Classification for LHEMothers, LHEDaughters, LHEAssociatedParticles formerly used in the miniAOD format. MELAStatus = -1 --> Intermediate, MELAStatus = 1 --> Mothers, MELAStatus =2 --> Daughters, MELAStatus = 3 --> Associated, MELASTATUS == 4 --> Jets
         self.out.branch("LHEPart_cosTheta1Dec", "F")
         self.out.branch("LHEPart_cosTheta2Dec", "F")
         self.out.branch("LHEPart_PhiDec", "F")
