@@ -38,6 +38,7 @@ class ZZFiller(Module):
         """
         print("***ZZFiller: isMC:", isMC, "year:", year, "data_tag:", data_tag, "bestCandByMELA:", bestCandByMELA, "filter:", filter, "candsToStore:", candsToStore, ("- This module filters events." if filter!='NoFilter' else ""),  flush=True)
         self.writeHistFile = False
+        self.mela = MELA
         self.isMC = isMC
         self.year = year
         if bestCandByMELA :
@@ -93,8 +94,8 @@ class ZZFiller(Module):
                 raise Exception("WARNING: CRs are not supported when candsToStore==AllWithRelaxedMuId")
             self.leptonPresel = (lambda l : (abs(l.pdgId)==13 and l.pt>5 and abs(l.eta) < 2.4) or (abs(l.pdgId)==11 and l.ZZFullSel))
 
-        if MELA != None :
-            self.mela = MELA
+        
+        
 
         # Example of adding control histograms (requires self.writeHistFile = True)
         # def beginJob(self,histFile=None, histDirName=None):

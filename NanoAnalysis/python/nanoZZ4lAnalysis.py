@@ -164,7 +164,7 @@ if not IsMC :
 
 # Standard sequence used for both data and MC
 reco_sequence = [lepFiller(cuts, LEPTON_SETUP), # FSR and FSR-corrected iso; flags for passing IDs
-                 ZZFiller(runMELA, bestCandByMELA, m,
+                 ZZFiller(bestCandByMELA, m,
                           isMC=IsMC,
                           year=LEPTON_SETUP,
                           data_tag=DATA_TAG,
@@ -308,6 +308,7 @@ if IsMC:
                           'keep HTXS_Higgs*',
                           'keep HTXS_njets30',
                           'keep Pileup*',
+                          'keep GenJet*',
                         #  'keep LHEPart*',
                           #'keep Generator*',
                           #'keep PV*',
