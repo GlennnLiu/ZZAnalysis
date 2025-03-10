@@ -81,32 +81,31 @@ class ZZExtraFiller(Module):
             # Kinematic angles 
             costhetastar = helcosthetaZ1 = helcosthetaZ2 = helphi = phistarZ1 = c_float(0.)
             dressedLepsp4 = [l.p4() for l in theCandLeps] # FIXME must add FSR if present
-            # TUtil.computeAngles(costhetastar, helcosthetaZ1, helcosthetaZ2, helphi, phistarZ1,
-            #                     dressedLepsp4[0], theCandLeps[0].pdgId,
-            #                     dressedLepsp4[1], theCandLeps[1].pdgId,
-            #                     dressedLepsp4[2], theCandLeps[2].pdgId,
-            #                     dressedLepsp4[3], theCandLeps[3].pdgId)
 
-            daughters = Mela.SimpleParticleCollection_t()
-            daughters.add_particle(Mela.SimpleParticle_t(theCandLeps[0].pdgId, dressedLepsp4[0].Px(), dressedLepsp4[0].Py(), dressedLepsp4[0].Pz(), dressedLepsp4[0].E()))
+            if self.MELA != None: 
+
+                daughters = Mela.SimpleParticleCollection_t()
+                daughters.add_particle(Mela.SimpleParticle_t(theCandLeps[0].pdgId, dressedLepsp4[0].Px(), dressedLepsp4[0].Py(), dressedLepsp4[0].Pz(), dressedLepsp4[0].E()))
+                
+                daughters.add_particle(Mela.SimpleParticle_t(theCandLeps[1].pdgId, dressedLepsp4[1].Px(), dressedLepsp4[1].Py(), dressedLepsp4[1].Pz(), dressedLepsp4[1].E()))
+
+                daughters.add_particle(Mela.SimpleParticle_t(theCandLeps[2].pdgId, dressedLepsp4[2].Px(), dressedLepsp4[2].Py(), dressedLepsp4[2].Pz(), dressedLepsp4[2].E()))
+
+                daughters.add_particle(Mela.SimpleParticle_t(theCandLeps[3].pdgId, dressedLepsp4[3].Px(), dressedLepsp4[3].Py(), dressedLepsp4[3].Pz(), dressedLepsp4[3].E()))
+                
+
+                self.MELA.setInputEvent(daughters, None, None, 0)
+
+                qH, mZ1, mZ2, helcosthetaZ1, helcosthetaZ2, helphi, costhetastar, phistarZ1 = self.MELA.computeDecayAngles() 
+
+                self.MELA.resetInputEvent()
             
-            daughters.add_particle(Mela.SimpleParticle_t(theCandLeps[1].pdgId, dressedLepsp4[1].Px(), dressedLepsp4[1].Py(), dressedLepsp4[1].Pz(), dressedLepsp4[1].E()))
-
-            daughters.add_particle(Mela.SimpleParticle_t(theCandLeps[2].pdgId, dressedLepsp4[2].Px(), dressedLepsp4[2].Py(), dressedLepsp4[2].Pz(), dressedLepsp4[2].E()))
-
-            daughters.add_particle(Mela.SimpleParticle_t(theCandLeps[3].pdgId, dressedLepsp4[3].Px(), dressedLepsp4[3].Py(), dressedLepsp4[3].Pz(), dressedLepsp4[3].E()))
+                self.out.fillBranch(collName+"_nExtraLep", nExtraLeps)
+                self.out.fillBranch(collName+"_nExtraZ", nExtraZs)
+                if self.isMC:
+                    self.out.fillBranch(collName+"_dataMCWeight", wDataMC)
             
 
-            self.MELA.setInputEvent(daughters, None, None, 0)
-
-            qH, mZ1, mZ2, helcosthetaZ1, helcosthetaZ2, helphi, costhetastar, phistarZ1 = self.MELA.computeDecayAngles() 
-
-            self.MELA.resetInputEvent()
-
-        self.out.fillBranch(collName+"_nExtraLep", nExtraLeps)
-        self.out.fillBranch(collName+"_nExtraZ", nExtraZs)
-        if self.isMC:
-            self.out.fillBranch(collName+"_dataMCWeight", wDataMC)
 
 
     ### Compute lepton efficiency scale factor
