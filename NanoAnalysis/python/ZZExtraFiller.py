@@ -79,8 +79,13 @@ class ZZExtraFiller(Module):
                 wDataMC[iCand] = self.getDataMCWeight(theCandLeps)
 
             # Kinematic angles 
-            costhetastar = helcosthetaZ1 = helcosthetaZ2 = helphi = phistarZ1 = c_float(0.)
+            
             dressedLepsp4 = [l.p4() for l in theCandLeps] # FIXME must add FSR if present
+
+            self.out.fillBranch(collName+"_nExtraLep", nExtraLeps)
+            self.out.fillBranch(collName+"_nExtraZ", nExtraZs)
+            if self.isMC:
+                self.out.fillBranch(collName+"_dataMCWeight", wDataMC)
 
             if self.MELA != None: 
 
@@ -96,14 +101,11 @@ class ZZExtraFiller(Module):
 
                 self.MELA.setInputEvent(daughters, None, None, 0)
 
-                qH, mZ1, mZ2, helcosthetaZ1, helcosthetaZ2, helphi, costhetastar, phistarZ1 = self.MELA.computeDecayAngles() 
+                qH, mZ1, mZ2, helcosthetaZ1, helcosthetaZ2, helPhi, costhetastar, phistarZ1 = self.MELA.computeDecayAngles() 
 
                 self.MELA.resetInputEvent()
             
-                self.out.fillBranch(collName+"_nExtraLep", nExtraLeps)
-                self.out.fillBranch(collName+"_nExtraZ", nExtraZs)
-                if self.isMC:
-                    self.out.fillBranch(collName+"_dataMCWeight", wDataMC)
+            
             
 
 

@@ -15,9 +15,15 @@ class genAngProbFiller(Module):
         self.MELA = MELA
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
-        self.out.branch("LHEPart_cosTheta1Dec", "F")
-        self.out.branch("LHEPart_cosTheta2Dec", "F")
-        self.out.branch("LHEPart_PhiDec", "F")
+        self.out.branch("LHEMela_qH", "F")
+        self.out.branch("LHEMela_mZ1", "F")
+        self.out.branch("LHEMela_mZ2", "F")
+        self.out.branch("LHEMela_costheta1", "F")
+        self.out.branch("LHEMela_costheta2", "F")
+        self.out.branch("LHEMela_Phi", "F")
+        self.out.branch("LHEMela_costhetastar", "F")
+        self.out.branch("LHEMela_Phi1", "F")
+        
     def analyze(self, event):
         LHEPart = Collection(event, 'LHEPart')
         LHEMothers = filter(lambda p: p.MELAStatus==1, LHEPart)
@@ -43,13 +49,15 @@ class genAngProbFiller(Module):
 
         self.MELA.setInputEvent(daughters, associated, mothers, 1)
         self.MELA.setProcess(Mela.Process.SelfDefine_spin0, Mela.MatrixElement.JHUGen, Mela.Production.ZZGG)
-        _, _, _, c1Dec, c2Dec, pDec, _, _ = self.MELA.computeDecayAngles()
+        qH, mZ1, mZ2, costheta1, costheta2, Phi, costhetastar, Phi1 = self.MELA.computeDecayAngles()
         
         self.MELA.resetInputEvent()
         
-        self.out.fillBranch("LHEPart_cosTheta1Dec", c1Dec)
-        self.out.fillBranch("LHEPart_cosTheta2Dec", c2Dec)
-        self.out.fillBranch("LHEPart_PhiDec", pDec)
+        self.out.fillBranch("LHEMela_costheta1", costheta1)
+        self.out.fillBranch("LHEMela_costheta2", costheta2)
+        self.out.fillBranch("LHEMela_Phi", Phi)
+        self.out.fillBranch("LHEMela_costhetastar", costhetastar)
+        self.out.fillBranch("LHEMela_Phi1", Phi1)
         return True
     
 
