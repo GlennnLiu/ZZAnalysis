@@ -233,6 +233,7 @@ if IsMC:
                                                'overallEventWeight',
                                                'Pileup_nTrueInt'
                                                'LHEPart*'
+                                               'LHEMela*'
                                                ],
                                       #Stop further processing for events that don't have 4 reco leps
                                       continueFor = postPresel
@@ -304,6 +305,7 @@ if IsMC:
                           'keep HTXS_njets30',
                           'keep Pileup*',
                           'keep GenJet*',
+                          #'keep LHEMela*', 
                         #  'keep LHEPart*',
                           #'keep Generator*',
                           #'keep PV*',
