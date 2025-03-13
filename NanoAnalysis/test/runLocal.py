@@ -16,6 +16,7 @@ if not validateCheckout() :
 #SampleToRun = "MCsync_UL"
 #SampleToRun = "Data2022"
 SampleToRun = "MC2022"
+#SampleToRun = "MELA_Test"
 
 ### Customize processing variables
 #setConf("runMELA", False)
@@ -106,7 +107,17 @@ elif SampleToRun == "MC2022" :
 #        "/store/mc/Run3Summer22EENanoAODv12/GluGluHtoZZto4L_M-125_TuneCP5_13p6TeV_powheg2-JHUGenV752-pythia8/NANOAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2530000/8f306f2b-1284-41b8-a98f-744267f64b9c.root",
         ])
 #    json = {"1": [[1245, 1245],[1306, 1306],[1410, 1410],[1692, 1692],[1903, 1903],[1910, 1910],[1915, 1915],[1927, 1927],[1939, 1939],[1940, 1940],[1944, 1944],[1945, 1945],[1956, 1956],[1960, 1960],[1965, 1965],[1967, 1967],[1968, 1968],[1969, 1969],[2104, 2104]]}
-
+###################################################################################
+elif SampleToRun == "MELA_Test" : 
+    setConf("SAMPLENAME", "ggH125")
+    setConf("LEPTON_SETUP", 2022)  
+    setConf("XSEC", 290.58626*0.0002745)
+    setConf("IsMC", True)
+    setConf("ADD_ALLEVENTS", True)
+    setConf("NANOVERSION", 15)
+    setConf("store", "")
+    setConf("fileNames", ["/eos/user/n/nipinto/old_CMSSW_13_3_3/src/ggH_test.root"])
+    
 
 
 #####################################################################

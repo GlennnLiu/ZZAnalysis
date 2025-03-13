@@ -16,6 +16,10 @@ from ZZAnalysis.NanoAnalysis.jetFiller import *
 from ZZAnalysis.NanoAnalysis.ZZFiller import *
 from ZZAnalysis.NanoAnalysis.ZZExtraFiller import *
 from ZZAnalysis.NanoAnalysis.weightFiller import weightFiller
+from ZZAnalysis.NanoAnalysis.LHEFiller import * 
+from ZZAnalysis.NanoAnalysis.genAngProbFiller import * 
+from ZZAnalysis.NanoAnalysis.initializeMELA import * 
+
 
 ### Get processing customizations, if defined in the including .py; use defaults otherwise
 DEBUG = getConf("DEBUG", False)
@@ -66,6 +70,8 @@ CANDSTOSTORE = getConf("CANDSTOSTORE", 'BestCandOnly') # which candidates should
                                                   #   don't pass ID cuts (useful for ID cut optimization studies).
                                                   # Note that this option does not affect the ZLLCand collection: for each
                                                   # CR that is activated, only the best candidate is stored.
+
+mela = initializeMELA(runMELA, LEPTON_SETUP)
                                                   
 ### Definition of analysis cuts
 cuts = dict(
@@ -153,17 +159,18 @@ if not IsMC :
 
 # Standard sequence used for both data and MC
 reco_sequence = [lepFiller(cuts, LEPTON_SETUP), # FSR and FSR-corrected iso; flags for passing IDs
-                 ZZFiller(runMELA, bestCandByMELA,
+                 ZZFiller(bestCandByMELA, mela,
                           isMC=IsMC,
                           year=LEPTON_SETUP,
                           data_tag=DATA_TAG,
+                          
                           processCR=PROCESS_CR,
                           addZL=PROCESS_ZL,
                           filter=FILTER_EVENTS,
                           candsToStore=CANDSTOSTORE,
                           debug=DEBUG), # Build ZZ candidates; choose best candidate; filter events with candidates
                  jetFiller(), # Jets cleaning with leptons
-                 ZZExtraFiller(IsMC, LEPTON_SETUP, DATA_TAG, PROCESS_CR), # Additional variables to selected candidates
+                 ZZExtraFiller(mela, IsMC, LEPTON_SETUP, DATA_TAG, PROCESS_CR), # Additional variables to selected candidates
                  # MELAFiller(), # Compute the full set of discriminants for the best candidate
                  ]
 
@@ -194,7 +201,7 @@ if APPLYJETCORR and LEPTON_SETUP >=2022 :
     insertBefore(reco_sequence, 'jetFiller', getJetVetoMap(LEPTON_SETUP, DATA_TAG))
 
 # Special modules to be applied before the reco_sequence, that may filter events
-pre_sequence = [triggerAndSkim(isMC=IsMC, PD=PD, era=LEPTON_SETUP, passThru=TRIGPASSTHROUGH), # Filter for good PV and trigger requirements; apply PD precedence rules for data
+pre_sequence = [triggerAndSkim(isMC=IsMC, PD=PD, era=LEPTON_SETUP, passThru=TRIGPASSTHROUGH),  # Filter for good PV and trigger requirements; apply PD precedence rules for data
                 ]
 # Special modules to be applied after the reco_sequence (ie only for selected events)
 post_sequence = []
@@ -211,12 +218,11 @@ if IsMC:
         from ZZAnalysis.NanoAnalysis.genFiller import *
         from ZZAnalysis.NanoAnalysis.cloneBranches import *
         pre_sequence = [puWeight(LEPTON_SETUP, DATA_TAG),
-                        weights,
+                        weights, 
                         genFiller(dump=False),
                         cloneBranches(treeName='AllEvents',
                                       varlist=['run', 'luminosityBlock', 'event',
                                                'GenDressedLepton_*',
-                                               #'LHEPart*',
                                                'FidDressedLeps_*',
                                                'FidZ*',
                                                'LHE*Weight',
@@ -226,11 +232,16 @@ if IsMC:
                                                'ggH_NNLOPS_Weight',
                                                'overallEventWeight',
                                                'Pileup_nTrueInt'
+                                               'LHEPart*'
+                                               'LHEMela*'
                                                ],
                                       #Stop further processing for events that don't have 4 reco leps
                                       continueFor = postPresel
                                       ),
                         ] + pre_sequence
+        if NANOVERSION >= 15: 
+            insertBefore(pre_sequence, 'cloneBranches', LHEFiller())
+            insertBefore(pre_sequence, 'cloneBranches', genAngProbFiller(mela))
 
     else : # Add them at the end, so that they are run only for selected events
         post_sequence.extend([puWeight(LEPTON_SETUP,DATA_TAG),
@@ -294,7 +305,8 @@ if IsMC:
                           'keep HTXS_njets30',
                           'keep Pileup*',
                           'keep GenJet*',
-                          #'keep LHE*',
+                          #'keep LHEMela*', 
+                        #  'keep LHEPart*',
                           #'keep Generator*',
                           #'keep PV*',
                         ])
@@ -304,7 +316,8 @@ if IsMC:
                               'keep FidDressedLeps_*',
                               'keep FidZ*',
                               'keep passedFiducial',
-                              #'keep LHEPart*'
+                            #   'keep LHEPart*',
+                            #   'keep LHEMela*'
                               ])
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
@@ -331,3 +344,5 @@ print ("", flush=True)
 
 ### Run command should be issued by the calling scripy
 # p.run()
+
+
