@@ -22,11 +22,10 @@ class triggerAndSkim(Module):
         
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
-        self.out.branch("HLT_passZZ4lEle", "O")   # pass Ele triggers
-        self.out.branch("HLT_passZZ4lMu", "O")    # pass Muon triggers
-        self.out.branch("HLT_passZZ4lMuEle", "O") # pass MuEle triggers
-        self.out.branch("HLT_passZZ4l", "O")      # pass trigger requirements for the given PD (including PD precedence vetos) 
-
+        self.out.branch("HLT_passZZ4lEle", "O", title="pass ZZ Ele triggers")
+        self.out.branch("HLT_passZZ4lMu", "O", title="pass ZZ Muon triggers")
+        self.out.branch("HLT_passZZ4lMuEle", "O", title="pass ZZ MuEle triggers")
+        self.out.branch("HLT_passZZ4l", "O", title="pass ZZ triggers (with PD precedence vetos)")
 
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
