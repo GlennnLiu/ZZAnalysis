@@ -28,7 +28,7 @@ def getEleScaleRes(era, tag, is_mc, overwritePt=True, EtDependent=True) :
             smearKey = "EGMSmearAndSyst_ElePTsplit_2023postBPIX" if is_mc else None
             fname = "electronSS_EtDependent_2023postBPix.json.gz"
  
-    json = "%s/src/ZZAnalysis/NanoAnalysis/data/%s" % (os.environ['CMSSW_BASE'], fname)
+    json = "%s/src/ZZAnalysis/NanoAnalysis/data/ElectronScale/%s" % (os.environ['CMSSW_BASE'], fname)
 
     print("***eleScaleRes: era:", era, "tag:", tag, "is MC:", is_mc, "overwritePt:", overwritePt, "json:", json)
     return eleScaleRes(json, scaleKey, smearKey, overwritePt, EtDependent)
