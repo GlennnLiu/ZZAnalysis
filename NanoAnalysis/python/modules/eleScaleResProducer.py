@@ -1,22 +1,34 @@
 import os
 
 # Set up the NATModules eleScaleRes module
-def getEleScaleRes(era, tag, is_mc, overwritePt=True, EtDependent=True) :
+def getEleScaleRes(era, tag, is_mc, overwritePt=True, EtDependent=None):
     from PhysicsTools.NATModules.modules.eleScaleRes import eleScaleRes
+
+    # Set default behavior: Standard for 2022, EtDependent for 2023
+    if EtDependent is None:
+        EtDependent = (era == 2023)
 
     # Check for supported eras
     if era not in [2022, 2023]:
         raise ValueError(f"getEleScaleRes: Era {era} not supported")
 
     if era == 2022:
-        if "pre_EE" in tag :
-            scaleKey = "EGMScale_Compound_Ele_2022preEE"
-            smearKey = "EGMSmearAndSyst_ElePTsplit_2022preEE" if is_mc else None
-            fname = "electronSS_EtDependent_2022preEE.json.gz"
-        else:
-            scaleKey = "EGMScale_Compound_Ele_2022postEE"
-            smearKey = "EGMSmearAndSyst_ElePTsplit_2022postEE" if is_mc else None
-            fname = "electronSS_EtDependent_2022postEE.json.gz"
+            if EtDependent:
+                if "pre_EE" in tag :
+                    scaleKey = "EGMScale_Compound_Ele_2022preEE"
+                    smearKey = "EGMSmearAndSyst_ElePTsplit_2022preEE" if is_mc else None
+                    fname = "electronSS_EtDependent_2022preEE.json.gz"
+                else:
+                    scaleKey = "EGMScale_Compound_Ele_2022postEE"
+                    smearKey = "EGMSmearAndSyst_ElePTsplit_2022postEE" if is_mc else None
+                    fname = "electronSS_EtDependent_2022postEE.json.gz"
+            else:
+                scaleKey = "Scale"
+                smearKey = "Smearing" if is_mc else None
+                if "pre_EE" in tag :
+                    fname = "electronSS_Standard_2022preEE.json.gz"
+                else:
+                    fname = "electronSS_Standard_2022postEE.json.gz"
 
     elif era == 2023:
         if "pre_BPix" in tag:
@@ -30,5 +42,5 @@ def getEleScaleRes(era, tag, is_mc, overwritePt=True, EtDependent=True) :
  
     json = "%s/src/ZZAnalysis/NanoAnalysis/data/ElectronScale/%s" % (os.environ['CMSSW_BASE'], fname)
 
-    print("***eleScaleRes: era:", era, "tag:", tag, "is MC:", is_mc, "overwritePt:", overwritePt, "json:", json)
+    print("***eleScaleRes: era:", era, "tag:", tag, "is MC:", is_mc, "overwritePt:", overwritePt, "EtDependent:", EtDependent, "json:", json)
     return eleScaleRes(json, scaleKey, smearKey, overwritePt, EtDependent)
