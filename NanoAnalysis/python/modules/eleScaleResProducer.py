@@ -23,11 +23,13 @@ def getEleScaleRes(era, tag, is_mc, overwritePt=True, EtDependent=None):
                     smearKey = "EGMSmearAndSyst_ElePTsplit_2022postEE" if is_mc else None
                     fname = "electronSS_EtDependent_2022postEE.json.gz"
             else:
-                scaleKey = "Scale"
-                smearKey = "Smearing" if is_mc else None
                 if "pre_EE" in tag :
+                    scaleKey = "2022Re-recoBCD_ScaleJSON"
+                    smearKey = "2022Re-recoBCD_SmearingJSON" if is_mc else None
                     fname = "electronSS_Standard_2022preEE.json.gz"
                 else:
+                    scaleKey = "2022Re-recoE+PromptFG_ScaleJSON"
+                    smearKey = "2022Re-recoE+PromptFG_SmearingJSON" if is_mc else None
                     fname = "electronSS_Standard_2022postEE.json.gz"
 
     elif era == 2023:
