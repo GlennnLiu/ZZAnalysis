@@ -631,6 +631,7 @@ class ZZFiller(Module):
                     passDeltaR = False
                     break
 
+        if self.DEBUG : print(f"ZZ: Z1: {Z1.M}, Z2: {Z2.M}, pTs: {lepPts}, passDR: {passDeltaR} passQCD: {passQCD}")
         if not (passQCD and passDeltaR) : return None
 
         # trigger acceptance cuts (20,10 GeV)
@@ -647,7 +648,9 @@ class ZZFiller(Module):
                 mZa=(Z1.l1DressedP4+Z2.l2DressedP4).M()
                 mZb=(Z1.l2DressedP4+Z2.l1DressedP4).M()
             if (abs(mZa-self.ZmassValue)>abs(mZb-self.ZmassValue)) : mZa, mZb = mZb, mZa
-            if (abs(mZa-self.ZmassValue)<abs(Z1.M-self.ZmassValue)) and mZb < 12.: return None
+            if (abs(mZa-self.ZmassValue)<abs(Z1.M-self.ZmassValue)) and mZb < 12.:
+                if self.DEBUG : print(f"  fails smart cut: {mZa}, {mZb}")
+                return None
 
         #Compute D_bkg^kin
         p_GG_SIG_ghg2_1_ghz1_1_JHUGen = 0.

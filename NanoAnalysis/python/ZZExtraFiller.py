@@ -12,7 +12,6 @@ from __future__ import print_function
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 #from PhysicsTools.NanoAODTools.postprocessing.tools import deltaR
-from ROOT import LeptonSFHelper, TUtil
 from ctypes import c_float
 import Mela
 
@@ -22,8 +21,6 @@ class ZZExtraFiller(Module):
         self.isMC = isMC
         self.processCR = processCR
         self.year = year
-        if isMC:
-            self.lepSFHelper = LeptonSFHelper(data_tag)
         self.MELA = MELA
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
@@ -37,7 +34,7 @@ class ZZExtraFiller(Module):
         self.out.branch(collName+"_nExtraLep", "I", lenVar=theLenVar, title="number of extra leptons passing H4l full sel")
         self.out.branch(collName+"_nExtraZ", "I", lenVar=theLenVar, title="number of extra Zs passing H4l full sel")
         if self.isMC:
-            self.out.branch(collName+"_dataMCWeight", "F", lenVar=theLenVar, title="data/MC efficiency correction weight")
+            self.out.branch(collName+"_dataMCWeight", "F", lenVar=theLenVar, title="data/MC efficiency correction weight", limitedPrecision=12)
 
     def analyze(self, event) :
         electrons = Collection(event, "Electron")
@@ -108,29 +105,13 @@ class ZZExtraFiller(Module):
             self.out.fillBranch(collName+"_dataMCWeight", wDataMC)    
             
             
-
-
-
-    ### Compute lepton efficiency scale factor
     def getDataMCWeight(self, leps) :
-        if self.year > 2023 : #FIXME: not yet implemented
-            return 1.
+        '''Compute lepton efficiency scale factor for the selected leptons'''
+
         dataMCWeight = 1.
         for lep in leps:
-            myLepID = abs(lep.pdgId)
-            mySCeta = lep.eta
-            isCrack = False # FIXME: isGap() is not available in nanoAODs, and cannot be recomputed easily based on eta, phi. We thus use the non-gap SFs for all electrons.
-            if myLepID==11 :
-                mySCeta = lep.eta + lep.deltaEtaSC    
-
-            # Deal with very rare cases when SCeta is out of 2.5 bounds
-            mySCeta = min(mySCeta,2.49)
-            mySCeta = max(mySCeta,-2.49)
-
-            SF = self.lepSFHelper.getSF(self.year, myLepID, lep.pt, lep.eta, mySCeta, isCrack)
-#            SF_Unc = self.lepSFHelper.getSFError(year, myLepID, lep.pt, lep.eta, mySCeta, isCrack)
-            dataMCWeight *= SF
-
+            dataMCWeight *= lep.dataMC        
+            
         return dataMCWeight
 
         
