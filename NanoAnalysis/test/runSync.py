@@ -20,7 +20,7 @@ SampleToRun = "MC2022"
 #SampleToRun = "ggh125_UL"
 
 ### Customize processing variables
-setConf("DEBUG", True)
+#setConf("DEBUG", True)
 setConf("runMELA", True)
 setConf("bestCandByMELA", False)
 setConf("APPLYMUCORR", False)
@@ -105,6 +105,9 @@ p.outputbranchsel=BranchSelection(['drop *',
 
 #replace JSON
 p.json = json
+
+#from ZZAnalysis.NanoAnalysis.dumpEvents import dumpEvents
+#insertAfter(p.modules,"lepFiller",dumpEvents(level=-1,nanoVersion=12))
 
 ### Run the postprocessor
 p.run()
