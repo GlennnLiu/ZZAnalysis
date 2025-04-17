@@ -37,13 +37,11 @@ class ZZExtraFiller(Module):
             self.out.branch(collName+"_dataMCWeight", "F", lenVar=theLenVar, title="data/MC efficiency correction weight", limitedPrecision=12)
 
         # Book MELA angle branches
-        self.out.branch(collName + "_helcosthetaZ1", "F", lenVar=theLenVar)
-        self.out.branch(collName + "_helcosthetaZ2", "F", lenVar=theLenVar)
-        self.out.branch(collName + "_helPhi", "F", lenVar=theLenVar)
-        self.out.branch(collName + "_costhetastar", "F", lenVar=theLenVar)
-        self.out.branch(collName + "_phistarZ1", "F", lenVar=theLenVar)
-        self.out.branch(collName + "_mZ1", "F", lenVar=theLenVar)
-        self.out.branch(collName + "_mZ2", "F", lenVar=theLenVar)
+        self.out.branch(collName + "_costheta1", "F", lenVar=theLenVar, limitedPrecision=12)
+        self.out.branch(collName + "_costheta2", "F", lenVar=theLenVar, limitedPrecision=12)
+        self.out.branch(collName + "_Phi", "F", lenVar=theLenVar, limitedPrecision=12)
+        self.out.branch(collName + "_costhetastar", "F", lenVar=theLenVar, limitedPrecision=12)
+        self.out.branch(collName + "_Phi1", "F", lenVar=theLenVar, limitedPrecision=12)
 
     def analyze(self, event) :
         electrons = Collection(event, "Electron")
@@ -133,13 +131,11 @@ class ZZExtraFiller(Module):
             self.out.fillBranch(collName+"_dataMCWeight", wDataMC)    
 
         # Fill MELA angle branches
-        self.out.fillBranch(collName + "_helcosthetaZ1", helcosthetaZ1s)
-        self.out.fillBranch(collName + "_helcosthetaZ2", helcosthetaZ2s)
-        self.out.fillBranch(collName + "_helPhi", helPhis)
+        self.out.fillBranch(collName + "_costheta1", helcosthetaZ1s)
+        self.out.fillBranch(collName + "_costheta2", helcosthetaZ2s)
+        self.out.fillBranch(collName + "_Phi", helPhis)
         self.out.fillBranch(collName + "_costhetastar", costhetastars)
-        self.out.fillBranch(collName + "_phistarZ1", phistarZ1s)
-        self.out.fillBranch(collName + "_mZ1", mZ1s)
-        self.out.fillBranch(collName + "_mZ2", mZ2s)
+        self.out.fillBranch(collName + "_Phi1", phistarZ1s)
 
     def getDressedP4(self, lep, fsrPhotons):
         '''Returns the dressed 4-momentum including FSR photon if available'''
