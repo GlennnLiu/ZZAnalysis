@@ -11,6 +11,7 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collect
 from PhysicsTools.HeppyCore.utils.deltar import deltaR
 from ROOT import TLorentzVector
 from ZZAnalysis.NanoAnalysis.tools import Mother
+import Mela
 
 ZMASS = 91.1876
 MIN_MZ1 = 40
@@ -23,9 +24,10 @@ class genFiller(Module):
         Module that builds gen-level Z and ZZ candidates
         that satisfy the fiducial selection for the HZZ analysis.
     '''
-    def __init__(self, dump=False):
+    def __init__(self, MELA, dump=False):
         print("***genFiller", flush=True)
         self.printGenHist = dump # print MC history
+        self.MELA = MELA
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
@@ -64,6 +66,14 @@ class genFiller(Module):
         self.out.branch("FidZ1_mass", "F")
         self.out.branch("FidZ2_mass", "F")
         self.out.branch("passedFiducial", "B", title="event passes fiducial selection at gen level")
+        # Angular variables
+        self.out.branch("FidZZ_helcosthetaZ1", "F")
+        self.out.branch("FidZZ_helcosthetaZ2", "F")
+        self.out.branch("FidZZ_helPhi", "F")
+        self.out.branch("FidZZ_costhetastar", "F")
+        self.out.branch("FidZZ_phistarZ1", "F")
+        self.out.branch("FidZZ_mZ1", "F")
+        self.out.branch("FidZZ_mZ2", "F")
 
     def dressLeptons(self, genpart, packedpart):
         '''
@@ -462,6 +472,46 @@ class genFiller(Module):
         self.out.fillBranch("FidZ1_mass", z1mass)
         self.out.fillBranch("FidZ2_mass", z2mass)
 
+    def computeMELAangles(self, event):
+        '''
+        Compute and store MELA angles using FidDressedLeps and associated indices.
+        '''
+        fidLeps = Collection(event, "FidDressedLeps")
+        fidLeps_id = list(event.FidDressedLeps_id)
+
+        # Get lepton indices from event
+        idx1 = event.FidZZ_Z1l1Idx
+        idx2 = event.FidZZ_Z1l2Idx
+        idx3 = event.FidZZ_Z2l1Idx
+        idx4 = event.FidZZ_Z2l2Idx
+
+        leptons = [fidLeps[idx1], fidLeps[idx2], fidLeps[idx3], fidLeps[idx4]]
+        pdg_ids = [fidLeps_id[idx1], fidLeps_id[idx2], fidLeps_id[idx3], fidLeps_id[idx4]]
+
+        # Create MELA particle collection
+        daughters = Mela.SimpleParticleCollection_t()
+        for lep, pdgId in zip(leptons, pdg_ids):
+            daughters.add_particle(
+                Mela.SimpleParticle_t(
+                    pdgId,
+                    lep.p4().Px(), lep.p4().Py(), lep.p4().Pz(), lep.p4().E()
+                )
+            )
+
+        # Compute angles
+        self.MELA.setInputEvent(daughters, None, None, 0)
+        qH, mZ1, mZ2, helcosthetaZ1, helcosthetaZ2, helPhi, costhetastar, phistarZ1 = self.MELA.computeDecayAngles()
+        self.MELA.resetInputEvent()
+
+        # Fill output branches
+        self.out.fillBranch("FidZZ_helcosthetaZ1", helcosthetaZ1)
+        self.out.fillBranch("FidZZ_helcosthetaZ2", helcosthetaZ2)
+        self.out.fillBranch("FidZZ_helPhi", helPhi)
+        self.out.fillBranch("FidZZ_costhetastar", costhetastar)
+        self.out.fillBranch("FidZZ_phistarZ1", phistarZ1)
+        self.out.fillBranch("FidZZ_mZ1", mZ1)
+        self.out.fillBranch("FidZZ_mZ2", mZ2)
+
     def analyze(self, event):
         '''
             Process event and return True (go to next module)
@@ -560,5 +610,17 @@ class genFiller(Module):
         self.out.fillBranch("FidZ_DauPdgId", zdau_pdg_id)
         self.out.fillBranch("FidZ_MomPdgId", zmom_pdg_id)
         self.out.fillBranch("passedFiducial", passFidSel)
+
+        if self.MELA is not None and passFidSel:
+            self.computeMELAangles(event)
+        else:
+            # For events that do not pass the fiducial selection, variables are set to -99
+            self.out.fillBranch("FidZZ_helcosthetaZ1", -99)
+            self.out.fillBranch("FidZZ_helcosthetaZ2", -99)
+            self.out.fillBranch("FidZZ_helPhi", -99)
+            self.out.fillBranch("FidZZ_costhetastar", -99)
+            self.out.fillBranch("FidZZ_phistarZ1", -99)
+            self.out.fillBranch("FidZZ_mZ1", -99)
+            self.out.fillBranch("FidZZ_mZ2", -99)
 
         return True

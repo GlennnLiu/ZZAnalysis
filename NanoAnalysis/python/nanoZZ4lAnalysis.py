@@ -223,7 +223,7 @@ if IsMC:
         from ZZAnalysis.NanoAnalysis.cloneBranches import *
         pre_sequence = [puWeight(LEPTON_SETUP, DATA_TAG),
                         weights, 
-                        genFiller(dump=False),
+                        genFiller(mela, dump=False),
                         cloneBranches(treeName='AllEvents',
                                       varlist=['run', 'luminosityBlock', 'event',
                                                'GenDressedLepton_*',
@@ -250,7 +250,7 @@ if IsMC:
     else : # Add them at the end, so that they are run only for selected events
         post_sequence.extend([puWeight(LEPTON_SETUP,DATA_TAG),
                               weights,
-                              #genFiller(dump=False), # Not required when ADD_ALLEVENTS = False?
+                              #genFiller(mela, dump=False), # Not required when ADD_ALLEVENTS = False?
                               ])
 else : # Data
     post_sequence = []
