@@ -36,6 +36,13 @@ class ZZExtraFiller(Module):
         if self.isMC:
             self.out.branch(collName+"_dataMCWeight", "F", lenVar=theLenVar, title="data/MC efficiency correction weight", limitedPrecision=12)
 
+        # Book MELA angle branches
+        self.out.branch(collName + "_costheta1", "F", lenVar=theLenVar, limitedPrecision=12)
+        self.out.branch(collName + "_costheta2", "F", lenVar=theLenVar, limitedPrecision=12)
+        self.out.branch(collName + "_Phi", "F", lenVar=theLenVar, limitedPrecision=12)
+        self.out.branch(collName + "_costhetastar", "F", lenVar=theLenVar, limitedPrecision=12)
+        self.out.branch(collName + "_Phi1", "F", lenVar=theLenVar, limitedPrecision=12)
+
     def analyze(self, event) :
         electrons = Collection(event, "Electron")
         muons = Collection(event, "Muon")
@@ -50,10 +57,21 @@ class ZZExtraFiller(Module):
 
     def addExtra(self, collName, event) :
         cands = Collection(event, collName)
+        fsrPhotons = Collection(event, "FsrPhoton")
 
         nExtraLeps = [-1]*len(cands)
         nExtraZs = [-1]*len(cands)
         wDataMC = [-1]*len(cands)
+
+        # MELA angle arrays
+        helcosthetaZ1s = [-999.] * len(cands)
+        helcosthetaZ2s = [-999.] * len(cands)
+        helPhis = [-999.] * len(cands)
+        costhetastars = [-999.] * len(cands)
+        phistarZ1s = [-999.] * len(cands)
+        mZ1s = [-999.] * len(cands)
+        mZ2s = [-999.] * len(cands)
+
         for iCand, aCand in enumerate(cands):
             theCandLepIdxs = [aCand.Z1l1Idx, aCand.Z1l2Idx, aCand.Z2l1Idx, aCand.Z2l2Idx]
 
@@ -77,8 +95,7 @@ class ZZExtraFiller(Module):
 
             # Kinematic angles 
             
-            dressedLepsp4 = [l.p4() for l in theCandLeps] # FIXME must add FSR if present
-
+            dressedLepsp4 = [self.getDressedP4(l, fsrPhotons) for l in theCandLeps]
             
 
             if self.MELA != None: 
@@ -98,12 +115,34 @@ class ZZExtraFiller(Module):
                 qH, mZ1, mZ2, helcosthetaZ1, helcosthetaZ2, helPhi, costhetastar, phistarZ1 = self.MELA.computeDecayAngles() 
 
                 self.MELA.resetInputEvent()
+
+                # Store angles
+                helcosthetaZ1s[iCand] = helcosthetaZ1
+                helcosthetaZ2s[iCand] = helcosthetaZ2
+                helPhis[iCand] = helPhi
+                costhetastars[iCand] = costhetastar
+                phistarZ1s[iCand] = phistarZ1
+                mZ1s[iCand] = mZ1
+                mZ2s[iCand] = mZ2
         
         self.out.fillBranch(collName+"_nExtraLep", nExtraLeps)
         self.out.fillBranch(collName+"_nExtraZ", nExtraZs)
         if self.isMC:
             self.out.fillBranch(collName+"_dataMCWeight", wDataMC)    
-            
+
+        # Fill MELA angle branches
+        self.out.fillBranch(collName + "_costheta1", helcosthetaZ1s)
+        self.out.fillBranch(collName + "_costheta2", helcosthetaZ2s)
+        self.out.fillBranch(collName + "_Phi", helPhis)
+        self.out.fillBranch(collName + "_costhetastar", costhetastars)
+        self.out.fillBranch(collName + "_Phi1", phistarZ1s)
+
+    def getDressedP4(self, lep, fsrPhotons):
+        '''Returns the dressed 4-momentum including FSR photon if available'''
+        p4 = lep.p4()
+        if hasattr(lep, 'fsrPhotonIdx') and lep.fsrPhotonIdx >= 0:
+            p4 += fsrPhotons[lep.fsrPhotonIdx].p4()
+        return p4
             
     def getDataMCWeight(self, leps) :
         '''Compute lepton efficiency scale factor for the selected leptons'''
