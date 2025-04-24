@@ -75,6 +75,7 @@ Jump to:
 | **Electron_convVeto** | Bool_t| pass conversion veto |
 | **Electron_cutBased** | UChar_t| cut-based ID RunIII Winter22 (0:fail, 1:veto, 2:loose, 3:medium, 4:tight) |
 | **Electron_cutBased_HEEP** | Bool_t| cut-based HEEP ID |
+| **Electron_dataMC** | Float_t| data/MC correction |
 | **Electron_deltaEtaSC** | Float_t| delta eta (SC,ele) with sign |
 | **Electron_dr03EcalRecHitSumEt** | Float_t| Non-PF Ecal isolation within a delta R cone of 0.3 with electron pt > 35 GeV |
 | **Electron_dr03HcalDepth1TowerSumEt** | Float_t| Non-PF Hcal isolation within a delta R cone of 0.3 with electron pt > 35 GeV |
@@ -169,10 +170,15 @@ Jump to:
 ### <a id='fidzz'></a>FidZZ [<sup>[back to top]</sup>](#events-tree-content)
 | Object property | Type | Description |
 | - | - | - |
+| **FidZZ_Phi** | Float_t| FidZZ_Phi/F |
+| **FidZZ_Phi1** | Float_t| FidZZ_Phi1/F |
 | **FidZZ_Z1l1Idx** | Short_t(index to Z1L1)| Index of 1st Z1 daughter in FidDressedLeps collection |
 | **FidZZ_Z1l2Idx** | Short_t(index to Z1L2)| Index of 2nd Z1 daughter in FidDressedLeps collection |
 | **FidZZ_Z2l1Idx** | Short_t(index to Z2L1)| Index of 1st Z2 daughter in FidDressedLeps collection |
 | **FidZZ_Z2l2Idx** | Short_t(index to Z2L2)| Index of 2nd Z1 daughter in FidDressedLeps collection |
+| **FidZZ_costheta1** | Float_t| FidZZ_costheta1/F |
+| **FidZZ_costheta2** | Float_t| FidZZ_costheta2/F |
+| **FidZZ_costhetastar** | Float_t| FidZZ_costhetastar/F |
 | **FidZZ_eta** | Float_t| FidZZ_eta/F |
 | **FidZZ_mass** | Float_t| mass of gen ZZ made with FidDressedLeps |
 | **FidZZ_phi** | Float_t| FidZZ_phi/F |
@@ -418,6 +424,7 @@ Jump to:
 | **Muon_bsConstrainedPt** | Float_t| pT with beamspot constraint |
 | **Muon_bsConstrainedPtErr** | Float_t| pT error with beamspot constraint  |
 | **Muon_charge** | Int_t| electric charge |
+| **Muon_dataMC** | Float_t| data/MC correction |
 | **Muon_dxy** | Float_t| dxy (with sign) wrt first PV, in cm |
 | **Muon_dxyErr** | Float_t| dxy uncertainty, in cm |
 | **Muon_dxybs** | Float_t| dxy (with sign) wrt the beam spot, in cm |
@@ -462,7 +469,7 @@ Jump to:
 | **Muon_pfRelIso03_chg** | Float_t| PF relative isolation dR=0.3, charged component |
 | **Muon_pfRelIso04_all** | Float_t| PF relative isolation dR=0.4, total (deltaBeta corrections) |
 | **Muon_phi** | Float_t| phi |
-| **Muon_pt** | Float_t| pt |
+| **Muon_pt** | Float_t| corrected pT |
 | **Muon_ptErr** | Float_t| ptError of the muon track |
 | **Muon_puppiIsoId** | UChar_t| PuppiIsoId from miniAOD selector (1=Loose, 2=Medium, 3=Tight) |
 | **Muon_segmentComp** | Float_t| muon segment compatibility |
@@ -470,16 +477,16 @@ Jump to:
 | **Muon_softId** | Bool_t| soft cut-based ID |
 | **Muon_softMva** | Float_t| soft MVA ID score |
 | **Muon_softMvaId** | Bool_t| soft MVA ID |
-| **Muon_stat_pt** | Float_t| Muon_stat_pt[nMuon]/F |
+| **Muon_stat_pt** | Float_t| correction uncertainty |
 | **Muon_svIdx** | Short_t(index to Sv)| index of matching secondary vertex |
-| **Muon_syst_pt** | Float_t| Muon_syst_pt[nMuon]/F |
+| **Muon_syst_pt** | Float_t| correction uncertainty |
 | **Muon_tightCharge** | UChar_t| Tight charge criterion using pterr/pt of muonBestTrack (0:fail, 2:pass) |
 | **Muon_tightId** | Bool_t| cut-based ID, tight WP |
 | **Muon_tkIsoId** | UChar_t| TkIso ID (1=TkIsoLoose, 2=TkIsoTight) |
 | **Muon_tkRelIso** | Float_t| Tracker-based relative isolation dR=0.3 for highPt, trkIso/tunePpt |
 | **Muon_triggerIdLoose** | Bool_t| TriggerIdLoose ID |
 | **Muon_tunepRelPt** | Float_t| TuneP relative pt, tunePpt/pt |
-| **Muon_uncorrected_pt** | Float_t| Muon_uncorrected_pt[nMuon]/F |
+| **Muon_uncorrected_pt** | Float_t| original (uncorrected) pT |
 | **nMuon** | Int_t| slimmedMuons after basic selection (pt > 15 \|\| (pt > 3 && (passed("CutBasedIdLoose") \|\| passed("SoftCutBasedId") \|\| passed("SoftMvaId") \|\| passed("CutBasedIdGlobalHighPt") \|\| passed("CutBasedIdTrkHighPt")))) |
 
 ### <a id='psweight'></a>PSWeight [<sup>[back to top]</sup>](#events-tree-content)
@@ -502,7 +509,7 @@ Jump to:
 | Object property | Type | Description |
 | - | - | - |
 | **ZCand_eta** | Float_t| ZCand_eta[nZCand]/F |
-| **ZCand_flav** | Float_t| Product of the pdgIds of the 2 daughters |
+| **ZCand_flav** | Int_t| Product of the pdgIds of the 2 daughters |
 | **ZCand_fsr1Idx** | Short_t(index to Fsr1)| index of FSR associated to l1 (-1 if none) |
 | **ZCand_fsr2Idx** | Short_t(index to Fsr2)| index of FSR associated to l2 (-1 if none) |
 | **ZCand_l1Idx** | Short_t(index to L1)| index of 1st daughter in Electron+Muon merged collection |
@@ -522,14 +529,19 @@ Jump to:
 | Object property | Type | Description |
 | - | - | - |
 | **ZLLCand_KD** | Float_t| ZLLCand_KD[nZLLCand]/F |
+| **ZLLCand_Phi** | Float_t| ZLLCand_Phi[nZLLCand]/F |
+| **ZLLCand_Phi1** | Float_t| ZLLCand_Phi1[nZLLCand]/F |
 | **ZLLCand_Z1flav** | Int_t| ZLLCand_Z1flav[nZLLCand]/I |
 | **ZLLCand_Z1l1Idx** | Short_t(index to Z1L1)| ZLLCand_Z1l1Idx[nZLLCand]/S |
 | **ZLLCand_Z1l2Idx** | Short_t(index to Z1L2)| ZLLCand_Z1l2Idx[nZLLCand]/S |
 | **ZLLCand_Z1mass** | Float_t| ZLLCand_Z1mass[nZLLCand]/F |
-| **ZLLCand_Z2flav** | Short_t| ZLLCand_Z2flav[nZLLCand]/S |
+| **ZLLCand_Z2flav** | Int_t| ZLLCand_Z2flav[nZLLCand]/I |
 | **ZLLCand_Z2l1Idx** | Short_t(index to Z2L1)| ZLLCand_Z2l1Idx[nZLLCand]/S |
 | **ZLLCand_Z2l2Idx** | Short_t(index to Z2L2)| ZLLCand_Z2l2Idx[nZLLCand]/S |
 | **ZLLCand_Z2mass** | Float_t| ZLLCand_Z2mass[nZLLCand]/F |
+| **ZLLCand_costheta1** | Float_t| ZLLCand_costheta1[nZLLCand]/F |
+| **ZLLCand_costheta2** | Float_t| ZLLCand_costheta2[nZLLCand]/F |
+| **ZLLCand_costhetastar** | Float_t| ZLLCand_costhetastar[nZLLCand]/F |
 | **ZLLCand_dataMCWeight** | Float_t| data/MC efficiency correction weight |
 | **ZLLCand_eta** | Float_t| ZLLCand_eta[nZLLCand]/F |
 | **ZLLCand_mass** | Float_t| ZLLCand_mass[nZLLCand]/F |
@@ -565,6 +577,8 @@ Jump to:
 | Object property | Type | Description |
 | - | - | - |
 | **ZZCand_KD** | Float_t| Kinematic discriminant for the choice of best candidate |
+| **ZZCand_Phi** | Float_t| ZZCand_Phi[nZZCand]/F |
+| **ZZCand_Phi1** | Float_t| ZZCand_Phi1[nZZCand]/F |
 | **ZZCand_Z1flav** | Int_t| Product of the pdgIds of the 2 Z1 daughters |
 | **ZZCand_Z1l1Idx** | Short_t(index to Z1L1)| Index of 1st Z1 daughter in the Electron+Muon merged collection |
 | **ZZCand_Z1l2Idx** | Short_t(index to Z1L2)| Index of 2nd Z1 daughter in the Electron+Muon merged collection |
@@ -574,6 +588,9 @@ Jump to:
 | **ZZCand_Z2l2Idx** | Short_t(index to Z2L2)| Index of 2nd Z2 daughter in the Electron+Muon merged collection |
 | **ZZCand_Z2mass** | Float_t| Z2 mass |
 | **ZZCand_Z2sumpt** | Float_t| sum of Z2 daughter pts (used in the choice of best candidate) |
+| **ZZCand_costheta1** | Float_t| ZZCand_costheta1[nZZCand]/F |
+| **ZZCand_costheta2** | Float_t| ZZCand_costheta2[nZZCand]/F |
+| **ZZCand_costhetastar** | Float_t| ZZCand_costhetastar[nZZCand]/F |
 | **ZZCand_dataMCWeight** | Float_t| data/MC efficiency correction weight |
 | **ZZCand_eta** | Float_t| ZZCand_eta[nZZCand]/F |
 | **ZZCand_mass** | Float_t| mass |
@@ -713,10 +730,15 @@ Jump to:
 ### <a id='fidzz'></a>FidZZ [<sup>[back to top]</sup>](#allevents-tree-content)
 | Object property | Type | Description |
 | - | - | - |
+| **FidZZ_Phi** | Float_t| FidZZ_Phi/F |
+| **FidZZ_Phi1** | Float_t| FidZZ_Phi1/F |
 | **FidZZ_Z1l1Idx** | Short_t(index to Z1L1)| Index of 1st Z1 daughter in FidDressedLeps collection |
 | **FidZZ_Z1l2Idx** | Short_t(index to Z1L2)| Index of 2nd Z1 daughter in FidDressedLeps collection |
 | **FidZZ_Z2l1Idx** | Short_t(index to Z2L1)| Index of 1st Z2 daughter in FidDressedLeps collection |
 | **FidZZ_Z2l2Idx** | Short_t(index to Z2L2)| Index of 2nd Z1 daughter in FidDressedLeps collection |
+| **FidZZ_costheta1** | Float_t| FidZZ_costheta1/F |
+| **FidZZ_costheta2** | Float_t| FidZZ_costheta2/F |
+| **FidZZ_costhetastar** | Float_t| FidZZ_costhetastar/F |
 | **FidZZ_eta** | Float_t| FidZZ_eta/F |
 | **FidZZ_mass** | Float_t| mass of gen ZZ made with FidDressedLeps |
 | **FidZZ_phi** | Float_t| FidZZ_phi/F |
