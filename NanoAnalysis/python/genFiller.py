@@ -604,7 +604,7 @@ class genFiller(Module):
         self.out.fillBranch("FidZ_MomPdgId", zmom_pdg_id)
         self.out.fillBranch("passedFiducial", passFidSel)
 
-        if self.MELA is not None and passFidSel:
+        if self.MELA is not None and ZCands_fidSel[0] != -1:
             self.computeMELAangles(ZIdx_fidSel, Leptons, dressedLeptons_id)
         else:
             # For events that do not pass the fiducial selection, variables are set to -99
