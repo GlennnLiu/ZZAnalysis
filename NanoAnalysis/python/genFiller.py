@@ -73,6 +73,10 @@ class genFiller(Module):
         self.out.branch("FidZZ_costhetastar", "F", limitedPrecision=12)
         self.out.branch("FidZZ_Phi1", "F", limitedPrecision=12)
 
+        self.out.branch("nCleanedGenJetsPt30", "B")
+        self.out.branch("GenJetLeadingIdx", "S")
+        self.out.branch("GenJetSubleadingIdx", "S")
+        
     def dressLeptons(self, genpart, packedpart):
         '''
             Dress leptons from gammas with dR(l,gamma)<0.3
@@ -513,7 +517,8 @@ class genFiller(Module):
         '''
 
         genpart=Collection(event,"GenPart")
-
+        genjets = Collection(event, "GenJet")
+        
         dressedLeptons_pt = []
         dressedLeptons_eta = []
         dressedLeptons_phi = []
@@ -572,6 +577,39 @@ class genFiller(Module):
                 zmom_pdg_id.append(z_mom_id)
 
         LeptonsCollection = [Leptons, LeptonsId, Lepts_RelIso]
+
+        # gen jets
+        
+        nCleanedGenJetsPt30 = 0
+        leadingGenJetIdx = -1
+        subleadingGenJetIdx = -1
+        leadingGenJetPt = 0.
+        subleadingGenJetPt = 0.
+
+        for ij, genjet in enumerate(genjets):
+            if genjet.pt < 30: 
+                continue
+            mask = False
+            for genlep in Leptons:
+                if deltaR(genlep.Eta(), genlep.Phi(), genjet.eta, genjet.phi) < 0.4: 
+                    mask = True
+                    break
+            if mask:
+                continue
+            else:
+                nCleanedGenJetsPt30 += 1
+                if genjet.pt > leadingGenJetPt:
+                    subleadingGenJetPt = leadingGenJetPt
+                    subleadingGenJetIdx = leadingGenJetIdx
+                    leadingGenJetPt = genjet.pt
+                    leadingGenJetIdx = ij
+                elif genjet.pt > subleadingGenJetPt:
+                    subleadingGenJetPt = genjet.pt
+                    subleadingGenJetIdx = ij
+
+        self.out.fillBranch("nCleanedGenJetsPt30", nCleanedGenJetsPt30)
+        self.out.fillBranch("GenJetLeadingIdx", leadingGenJetIdx)
+        self.out.fillBranch("GenJetSubleadingIdx", subleadingGenJetIdx)
 
         nFidLeps, nFidPtLead, nFidPtSubLead = self.countFiducialLeps(LeptonsCollection)
         passFidSel = False
