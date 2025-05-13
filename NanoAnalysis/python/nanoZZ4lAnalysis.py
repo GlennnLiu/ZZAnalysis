@@ -309,7 +309,6 @@ if IsMC:
                           'keep HTXS_njets30',
                           'keep Pileup*',
                           'keep GenJet*',
-                          'keep nCleanedGenJet*',
                           #'keep LHEMela*', 
                         #  'keep LHEPart*',
                           #'keep Generator*',

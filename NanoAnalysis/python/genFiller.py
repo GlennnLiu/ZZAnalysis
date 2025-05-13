@@ -72,10 +72,10 @@ class genFiller(Module):
         self.out.branch("FidZZ_Phi", "F", limitedPrecision=12)
         self.out.branch("FidZZ_costhetastar", "F", limitedPrecision=12)
         self.out.branch("FidZZ_Phi1", "F", limitedPrecision=12)
-
-        self.out.branch("nCleanedGenJetsPt30", "B")
-        self.out.branch("GenJetLeadingIdx", "S")
-        self.out.branch("GenJetSubleadingIdx", "S")
+        # GenJets
+        self.out.branch("FidZZ_nCleanedGenJetsPt30", "B")
+        self.out.branch("FidZZ_GenJetLeadingIdx", "S")
+        self.out.branch("FidZZ_GenJetSubleadingIdx", "S")
         
     def dressLeptons(self, genpart, packedpart):
         '''
@@ -579,6 +579,7 @@ class genFiller(Module):
         LeptonsCollection = [Leptons, LeptonsId, Lepts_RelIso]
 
         # gen jets
+        # FIXME: atm moment only cleaning with the 4 leps from H decay, need to additionally clean with leps passing full sel
         
         nCleanedGenJetsPt30 = 0
         leadingGenJetIdx = -1
@@ -607,9 +608,9 @@ class genFiller(Module):
                     subleadingGenJetPt = genjet.pt
                     subleadingGenJetIdx = ij
 
-        self.out.fillBranch("nCleanedGenJetsPt30", nCleanedGenJetsPt30)
-        self.out.fillBranch("GenJetLeadingIdx", leadingGenJetIdx)
-        self.out.fillBranch("GenJetSubleadingIdx", subleadingGenJetIdx)
+        self.out.fillBranch("FidZZ_nCleanedGenJetsPt30", nCleanedGenJetsPt30)
+        self.out.fillBranch("FidZZ_GenJetLeadingIdx", leadingGenJetIdx)
+        self.out.fillBranch("FidZZ_GenJetSubleadingIdx", subleadingGenJetIdx)
 
         nFidLeps, nFidPtLead, nFidPtSubLead = self.countFiducialLeps(LeptonsCollection)
         passFidSel = False
