@@ -308,7 +308,7 @@ if IsMC:
                           'keep HTXS_Higgs*',
                           'keep HTXS_njets30',
                           'keep Pileup*',
-                          'keep GenJet_*',
+                          'keep GenJet*',
                           #'keep LHEMela*', 
                         #  'keep LHEPart*',
                           #'keep Generator*',
