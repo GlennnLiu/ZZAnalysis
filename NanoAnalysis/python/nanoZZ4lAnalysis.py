@@ -238,6 +238,7 @@ if IsMC:
                                                'Pileup_nTrueInt',
                                                'LHEPart*', #FIXME: should be removed from AllEvents once development is completed
                                                'LHEMela*',
+                                               'GenJet*',
                                                ],
                                       #Stop further processing for events that don't have 4 reco leps
                                       continueFor = postPresel
@@ -322,6 +323,7 @@ if IsMC:
                               'keep passedFiducial',
                             #   'keep LHEPart*',
                             #   'keep LHEMela*'
+                              'keep GenJet*',
                               ])
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
