@@ -587,8 +587,14 @@ class genFiller(Module):
         leadingGenJetPt = 0.
         subleadingGenJetPt = 0.
 
+        # NOTE: The 50 GeV pT cut in the forward eta region (2.5 < |eta| < 3.0)
+        # was introduced following JME recommendations
+        # Ref: https://gitlab.cern.ch/cms-jetmet/coordination/coordination/-/issues/113
+        # TODO: This should be removed once a JSON-level fix is implemented.
+
         for ij, genjet in enumerate(genjets):
-            if genjet.pt < 30: 
+            pt_cut = 50.0 if (2.5 < abs(genjet.eta) < 3.0) else 30.0
+            if genjet.pt < pt_cut:
                 continue
             mask = False
             for genlep in Leptons:
