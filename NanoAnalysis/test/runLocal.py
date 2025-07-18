@@ -173,6 +173,10 @@ if len(p.inputFiles) == 1 :
 #p.cut = None # Remove preselction
 #insertAfter(p.modules,"lepFiller",dumpEvents(level=-1),getConf("NANOVERSION", 11)) 
 
+### Dump MC and LHE history for selected events
+#from ZZAnalysis.NanoAnalysis.mcHistoryDump import mcHistoryDump
+#p.modules.append(mcHistoryDump( printGen=True, printLHE=True))
+
 #p.branchsel=None #Read all branches
 #p.outputbranchsel=None #Output all branches
 

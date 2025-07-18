@@ -20,7 +20,11 @@ Plotter::Plotter():Tree()
 
    // TODO: Maybe get dataTag from config
    std::string dataTag = "ReReco";
-   lepSFHelper = new LeptonSFHelper(dataTag);
+   // FIXME:
+   cout << "**** WARNING: YEAR HARDCODED AS 2018" << endl
+	<< "     MUST BE SET BY HAND IN src/Plotter.cpp !" << endl
+	<< "****" << endl;
+   lepSFHelper = new LeptonSFHelper(2018, dataTag);
 
    // Z+X SS factors
    /*****************************************
@@ -161,10 +165,10 @@ void Plotter::MakeHistograms( TString input_file_name , int year)
       if ( input_file_name.Contains("VBFTo") ) _event_weight = _event_weight/1000.; // VBF-off shell samples have wrong unit in xsec
 
       // Rescale to updated version of SFs
-      // _updatedSF = ( lepSFHelper->getSF(year,LepLepId->at(0),LepPt->at(0),LepEta->at(0), LepEta->at(0), false) *
-      //                lepSFHelper->getSF(year,LepLepId->at(1),LepPt->at(1),LepEta->at(1), LepEta->at(1), false) *
-      //                lepSFHelper->getSF(year,LepLepId->at(2),LepPt->at(2),LepEta->at(2), LepEta->at(2), false) *
-      //                lepSFHelper->getSF(year,LepLepId->at(3),LepPt->at(3),LepEta->at(3), LepEta->at(3), false) );
+      // _updatedSF = ( lepSFHelper->getSF(LepLepId->at(0),LepPt->at(0),LepEta->at(0), LepEta->at(0), false).first *
+      //                lepSFHelper->getSF(LepLepId->at(1),LepPt->at(1),LepEta->at(1), LepEta->at(1), false).first *
+      //                lepSFHelper->getSF(LepLepId->at(2),LepPt->at(2),LepEta->at(2), LepEta->at(2), false).first *
+      //                lepSFHelper->getSF(LepLepId->at(3),LepPt->at(3),LepEta->at(3), LepEta->at(3), false).first );
       _updatedSF = 1.0;
       for (int lepl = 0; lepl < 4; ++lepl)
       {
@@ -173,7 +177,7 @@ void Plotter::MakeHistograms( TString input_file_name , int year)
               float leta = LepEta->at(lepl);
               if(abs(lid) == 11) leta = LepSCEta->at(lepl);
               bool isCrack = LepisCrack->at(lepl);
-              _updatedSF *= lepSFHelper->getSF(year, lid, lpt, leta, leta, isCrack);
+              _updatedSF *= lepSFHelper->getSF(lid, lpt, leta, leta, isCrack).first;
       }
       // check very rare cases in which _updatedSF = 0 and use the old one
       if(_updatedSF == 0) _updatedSF = dataMCWeight;

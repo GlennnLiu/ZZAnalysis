@@ -15,10 +15,6 @@ from ZZAnalysis.NanoAnalysis.lepFiller import *
 from ZZAnalysis.NanoAnalysis.jetFiller import *
 from ZZAnalysis.NanoAnalysis.ZZFiller import *
 from ZZAnalysis.NanoAnalysis.ZZExtraFiller import *
-from ZZAnalysis.NanoAnalysis.weightFiller import weightFiller
-from ZZAnalysis.NanoAnalysis.LHEFiller import * 
-from ZZAnalysis.NanoAnalysis.LHEAngProbFiller import * 
-from ZZAnalysis.NanoAnalysis.initializeMELA import * 
 
 
 ### Get processing customizations, if defined in the including .py; use defaults otherwise
@@ -74,7 +70,7 @@ CANDSTOSTORE = getConf("CANDSTOSTORE", 'BestCandOnly') # which candidates should
 # MELA Probabilities Dictionary:
 MELAprobabilities = getConf("probabilities", None) 
 
-
+from ZZAnalysis.NanoAnalysis.initializeMELA import * 
 mela, melaSettings = initializeMELA(runMELA, LEPTON_SETUP, probabilities=MELAprobabilities)
                                                   
 ### Definition of analysis cuts
@@ -212,21 +208,22 @@ post_sequence = []
 
 if IsMC:
     from ZZAnalysis.NanoAnalysis.modules.puWeightProducer import *
-    from ZZAnalysis.NanoAnalysis.mcTruthAnalyzer import *
     from ZZAnalysis.NanoAnalysis.lepDataMCWeight import *
-    from ZZAnalysis.NanoAnalysis.genExtraFiller import *
-
     insertBefore(reco_sequence, 'ZZExtraFiller', lepDataMCWeight(LEPTON_SETUP, DATA_TAG))
     
     # Weights computation, to be placed in pre or post sequences based on the configuration
+    from ZZAnalysis.NanoAnalysis.weightFiller import weightFiller
     weights = weightFiller(XSEC, APPLY_K_NNLOQCD_ZZGG, APPLY_K_NNLOQCD_ZZQQB, APPLY_K_NNLOEW_ZZQQB, APPLY_QCD_GGF_UNCERT)
 
-    post_sequence.append(mcTruthAnalyzer(dump=False)) # Gen final state etc.
-    # insertAfter(post_sequence, "mcTruthAnalyzer", genExtraFiller(mela))
+    from ZZAnalysis.NanoAnalysis.mcTruthAnalyzer import *
+    post_sequence.append(mcTruthAnalyzer()) # Gen final state etc.
+    # from ZZAnalysis.NanoAnalysis.genExtraFiller import *
+    # post_sequence.append(genExtraFiller(mela)) Gen-level angles (not to be confused with LHE-level angles, filled by LHEAngProbFiller
 
     if ADD_ALLEVENTS: # Add modules that produce the variables to be stored for all events at the beginning
         from ZZAnalysis.NanoAnalysis.genFiller import *
         from ZZAnalysis.NanoAnalysis.cloneBranches import *
+        from ZZAnalysis.NanoAnalysis.LHEAngProbFiller import * 
         pre_sequence = [puWeight(LEPTON_SETUP, DATA_TAG),
                         weights, 
                         genFiller(mela, dump=False),
@@ -250,7 +247,8 @@ if IsMC:
                                       continueFor = postPresel
                                       ),
                         ] + pre_sequence
-        if NANOVERSION >= 15: 
+        if NANOVERSION >= 15:
+            from ZZAnalysis.NanoAnalysis.LHEFiller import * 
             insertBefore(pre_sequence, 'cloneBranches', LHEFiller())
         
         
@@ -317,19 +315,17 @@ if IsMC:
                           'keep HTXS_njets30',
                           'keep Pileup*',
                           'keep GenJet_*',
-                          'keep LHEMela*', 
-                          'keep LHEPart*',
                           #'keep Generator*',
                           #'keep PV*',
                         ])
 
-    if ADD_ALLEVENTS :
+    if ADD_ALLEVENTS : # Gen-level variables that are relevant only for signals
         branchsel_out.extend(['keep GenDressedLepton_*',
                               'keep FidDressedLeps_*',
                               'keep FidZ*',
                               'keep passedFiducial',
-                            #   'keep LHEPart*',
-                            #   'keep LHEMela*'
+                              'keep LHEPart*',
+                              'keep LHEMela*'
                               ])
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
