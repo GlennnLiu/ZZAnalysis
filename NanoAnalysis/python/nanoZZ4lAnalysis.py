@@ -17,7 +17,7 @@ from ZZAnalysis.NanoAnalysis.ZZFiller import *
 from ZZAnalysis.NanoAnalysis.ZZExtraFiller import *
 from ZZAnalysis.NanoAnalysis.weightFiller import weightFiller
 from ZZAnalysis.NanoAnalysis.LHEFiller import * 
-from ZZAnalysis.NanoAnalysis.genAngProbFiller import * 
+from ZZAnalysis.NanoAnalysis.LHEAngProbFiller import * 
 from ZZAnalysis.NanoAnalysis.initializeMELA import * 
 
 
@@ -71,7 +71,11 @@ CANDSTOSTORE = getConf("CANDSTOSTORE", 'BestCandOnly') # which candidates should
                                                   # Note that this option does not affect the ZLLCand collection: for each
                                                   # CR that is activated, only the best candidate is stored.
 
-mela = initializeMELA(runMELA, LEPTON_SETUP)
+# MELA Probabilities Dictionary:
+MELAprobabilities = getConf("probabilities", None) 
+
+
+mela, melaSettings = initializeMELA(runMELA, LEPTON_SETUP, probabilities=MELAprobabilities)
                                                   
 ### Definition of analysis cuts
 cuts = dict(
@@ -210,6 +214,7 @@ if IsMC:
     from ZZAnalysis.NanoAnalysis.modules.puWeightProducer import *
     from ZZAnalysis.NanoAnalysis.mcTruthAnalyzer import *
     from ZZAnalysis.NanoAnalysis.lepDataMCWeight import *
+    from ZZAnalysis.NanoAnalysis.genExtraFiller import *
 
     insertBefore(reco_sequence, 'ZZExtraFiller', lepDataMCWeight(LEPTON_SETUP, DATA_TAG))
     
@@ -217,6 +222,7 @@ if IsMC:
     weights = weightFiller(XSEC, APPLY_K_NNLOQCD_ZZGG, APPLY_K_NNLOQCD_ZZQQB, APPLY_K_NNLOEW_ZZQQB, APPLY_QCD_GGF_UNCERT)
 
     post_sequence.append(mcTruthAnalyzer(dump=False)) # Gen final state etc.
+    # insertAfter(post_sequence, "mcTruthAnalyzer", genExtraFiller(mela))
 
     if ADD_ALLEVENTS: # Add modules that produce the variables to be stored for all events at the beginning
         from ZZAnalysis.NanoAnalysis.genFiller import *
@@ -224,6 +230,7 @@ if IsMC:
         pre_sequence = [puWeight(LEPTON_SETUP, DATA_TAG),
                         weights, 
                         genFiller(mela, dump=False),
+                        LHEAngProbFiller(mela, NANOVERSION, melaSettings),
                         cloneBranches(treeName='AllEvents',
                                       varlist=['run', 'luminosityBlock', 'event',
                                                'GenDressedLepton_*',
@@ -236,7 +243,6 @@ if IsMC:
                                                'ggH_NNLOPS_Weight',
                                                'overallEventWeight',
                                                'Pileup_nTrueInt',
-                                               'LHEPart*', #FIXME: should be removed from AllEvents once development is completed
                                                'LHEMela*',
                                                'GenJet*',
                                                ],
@@ -246,7 +252,8 @@ if IsMC:
                         ] + pre_sequence
         if NANOVERSION >= 15: 
             insertBefore(pre_sequence, 'cloneBranches', LHEFiller())
-            insertBefore(pre_sequence, 'cloneBranches', genAngProbFiller(mela))
+        
+        
 
     else : # Add them at the end, so that they are run only for selected events
         post_sequence.extend([puWeight(LEPTON_SETUP,DATA_TAG),
@@ -309,9 +316,9 @@ if IsMC:
                           'keep HTXS_Higgs*',
                           'keep HTXS_njets30',
                           'keep Pileup*',
-                          'keep GenJet*',
-                          #'keep LHEMela*', 
-                        #  'keep LHEPart*',
+                          'keep GenJet_*',
+                          'keep LHEMela*', 
+                          'keep LHEPart*',
                           #'keep Generator*',
                           #'keep PV*',
                         ])
@@ -323,7 +330,6 @@ if IsMC:
                               'keep passedFiducial',
                             #   'keep LHEPart*',
                             #   'keep LHEMela*'
-                              'keep GenJet*',
                               ])
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
