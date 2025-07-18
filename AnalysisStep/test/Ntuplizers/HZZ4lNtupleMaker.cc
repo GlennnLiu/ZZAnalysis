@@ -962,7 +962,7 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
   gr_NNLOPSratio_pt_powheg_3jet = (TGraphErrors*)NNLOPS_weight_file->Get("gr_NNLOPSratio_pt_powheg_3jet");
 
   //Scale factors for data/MC efficiency
-  if (!skipEleDataMCWeight && isMC) { lepSFHelper = new LeptonSFHelper(dataTag); }
+  if (!skipEleDataMCWeight && isMC) { lepSFHelper = new LeptonSFHelper(year, dataTag); }
 
   if (!skipHqTWeight) {
     //HqT weights
@@ -2753,8 +2753,9 @@ Float_t HZZ4lNtupleMaker::getAllWeight(const vector<const reco::Candidate*>& lep
     else isCrack = false;
 
 
-    SF = lepSFHelper->getSF(year,myLepID,myLepPt,myLepEta, mySCeta, isCrack);
-    SF_Unc = lepSFHelper->getSFError(year,myLepID,myLepPt,myLepEta, mySCeta, isCrack);
+    auto SFandUnc = lepSFHelper->getSF(myLepID,myLepPt,myLepEta, mySCeta, isCrack);
+    SF = SFandUnc.first;
+    SF_Unc = SFandUnc.second;
 
     LepSF.push_back(SF);
     LepSF_Unc.push_back(SF_Unc);

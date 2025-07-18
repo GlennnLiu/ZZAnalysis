@@ -83,22 +83,6 @@ def getParentID(part, gen) :
         pID = 25
     return pID
 
-def lhe_logger(genpart, LHEPart=None):
-    print ("---Gen:")
-    for i, gp in enumerate(genpart) :
-        motherId=-1
-        gmotherId=-1
-        if gp.genPartIdxMother >= 0 : 
-            motherId = genpart[gp.genPartIdxMother].pdgId
-            if genpart[gp.genPartIdxMother].genPartIdxMother >= 0 :
-                gmotherId = genpart[genpart[gp.genPartIdxMother].genPartIdxMother].pdgId
-        print (i, gp.pdgId, gp.genPartIdxMother, gp.pt, gp.eta, gp.phi, gp.p4().M(), gp.status)
-
-    if LHEPart != None :
-        print("---------LHEPart---------")
-        for i, Lp in enumerate(LHEPart):
-            print(i, Lp.pdgId, Lp.pt, Lp.eta, Lp.status, Lp.incomingpz)
-
 def get_genEventSumw(input_file, maxEntriesPerSample=None):
     '''
        Util function to get the sum of weights per event.

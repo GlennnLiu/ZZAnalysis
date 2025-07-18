@@ -6,7 +6,7 @@
 # stores the git commit ID of the script itself.
 #
 import subprocess
-import os
+import os, sys
 
 def validateCheckout() :
     oldrev = None
@@ -19,7 +19,12 @@ def validateCheckout() :
         oldrev = f.read()
         f.close()
         if oldrev != gitrev :
-            print("Warning: the ZZAnalysis working area has been pulled, but the checkout recipe was udpated upstream since the area was checked out. (diffs:", oldrev+".."+gitrev+")\nPlease re-create the working area.")
+            print("Warning: the ZZAnalysis working area has been pulled, but the checkout recipe was udpated upstream since the area was checked out.\nPlease re-create the working area.")
+            print("\nDiff in the checkout script:" )
+            diff = subprocess.Popen(['git', "diff", "--color=always", oldrev+".."+gitrev, "checkout_13X.csh"], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            for line in diff.stdout:
+                sys.stdout.buffer.write(line)
+            print("\nIf you want to proceed anyhow, please rm $CMSSW_BASE/src/ZZAnalysis/AnalysisStep/data/checkoutId\n")
             return False
         else:
             return True

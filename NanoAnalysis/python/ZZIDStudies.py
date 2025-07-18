@@ -26,7 +26,7 @@ class ZZIDStudies (Module):
                       dict(name="inTimeMuon", sel=lambda l : l.inTimeMuon), # 
                       ]
 
-        # ZZCand variables storeing the worst value of a given quantity among all muons of of a candidate, for cut optimization studies.
+        # ZZCand variables storing the worst value of a given quantity among all muons of of a candidate, for cut optimization studies.
         # Worst is intended as lowest value (as for an MVA), unless the variable's name starts with "max".
         self.muonIDVars=[dict(name="maxdxy", sel=lambda l : abs(l.dxy)),
                          dict(name="maxdz", sel=lambda l : abs(l.dz)),

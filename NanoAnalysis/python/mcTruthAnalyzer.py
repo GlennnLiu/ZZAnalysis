@@ -1,11 +1,8 @@
-### Analyze MC Truth
-# -Optionally dump MC history
-# -Add ZZ gen valriables:
-# -GenZZFinalState: product of IDs of the four gen ZZ leptons
-# -GenZZ_*Idx: ZZ lepton indices in the GenPart collection (FIXME: unsorted)
-# -FsrPhoton_genFsrIdx: index of the closest gen FSR from Z->l (e, mu)
-# 
-###
+""" Analyze MC Truth and add ZZ-related gen valriables:
+-GenZZFinalState: product of IDs of the four gen ZZ leptons
+-GenZZ_*Idx: ZZ lepton indices in the GenPart collection (FIXME: unsorted)
+-FsrPhoton_genFsrIdx: index of the closest gen FSR from Z->l (e, mu)
+""" 
 
 from __future__ import print_function
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
@@ -13,14 +10,12 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collect
 from PhysicsTools.HeppyCore.utils.deltar import deltaR
 from ROOT import TLorentzVector
 
-from ZZAnalysis.NanoAnalysis.tools import Mother, getParentID, lhe_logger
+from ZZAnalysis.NanoAnalysis.tools import Mother, getParentID
 
 class mcTruthAnalyzer(Module):
-    def __init__(self, dump=False):
+    def __init__(self):
         print("***mcTruthAnalyzer", flush=True)
         self.writeHistFile = False
-        self.printGenHist  = dump # print MC history
-
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
@@ -37,12 +32,6 @@ class mcTruthAnalyzer(Module):
         """process event, return True (go to next module) or False (fail, go to next event)"""
 
         genpart=Collection(event,"GenPart")
-
-        ### Print Gen history and LHE particles.
-        ### See also: https://github.com/cms-nanoAOD/nanoAOD-tools/blob/master/python/postprocessing/modules/common/hepmcDump.py
-        if self.printGenHist :
-            LHE=Collection(event,"LHEPart")
-            lhe_logger(genpart, LHE)
 
         ## Search for gen FSR from Z->ll (e, mu)
         genFSRIdxs = []
