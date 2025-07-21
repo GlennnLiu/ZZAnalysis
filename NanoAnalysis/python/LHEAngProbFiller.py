@@ -28,15 +28,16 @@ class LHEAngProbFiller(Module):
         self.out.branch("LHEMela_Phi", "F", limitedPrecision=16, title="In the Higgs' rest frame, phi is the angle between the planes formed by the decay products of the two Z bosons.")
         self.out.branch("LHEMela_costhetastar", "F", limitedPrecision=16, title="In the Higgs' rest frame, theta_star is the angle between the beamline and the momentum of one of the Higgs' decay products.")
         self.out.branch("LHEMela_Phi1", "F", limitedPrecision=16, title="In the Higgs' rest frame, phi_1 is the angle between the decay plane of Z1 and the beamline.")
-        for i, prob in enumerate(self.MELAsettings): 
-            self.out.branch(f"LHEMela_{prob['Name']}", "F", limitedPrecision=16, title="User-defined LHE-level probability")
-            if prob["ispm4l"]: 
-                self.out.branch("LHEMela_"+prob["Name"]+"_ScaleUp", "F", limitedPrecision=16, title="User-defined LHE-level m4l probability with Scale uncertainties up")
-                self.out.branch("LHEMela_"+prob["Name"]+"_ScaleDown", "F", limitedPrecision=16, title="User-defined LHE-level m4l probability with Scale uncertainties down")
-                self.out.branch("LHEMela_"+prob["Name"]+"_SystUp", "F", limitedPrecision=16, title="User-defined LHE-level m4l probability with Systematic uncertainties up")
-                self.out.branch("LHEMela_"+prob["Name"]+"_SystDown", "F", limitedPrecision=16, title="User-defined LHE-level m4l probability with Systematic uncertainties down")
-            if prob["computeprop"]: 
-                self.out.branch("LHEMela_"+prob["Name"]+"_prop", "F", limitedPrecision=16, title="User-defined LHE-level probability with non-default propagator scheme")
+        if self.MELAsettings != None: 
+            for i, prob in enumerate(self.MELAsettings): 
+                self.out.branch(f"LHEMela_{prob['Name']}", "F", limitedPrecision=16, title="User-defined LHE-level probability")
+                if prob["ispm4l"]: 
+                    self.out.branch("LHEMela_"+prob["Name"]+"_ScaleUp", "F", limitedPrecision=16, title="User-defined LHE-level m4l probability with Scale uncertainties up")
+                    self.out.branch("LHEMela_"+prob["Name"]+"_ScaleDown", "F", limitedPrecision=16, title="User-defined LHE-level m4l probability with Scale uncertainties down")
+                    self.out.branch("LHEMela_"+prob["Name"]+"_SystUp", "F", limitedPrecision=16, title="User-defined LHE-level m4l probability with Systematic uncertainties up")
+                    self.out.branch("LHEMela_"+prob["Name"]+"_SystDown", "F", limitedPrecision=16, title="User-defined LHE-level m4l probability with Systematic uncertainties down")
+                if prob["computeprop"]: 
+                    self.out.branch("LHEMela_"+prob["Name"]+"_prop", "F", limitedPrecision=16, title="User-defined LHE-level probability with non-default propagator scheme")
 
         
     def analyze(self, event):
