@@ -55,16 +55,15 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
 
   } else if (year == 2022) {
    if (data_tag.find("pre_EE") != std::string::npos) { // 2022 preEE
-     f_eleID           = basePath+"SF2D_preEE_RMS.root";
-     f_eleID_Cracks    = basePath+"SF2D_preEEgap_RMS.root";
+    //The most recent ID scale factors used in this context, calculated by Andro using the 2018UL MVA training, can be found at: /eos/user/a/anpetkov/SF2022eleID_EGMapproved/
+     f_eleID           = basePath+"SF2022eleID_preEE.root";
 
      f_eleReco_highPt  = basePath+"egammaEffi_ptAbove75.txt_EGM2D_2022preEE.root";
      f_eleReco_midPt   = basePath+"egammaEffi_ptBelow75.txt_EGM2D_2022preEE.root";
      f_eleReco_lowPt   = basePath+"egammaEffi_ptBelow20.txt_EGM2D_2022preEE.root";
 
    } else { // 2022 postEE
-     f_eleID           = basePath+"SF2D_postEE_RMS.root";
-     f_eleID_Cracks    = basePath+"SF2D_postEEgap_RMS.root";
+     f_eleID           = basePath+"SF2022eleID_postEE.root";
 
      f_eleReco_highPt  = basePath+"egammaEffi_ptAbove75.txt_EGM2D_2022postEE.root";
      f_eleReco_midPt   = basePath+"egammaEffi_ptBelow75.txt_EGM2D_2022postEE.root";
@@ -74,23 +73,18 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
   } else if (year >= 2023) { // FIXME: add 2024!
     if(data_tag.find("pre_BPix") != std::string::npos) { // 2023 preBPix
       //ID - for now using 2022 postEE
-      std::cout<<"WARNING 2023 preBPix Elecrton ID SFs - for now using 2022postEE"<<std::endl;
-      f_eleID          = basePath+"SF2D_postEE_RMS.root";
-      f_eleID_Cracks   = basePath+"SF2D_postEEgap_RMS.root";
+      std::cout<<"WARNING 2023 preBPix Electron ID SFs - for now using 2022postEE"<<std::endl;
+      f_eleID          = basePath+"SF2022eleID_postEE.root";
 
       //RECO - SFs for Electrons in 2023PromptC from EG - https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammSFandSSRun3
-      f_eleID          = basePath+"egammaEffi_ptAbove75.txt_EGM2D_2023preBPix.root";
-      f_eleID_Cracks   = "";
-
       f_eleReco_highPt = basePath+"egammaEffi_ptAbove75.txt_EGM2D_2023preBPix.root";
       f_eleReco_midPt  = basePath+"egammaEffi_ptBelow75.txt_EGM2D_2023preBPix.root";
       f_eleReco_lowPt  = basePath+"egammaEffi_ptBelow20.txt_EGM2D_2023preBPix.root";
 
     } else { // 2023 postBPix
       //ID - for now using 2022 postEE
-      std::cout<<"WARNING 2023 postBPix and 2024 Elecrton ID SFs - for now using 2022postEE"<<std::endl;
-      f_eleID          = basePath+"SF2D_postEE_RMS.root";
-      f_eleID_Cracks   = basePath+"SF2D_postEEgap_RMS.root";
+      std::cout<<"WARNING 2023 postBPix Electron ID SFs - for now using 2022postEE"<<std::endl;
+      f_eleID          = basePath+"SF2022eleID_postEE.root";
 
       //RECO - SFs for Electrons in 2023PromptD from EG - https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammSFandSSRun3
       f_eleReco_highPt = basePath+"egammaEffi_ptAbove75.txt_EGM2D_2023postBPix.root";
