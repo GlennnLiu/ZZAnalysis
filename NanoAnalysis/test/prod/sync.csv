@@ -1,0 +1,9 @@
+identifier,process,crossSection=-1,BR=1,execute=True,dataset,prefix,pattern,splitLevel,::variables,::pyFragments,comment
+
+###,,,,,,,,,,,2022 MC sync
+Sync_2022EE_ggH125,,52.23,0.0002745,,/store/mc/Run3Summer22EENanoAODv12/GluGluHtoZZto4L_M-125_TuneCP5_13p6TeV_powheg2-JHUGenV752-pythia8/NANOAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2540000/25c8f5ff-9de0-4a0c-9e2f-757332ad392f.root,pylist,root://cms-xrd-global.cern.ch/,1,APPLY_QCD_GGF_UNCERT=True;LEPTON_SETUP=2022;APPLYELECORR=True;APPLYMUCORR=True;APPLYJETCORR=True;bestCandByMELA=False,sync.py,
+Sync_2022EE_ZH125 ,,0.9439,0.00082131,,/store/mc/Run3Summer22EENanoAODv12/ZHto2Zto4L_M125_TuneCP5_13p6TeV_powheg2-minlo-HZJ-JHUGenV752-pythia8/NANOAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2520000/60da2336-6355-438e-ad2b-c8c4d83e50fe.root,pylist,root://cms-xrd-global.cern.ch/,1,LEPTON_SETUP=2022;APPLYELECORR=True;APPLYMUCORR=True;APPLYJETCORR=True;bestCandByMELA=False,sync.py,
+
+###,,,,,,,,,,,2023 MC sync
+Sync_2023postBPix_ggH125 ,,52.23,0.0002745,,/store/mc/Run3Summer23BPixNanoAODv12/GluGluHtoZZto4L_M-125_TuneCP5_13p6TeV_powheg-jhugen-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/50000/4daf03b4-93c9-4d35-bf53-738bb6cba90e.root,pylist,root://cms-xrd-global.cern.ch/,1,APPLY_QCD_GGF_UNCERT=True;LEPTON_SETUP=2023;DATA_TAG=post_BPix;APPLYELECORR=True;APPLYMUCORR=True;APPLYJETCORR=True;bestCandByMELA=False,sync.py,
+Sync_2023preBPix_ZH124p5 ,,0.8196,0.00078669,,/store/mc/Run3Summer23NanoAODv12/ZH_Hto2Z_4LFilter_M-124p5_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/NANOAODSIM/130X_mcRun3_2023_realistic_v15-v3/40000/83211296-6c7d-493e-b7c8-0a42ed3a770c.root,pylist,root://cms-xrd-global.cern.ch/,1,LEPTON_SETUP=2023;DATA_TAG=pre_BPix;APPLYELECORR=True;APPLYMUCORR=True;APPLYJETCORR=True;bestCandByMELA=False,sync.py,

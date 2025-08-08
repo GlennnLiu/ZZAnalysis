@@ -27,6 +27,7 @@ DATA_TAG = getConf("DATA_TAG", "" ) # used to distinguish different subperiods/r
                                     # "ULAPV", (used by LeptonSFHelper)
                                     # "pre_EE" (used by LeptonSFHelper, eleScaleResProducer, muonScaleResProducer, puWeightProducer, jetJERC)
                                     # "2022E", "2022F", "2022G" (used by jetJERC)
+                                    # "pre_BPix" (used by LeptonSFHelper, eleScaleResProducer, muonScaleResProducer, puWeightProducer, jetVMAP, jetJERC)
 NANOVERSION = getConf("NANOVERSION", 12)
 if not (LEPTON_SETUP == 2016 or LEPTON_SETUP == 2017 or LEPTON_SETUP == 2018 or LEPTON_SETUP == 2022 or LEPTON_SETUP == 2023) :
     print("Invalid LEPTON_SETUP", LEPTON_SETUP)
@@ -68,7 +69,10 @@ CANDSTOSTORE = getConf("CANDSTOSTORE", 'BestCandOnly') # which candidates should
                                                   # CR that is activated, only the best candidate is stored.
 
 # MELA Probabilities Dictionary:
-MELAprobabilities = getConf("probabilities", None) 
+MELAprobabilities = getConf("probabilities", None)
+
+# Process customizations - list of functions that operate on process
+customizations = getConf("customizations", [])
 
 from ZZAnalysis.NanoAnalysis.initializeMELA import * 
 mela, melaSettings = initializeMELA(runMELA, LEPTON_SETUP, probabilities=MELAprobabilities)
@@ -343,6 +347,10 @@ p = PostProcessor(".", fileNames,
                   firstEntry=0, # First event to be read
                   provenance = False
                   )
+
+for cf in customizations :
+    print(f"Applying process customization: {cf.__name__}")
+    cf(p)
 
 # Print sequence to be run:
 print("Sequence to be run:")
