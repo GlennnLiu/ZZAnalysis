@@ -6,10 +6,10 @@ def getEleScaleRes(era, tag, is_mc, overwritePt=True, EtDependent=None):
 
     # Set default behavior: Standard for 2022, EtDependent for 2023
     if EtDependent is None:
-        EtDependent = (era == 2023)
+        EtDependent = (era in [2023, 2024, 2025])
 
     # Check for supported eras
-    if era not in [2022, 2023]:
+    if era not in [2022, 2023, 2024, 2025]:
         raise ValueError(f"getEleScaleRes: Era {era} not supported")
 
     if era == 2022:
@@ -32,7 +32,7 @@ def getEleScaleRes(era, tag, is_mc, overwritePt=True, EtDependent=None):
                     smearKey = "2022Re-recoE+PromptFG_SmearingJSON" if is_mc else None
                     fname = "electronSS_Standard_2022postEE.json.gz"
 
-    elif era == 2023:
+    elif era == 2023 or era == 2024 or era == 2025:
         if "pre_BPix" in tag:
             scaleKey = "EGMScale_Compound_Ele_2023preBPIX"
             smearKey = "EGMSmearAndSyst_ElePTsplit_2023preBPIX" if is_mc else None
