@@ -12,15 +12,8 @@ from ZZAnalysis.AnalysisStep.validateCheckout import validateCheckout
 if not validateCheckout() :
     exit(1)
 
-#SampleToRun = "MCsync_2018Rereco" # for mini vs nano sync
-#SampleToRun = "MCsync_2017UL" # for mini vs nano sync
-#SampleToRun = "Data2022"
-SampleToRun = "MC2022"
-#SampleToRun = "MC2023postBPix"
-#SampleToRun = "MELA_Test"
-#SampleToRun = "ggh125_2018UL"
-#SampleToRun = "forNanoDoc" # To prepare variable lists with inspectNanoFile.py
-
+SampleToRun = "Data2024"
+#SampleToRun = "Data2025"
 
 ### Customize processing variables.
 #setConf("runMELA", False)
@@ -48,20 +41,46 @@ setConf("SYNCMODE", True) # Force muon resolution correction with fixed +1 sigma
 
 json = None #replace this if needed
 
-################################################################################
-if SampleToRun == "Data2022" :
-    # 2022 data sample from /MuonEG/Run2022D-PromptNanoAODv10_v1-v1/NANOAOD
+if SampleToRun == "Data2024" : ### 2018 UL test sample
+
+    setConf("DATA_TAG","")
+    setConf("PD","MuEG")
+    setConf("PROCESS_CR",True)
+    setConf("PROCESS_ZL",True)
+    setConf("FILTER_EVENTS","Z")
+    setConf("NANOVERSION",15)
+    setConf("LEPTON_SETUP",2024)
+    setConf("APPLYELECORR",False)
+    setConf("APPLYMUCORR",True)
+    setConf("APPLYJETCORR",True)
+    setConf("IsMC",False)
+    setConf("SAMPLENAME","MuonEG2024Cv1")
+    setConf("XSEC",-1.0)
+    setConf("fileNames",['root://cms-xrd-global.cern.ch//store/data/Run2024C/MuonEG/NANOAOD/MINIv6NANOv15-v1/2530000/694ee48f-c22e-4ae3-83f8-19f98edb481b.root', 'root://cms-xrd-global.cern.ch//store/data/Run2024C/MuonEG/NANOAOD/MINIv6NANOv15-v1/2530000/d5d27820-494a-4dba-aadb-d1d210a90a33.root'])
+
+    '''
+    setConf("DATA_TAG","2024")
     setConf("IsMC", False)
-    setConf("LEPTON_SETUP", 2022)
-    setConf("PD", "any")
-    setConf("SAMPLENAME", "test")
-    setConf("TRIGPASSTHROUGH", True)
-    setConf("store","root://cms-xrd-global.cern.ch/")
-    setConf("fileNames",[
-        "/store/data/Run2022D/MuonEG/NANOAOD/PromptNanoAODv10_v2-v1/50000/68f42f42-3274-46ec-b23d-bfadc13012c2.root",
-        ])
+    setConf("PD","Muon")
+    setConf("PROCESS_CR",True)
+    setConf("PROCESS_ZL",True)
+    setConf("FILTER_EVENTS","Z")
+    setConf("LEPTON_SETUP",2024)
+    setConf("APPLYELECORR",True)
+    setConf("APPLYMUCORR",True)
+    setConf("APPLYJETCORR",True)
+    setConf("IsMC",False)
+    setConf("SAMPLENAME","Muon02024Iv2")
+    setConf("XSEC",-1.0)
+    #setConf("fileNames",['root://cms-xrd-global.cern.ch//store/data/Run2024I/Muon0/NANOAOD/MINIv6NANOv15_v2-v1/2540000/9f68b54b-071a-4d95-8b27-cb8069b3c5ca.root', 'root://cms-xrd-globl.cern.ch//store/data/Run2024I/Muon0/NANOAOD/MINIv6NANOv15_v2-v1/2540000/b50db318-4da8-4b59-8937-b6f871c421e9.root'])
+    setConf("fileNames",['root://xrootd-cms.infn.it//store/data/Run2024I/Muon0/NANOAOD/MINIv6NANOv15_v2-v1/2540000/9f68b54b-071a-4d95-8b27-cb8069b3c5ca.root', 'root://xrootd-cms.infn.it//store/data/Run2024I/Muon0/NANOAOD/MINIv6NANOv15_v2-v1/2540000/b50db318-4da8-4b59-8937-b6f871c421e9.root'])
+#####################
+    '''
 
+'''
+elif SampleToRun == "Data2025" :
 
+<<<<<<< HEAD
 ################################################################################
 elif SampleToRun == "ggh125_2018UL" : ### 2018 UL test sample
     setConf("SAMPLENAME", "ggH125")
@@ -200,6 +219,22 @@ def customizeProcessForLocal(p) :
     
 setConf("customizations", customizeProcessForLocal, append=True) 
 
+=======
+    setConf("DATA_TAG","")
+    setConf("PD","MuEG")
+    setConf("PROCESS_CR",True)
+    setConf("PROCESS_ZL",True)
+    setConf("FILTER_EVENTS","Z")
+    setConf("LEPTON_SETUP",2025)
+    setConf("APPLYELECORR",True)
+    setConf("APPLYMUCORR",True)
+    setConf("APPLYJETCORR",False)
+    setConf("IsMC",False)
+    setConf("SAMPLENAME","MuonEG2025Dv1")
+    setConf("XSEC",-1.0)
+    setConf("fileNames",['root://cms-xrd-global.cern.ch//store/data/Run2025D/MuonEG/NANOAOD/PromptReco-v1/000/394/663/00000/508c34c6-0a3a-4f5f-9bad-409656c18680.root', 'root://cms-xrd-global.cern.ch//store/data/Run2025D/MuonEG/NANOAOD/PromptReco-v1/000/394/637/00000/a1ec80e8-7f0b-47ed-a65e-7de62a86aacb.root'])
+'''
+>>>>>>> 19d031df (Changes to run locally)
 
 #####################################################################
 ### This import should be done AFTER all configuration (setConf calls)
