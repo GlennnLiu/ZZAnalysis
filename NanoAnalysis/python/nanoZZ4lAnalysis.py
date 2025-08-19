@@ -15,10 +15,6 @@ from ZZAnalysis.NanoAnalysis.lepFiller import *
 from ZZAnalysis.NanoAnalysis.jetFiller import *
 from ZZAnalysis.NanoAnalysis.ZZFiller import *
 from ZZAnalysis.NanoAnalysis.ZZExtraFiller import *
-from ZZAnalysis.NanoAnalysis.weightFiller import weightFiller
-from ZZAnalysis.NanoAnalysis.LHEFiller import * 
-from ZZAnalysis.NanoAnalysis.genAngProbFiller import * 
-from ZZAnalysis.NanoAnalysis.initializeMELA import * 
 
 
 ### Get processing customizations, if defined in the including .py; use defaults otherwise
@@ -31,6 +27,7 @@ DATA_TAG = getConf("DATA_TAG", "" ) # used to distinguish different subperiods/r
                                     # "ULAPV", (used by LeptonSFHelper)
                                     # "pre_EE" (used by LeptonSFHelper, eleScaleResProducer, muonScaleResProducer, puWeightProducer, jetJERC)
                                     # "2022E", "2022F", "2022G" (used by jetJERC)
+                                    # "pre_BPix" (used by LeptonSFHelper, eleScaleResProducer, muonScaleResProducer, puWeightProducer, jetVMAP, jetJERC)
 NANOVERSION = getConf("NANOVERSION", 12)
 if not (LEPTON_SETUP == 2016 or LEPTON_SETUP == 2017 or LEPTON_SETUP == 2018 or LEPTON_SETUP == 2022 or LEPTON_SETUP == 2023) :
     print("Invalid LEPTON_SETUP", LEPTON_SETUP)
@@ -71,7 +68,14 @@ CANDSTOSTORE = getConf("CANDSTOSTORE", 'BestCandOnly') # which candidates should
                                                   # Note that this option does not affect the ZLLCand collection: for each
                                                   # CR that is activated, only the best candidate is stored.
 
-mela = initializeMELA(runMELA, LEPTON_SETUP)
+# MELA Probabilities Dictionary:
+MELAprobabilities = getConf("probabilities", None)
+
+# Process customizations - list of functions that operate on process
+customizations = getConf("customizations", [])
+
+from ZZAnalysis.NanoAnalysis.initializeMELA import * 
+mela, melaSettings = initializeMELA(runMELA, LEPTON_SETUP, probabilities=MELAprobabilities)
                                                   
 ### Definition of analysis cuts
 cuts = dict(
@@ -208,22 +212,26 @@ post_sequence = []
 
 if IsMC:
     from ZZAnalysis.NanoAnalysis.modules.puWeightProducer import *
-    from ZZAnalysis.NanoAnalysis.mcTruthAnalyzer import *
     from ZZAnalysis.NanoAnalysis.lepDataMCWeight import *
-
     insertBefore(reco_sequence, 'ZZExtraFiller', lepDataMCWeight(LEPTON_SETUP, DATA_TAG))
     
     # Weights computation, to be placed in pre or post sequences based on the configuration
+    from ZZAnalysis.NanoAnalysis.weightFiller import weightFiller
     weights = weightFiller(XSEC, APPLY_K_NNLOQCD_ZZGG, APPLY_K_NNLOQCD_ZZQQB, APPLY_K_NNLOEW_ZZQQB, APPLY_QCD_GGF_UNCERT)
 
-    post_sequence.append(mcTruthAnalyzer(dump=False)) # Gen final state etc.
+    from ZZAnalysis.NanoAnalysis.mcTruthAnalyzer import *
+    post_sequence.append(mcTruthAnalyzer()) # Gen final state etc.
+    # from ZZAnalysis.NanoAnalysis.genExtraFiller import *
+    # post_sequence.append(genExtraFiller(mela)) Gen-level angles (not to be confused with LHE-level angles, filled by LHEAngProbFiller
 
     if ADD_ALLEVENTS: # Add modules that produce the variables to be stored for all events at the beginning
         from ZZAnalysis.NanoAnalysis.genFiller import *
         from ZZAnalysis.NanoAnalysis.cloneBranches import *
+        from ZZAnalysis.NanoAnalysis.LHEAngProbFiller import * 
         pre_sequence = [puWeight(LEPTON_SETUP, DATA_TAG),
                         weights, 
                         genFiller(mela, dump=False),
+                        LHEAngProbFiller(mela, NANOVERSION, melaSettings),
                         cloneBranches(treeName='AllEvents',
                                       varlist=['run', 'luminosityBlock', 'event',
                                                'GenDressedLepton_*',
@@ -236,7 +244,6 @@ if IsMC:
                                                'ggH_NNLOPS_Weight',
                                                'overallEventWeight',
                                                'Pileup_nTrueInt',
-                                               'LHEPart*', #FIXME: should be removed from AllEvents once development is completed
                                                'LHEMela*',
                                                'GenJet*',
                                                ],
@@ -244,9 +251,11 @@ if IsMC:
                                       continueFor = postPresel
                                       ),
                         ] + pre_sequence
-        if NANOVERSION >= 15: 
+        if NANOVERSION >= 15:
+            from ZZAnalysis.NanoAnalysis.LHEFiller import * 
             insertBefore(pre_sequence, 'cloneBranches', LHEFiller())
-            insertBefore(pre_sequence, 'cloneBranches', genAngProbFiller(mela))
+        
+        
 
     else : # Add them at the end, so that they are run only for selected events
         post_sequence.extend([puWeight(LEPTON_SETUP,DATA_TAG),
@@ -309,21 +318,18 @@ if IsMC:
                           'keep HTXS_Higgs*',
                           'keep HTXS_njets30',
                           'keep Pileup*',
-                          'keep GenJet*',
-                          #'keep LHEMela*', 
-                        #  'keep LHEPart*',
+                          'keep GenJet_*',
                           #'keep Generator*',
                           #'keep PV*',
                         ])
 
-    if ADD_ALLEVENTS :
+    if ADD_ALLEVENTS : # Gen-level variables that are relevant only for signals
         branchsel_out.extend(['keep GenDressedLepton_*',
                               'keep FidDressedLeps_*',
                               'keep FidZ*',
                               'keep passedFiducial',
-                            #   'keep LHEPart*',
-                            #   'keep LHEMela*'
-                              'keep GenJet*',
+                              'keep LHEPart*',
+                              'keep LHEMela*'
                               ])
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
@@ -341,6 +347,10 @@ p = PostProcessor(".", fileNames,
                   firstEntry=0, # First event to be read
                   provenance = False
                   )
+
+for cf in customizations :
+    print(f"Applying process customization: {cf.__name__}")
+    cf(p)
 
 # Print sequence to be run:
 print("Sequence to be run:")

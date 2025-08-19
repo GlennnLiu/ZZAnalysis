@@ -431,8 +431,8 @@ ZNtupleMaker::ZNtupleMaker(const edm::ParameterSet& pset) :
   gen_sumGenMCWeight = 0.f;
   gen_sumWeights =0.f;
 
-   //Scale factors for data/MC efficiency
-   if (!skipEleDataMCWeight && isMC) { lepSFHelper = new LeptonSFHelper(dataTag); }
+  //Scale factors for data/MC efficiency
+  if (!skipEleDataMCWeight && isMC) { lepSFHelper = new LeptonSFHelper(year, dataTag); }
 
 }
 
@@ -1205,8 +1205,8 @@ Float_t ZNtupleMaker::getAllWeight(const reco::Candidate* Lep)
  else isCrack = false;
 
 
- SF = lepSFHelper->getSF(year,myLepID,myLepPt,myLepEta, mySCeta, isCrack);
- //SF_Unc = lepSFHelper->getSFError(year,myLepID,myLepPt,myLepEta, mySCeta, isCrack);
+ SF = (lepSFHelper->getSF(myLepID,myLepPt,myLepEta, mySCeta, isCrack)).first;
+ //SF_Unc = (lepSFHelper->getSFError(myLepID,myLepPt,myLepEta, mySCeta, isCrack)).second;
 
  return SF;
 }

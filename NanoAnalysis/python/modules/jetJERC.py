@@ -124,7 +124,7 @@ def getJetCorrected(era, tag, is_mc, overwritePt=True) :
 
     print("***jetJERC: era:", era, "tag:", tag, "is MC:", is_mc, "overwritePt:", overwritePt, "json_JERC:", json_JERC, "json_JERsmear:", json_JERsmear)
     # Determine usePhiDependentJEC based on the tag
-    usePhiDependentJEC = "post_BPix" in tag # True if "post_BPix" is in tag, False otherwise
+    usePhiDependentJEC = not ("pre_BPix" in tag) # False in pre_BPix, True in post_BPix
     # Apply run-dependent JEC only for 2023 data (not MC)
     useRunDependentJEC = (era == 2023) and (not is_mc)
 

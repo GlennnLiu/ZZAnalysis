@@ -12,27 +12,33 @@ class lepDataMCWeight(Module):
         
         print("***lepDataMCWeight: year:", year, "data_tag:", data_tag, flush=True)
         self.year = year
-        self.lepSFHelper = LeptonSFHelper(data_tag)
+        self.lepSFHelper = LeptonSFHelper(year, data_tag)
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
         self.out.branch("Muon_dataMC", "F", lenVar="nMuon", title="data/MC correction", limitedPrecision=12)
+        self.out.branch("Muon_dataMCUnc", "F", lenVar="nMuon", title="data/MC correction relative uncertainty", limitedPrecision=12)
         self.out.branch("Electron_dataMC", "F", lenVar="nElectron", title="data/MC correction", limitedPrecision=12)
+        self.out.branch("Electron_dataMCUnc", "F", lenVar="nElectron", title="data/MC correction relative uncertainty", limitedPrecision=12)
 
     def analyze(self, event):
         electrons = Collection(event, "Electron")
         muons = Collection(event, "Muon")
 
         e_SFs = [1.]*event.nElectron
+        e_SFsUnc = [1.]*event.nElectron
         for ie, ele in enumerate(electrons):
-            e_SFs[ie] = self.getLepSF(ele)
+            e_SFs[ie], e_SFsUnc[ie] = self.getLepSF(ele)
 
         m_SFs = [1.]*event.nMuon
+        m_SFsUnc = [1.]*event.nMuon
         for im, mu in enumerate(muons):
-            m_SFs[im] = self.getLepSF(mu)
+            m_SFs[im], m_SFsUnc[im] = self.getLepSF(mu)
         
         self.out.fillBranch("Electron_dataMC", e_SFs)    
-        self.out.fillBranch("Muon_dataMC", m_SFs)    
+        self.out.fillBranch("Electron_dataMCUnc", e_SFsUnc)
+        self.out.fillBranch("Muon_dataMC", m_SFs)
+        self.out.fillBranch("Muon_dataMCUnc", m_SFsUnc)
 
         return True
 
@@ -52,7 +58,13 @@ class lepDataMCWeight(Module):
         mySCeta = min(mySCeta,2.49)
         mySCeta = max(mySCeta,-2.49)
 
-        SF = self.lepSFHelper.getSF(self.year, myLepID, lep.pt, lep.eta, mySCeta, isCrack)
-        # SF_Unc = self.lepSFHelper.getSFError(year, myLepID, lep.pt, lep.eta, mySCeta, isCrack)
-        return SF
+        pair = self.lepSFHelper.getSF(myLepID, lep.pt, lep.eta, mySCeta, isCrack)
+        SF = pair.first
+        SFerror = pair.second
+
+        # Add a protection for leptons outside standard acceptance (pt<5/7 for mu/ele or |eta|>2.4 for mu) which get SF=0 and SFError = nan, since they may be still
+        # be used for dedicated studies
+        if SF==0 :
+            SF, SFerror = 1., 0.5
+        return SF, SFerror
       

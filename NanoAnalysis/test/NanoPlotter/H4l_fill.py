@@ -1,6 +1,6 @@
 #!/bin/env python3
-### Example macro for filling standard histograms from H4l nanoAODs.
-### Histograms are stored on a file and can then be plotted with
+### Example macro showing how to fill histograms from H4l nanoAODs, handling MC weights.
+### Histograms are stored on a file and can then be plotted with H4l_draw.py
 
 from __future__ import print_function
 import math
@@ -10,12 +10,11 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collect
 from ZZAnalysis.NanoAnalysis.tools import getLeptons, get_genEventSumw
 
 
-pathMC = "/eos/user/n/namapane/H4lnano/220420/" # FIXME: Use 2018 MC for the time being
-pathDATA = "/eos/cms/store/group/phys_higgs/cmshzz4l/cjlst/RunIII/231209_nano/Data2022/"
+pathMC = "/eos/cms/store/group/phys_higgs/cmshzz4l/cjlst/RunIII_byZ1Z2/240820/2022EE/"
+pathDATA = "/eos/cms/store/group/phys_higgs/cmshzz4l/cjlst/RunIII_byZ1Z2/240820/2022EE/"
 
-ZmassValue = 91.1876
 
-maxEntriesPerSample = 1e12 # Use only up to this number of events in each MC sample, for quick tests.
+maxEntriesPerSample = None # Use only up to this number of events in each MC sample, for quick tests; use None for no scaling
 
 
 
@@ -93,29 +92,29 @@ def runMC():
     outFile = "H4l_MC.root" 
 
     samples = [
-        dict(name = "WWZ",filename = pathMC+"WWZ/ZZ4lAnalysis.root"),
-        dict(name = "WZZ",filename = pathMC+"WZZ/ZZ4lAnalysis.root"),
-        dict(name = "ZZZ",filename = pathMC+"ZZZ/ZZ4lAnalysis.root"),
+        # dict(name = "WWZ",filename = pathMC+"WWZ/ZZ4lAnalysis.root"),
+        # dict(name = "WZZ",filename = pathMC+"WZZ/ZZ4lAnalysis.root"),
+        # dict(name = "ZZZ",filename = pathMC+"ZZZ/ZZ4lAnalysis.root"),
         
-        dict(name = "VBFToZZTo4l",filename = pathMC + "VBFToContinToZZTo4l/ZZ4lAnalysis.root"),
-        dict(name = "TTZToLLNuNu",filename = pathMC + "TTZToLLNuNu_M10ext1/ZZ4lAnalysis.root"),
-        dict(name = "TTZJets",filename = pathMC + "TTZJets_M10_MLMext1/ZZ4lAnalysis.root"),
+        # dict(name = "VBFToZZTo4l",filename = pathMC + "VBFToContinToZZTo4l/ZZ4lAnalysis.root"),
+        # dict(name = "TTZToLLNuNu",filename = pathMC + "TTZToLLNuNu_M10ext1/ZZ4lAnalysis.root"),
+        # dict(name = "TTZJets",filename = pathMC + "TTZJets_M10_MLMext1/ZZ4lAnalysis.root"),
 
-        dict(name = "ggTo4mu",filename = pathMC+"ggTo4mu_Contin_MCFM701/ZZ4lAnalysis.root"),
-        dict(name = "ggTo4e",filename = pathMC+"ggTo4e_Contin_MCFM701/ZZ4lAnalysis.root"),
-        dict(name = "ggTo4tau",filename = pathMC+"ggTo4tau_Contin_MCFM701/ZZ4lAnalysis.root"),
-        dict(name = "ggTo2e2mu",filename = pathMC+"ggTo2e2mu_Contin_MCFM701/ZZ4lAnalysis.root"),       
-        dict(name = "ggTo2e2tau",filename = pathMC+"ggTo2e2tau_Contin_MCFM701/ZZ4lAnalysis.root"),
-        dict(name = "ggTo2mu2tau",filename = pathMC+"ggTo2mu2tau_Contin_MCFM701/ZZ4lAnalysis.root"),
+        # dict(name = "ggTo4mu",filename = pathMC+"ggTo4mu_Contin_MCFM701/ZZ4lAnalysis.root"),
+        # dict(name = "ggTo4e",filename = pathMC+"ggTo4e_Contin_MCFM701/ZZ4lAnalysis.root"),
+        # dict(name = "ggTo4tau",filename = pathMC+"ggTo4tau_Contin_MCFM701/ZZ4lAnalysis.root"),
+        # dict(name = "ggTo2e2mu",filename = pathMC+"ggTo2e2mu_Contin_MCFM701/ZZ4lAnalysis.root"),       
+        # dict(name = "ggTo2e2tau",filename = pathMC+"ggTo2e2tau_Contin_MCFM701/ZZ4lAnalysis.root"),
+        # dict(name = "ggTo2mu2tau",filename = pathMC+"ggTo2mu2tau_Contin_MCFM701/ZZ4lAnalysis.root"),
 
-        dict(name = "ZZTo4l",filename = pathMC+"ZZTo4lext1/ZZ4lAnalysis.root"),
+        # dict(name = "ZZTo4l",filename = pathMC+"ZZTo4lext1/ZZ4lAnalysis.root"),
         
-        dict(name = "VBF125",filename = pathMC+"VBFH125/ZZ4lAnalysis.root"),
-        dict(name = "ggH",filename = pathMC+"ggH125/ZZ4lAnalysis.root"),
-        dict(name = "WplusH125",filename = pathMC+"WplusH125/ZZ4lAnalysis.root"),
-        dict(name = "WminusH125",filename = pathMC+"WminusH125/ZZ4lAnalysis.root"),
-        dict(name = "ZH125",filename = pathMC+"ZH125/ZZ4lAnalysis.root"),
-        dict(name = "ttH125",filename = pathMC+"ttH125/ZZ4lAnalysis.root"),
+        dict(name = "ggH125",filename = pathMC+"ggH125/ZZ4lAnalysis.root"),
+        # dict(name = "VBF125",filename = pathMC+"VBFH125/ZZ4lAnalysis.root"),
+        # dict(name = "WplusH125",filename = pathMC+"WplusH125/ZZ4lAnalysis.root"),
+        # dict(name = "WminusH125",filename = pathMC+"WminusH125/ZZ4lAnalysis.root"),
+        # dict(name = "ZH125",filename = pathMC+"ZH125/ZZ4lAnalysis.root"),
+        # dict(name = "ttH125",filename = pathMC+"ttH125/ZZ4lAnalysis.root"),
     ]
 
 
@@ -141,5 +140,5 @@ def runData():
     of.Close()
 
 if __name__ == "__main__" :
-#    runMC()
-    runData()
+    runMC()
+#    runData()
