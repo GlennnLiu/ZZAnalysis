@@ -48,7 +48,6 @@ def getEleBDTCut(era, dataTag, nanoVersion, useUncorrPt=False) :
                                 (fSCeta>=1.479                and BDT > -0.5169136775)))
 
     def eleBDTCut_RunIII_2022Training_WP(ele):
-        print("WP: ", ele.mvaIso_WPHZZ)
         return ele.mvaIso_WPHZZ
     if era == 2017 or era == 2018 :
         if "UL" in dataTag :
@@ -60,13 +59,11 @@ def getEleBDTCut(era, dataTag, nanoVersion, useUncorrPt=False) :
 
     elif era >=2022 :
         if nanoVersion <14:
-            print("NanoVersion <14")
             if useUncorrPt:
                 return eleBDTCut_RunIII_ULTraining_uncorr
             else :
                 return eleBDTCut_RunIII_ULTraining_def
         else:
-            print("NanoVersion >=14")
             return eleBDTCut_RunIII_2022Training_WP
 
     # Fallback: combination not supported

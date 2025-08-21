@@ -6,7 +6,7 @@ def getEleScaleRes(era, tag, is_mc, overwritePt=True, EtDependent=None):
 
     # Set default behavior: Standard for 2022, EtDependent for 2023
     if EtDependent is None:
-        EtDependent = (era in [2023, 2024, 2025])
+        EtDependent = (era in [2022, 2023, 2024, 2025])
 
     # Check for supported eras
     if era not in [2022, 2023, 2024, 2025]:
@@ -32,7 +32,7 @@ def getEleScaleRes(era, tag, is_mc, overwritePt=True, EtDependent=None):
                     smearKey = "2022Re-recoE+PromptFG_SmearingJSON" if is_mc else None
                     fname = "electronSS_Standard_2022postEE.json.gz"
 
-    elif era == 2023 or era == 2024 or era == 2025:
+    elif era == 2023:
         if "pre_BPix" in tag:
             scaleKey = "EGMScale_Compound_Ele_2023preBPIX"
             smearKey = "EGMSmearAndSyst_ElePTsplit_2023preBPIX" if is_mc else None
@@ -41,7 +41,12 @@ def getEleScaleRes(era, tag, is_mc, overwritePt=True, EtDependent=None):
             scaleKey = "EGMScale_Compound_Ele_2023postBPIX"
             smearKey = "EGMSmearAndSyst_ElePTsplit_2023postBPIX" if is_mc else None
             fname = "electronSS_EtDependent_2023postBPix.json.gz"
- 
+    elif era == 2024:
+        print(f"WARNING {era} electron SS - for now using 2023BPix")
+        scaleKey = "EGMScale_Compound_Ele_2023postBPIX"
+        smearKey = "EGMSmearAndSyst_ElePTsplit_2023postBPIX" if is_mc else None
+        fname = "electronSS_EtDependent_2023postBPix.json.gz"
+
     json = "%s/src/ZZAnalysis/NanoAnalysis/data/ElectronScale/%s" % (os.environ['CMSSW_BASE'], fname)
 
     print("***eleScaleRes: era:", era, "tag:", tag, "is MC:", is_mc, "overwritePt:", overwritePt, "EtDependent:", EtDependent, "json:", json)

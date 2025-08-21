@@ -2,7 +2,7 @@ from __future__ import print_function
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 #from correctionlib._core import CorrectionSet
-from PhysicsTools.NATModules.modules.jetid_from_json import get_jetid_flags
+#from PhysicsTools.NATModules.modules.jetid_from_json import get_jetid_flags
 #evaluator = CorrectionSet.from_file("/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/JME/2024_Winter24/jetid.json.gz")
 
 
@@ -23,7 +23,8 @@ class jetIdUpdate(Module):
         original_jetId = []
 
         for ijet, jet in enumerate(jets):
-            has_jetId = hasattr(jet, 'jetId')
+            #has_jetId = hasattr(jet, 'jetId')
+            has_jetId = True # Set to true or the moment until we debug jetid_from_json from NATmodules
             jetid_value = getattr(jet, 'jetId', -1)
             original_jetId.append(jetid_value)
 
@@ -32,7 +33,8 @@ class jetIdUpdate(Module):
             Jet_passJetIdTightLepVeto = False
 
             if not has_jetId:
-                Jet_passJetIdTight, Jet_passJetIdTightLepVeto = get_jetid_flags(jet, jetType="AK4PUPPI")
+                 print(has_jetId)
+#                Jet_passJetIdTight, Jet_passJetIdTightLepVeto = get_jetid_flags(jet, jetType="AK4PUPPI")
 #                print(f"[INFO] Jet[{ijet}] has no jetId. Using evaluator JSON.", flush=True)
 #                nTotalMult = jet.chMultiplicity + jet.neMultiplicity
 #                Jet_passJetIdTight = evaluator["AK4PUPPI_Tight"].evaluate(

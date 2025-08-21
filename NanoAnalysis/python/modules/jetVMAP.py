@@ -14,7 +14,7 @@ def getJetVetoMap(era, tag) :
                 folderKey = "2022_Summer22EE"
                 corrName = "Summer22EE_23Sep2023_RunEFG_V1"
     
-    elif era == 2023 or era == 2025:
+    elif era == 2023:
             if "pre_BPix" in tag:
                 folderKey = "2023_Summer23"
                 corrName = "Summer23Prompt23_RunC_V1"
