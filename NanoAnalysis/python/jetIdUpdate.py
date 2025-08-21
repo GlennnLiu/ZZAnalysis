@@ -16,6 +16,7 @@ class jetIdUpdate(Module):
         self.out.branch("Jet_jetIdOriginal", "b", lenVar="nJet", title="Original Jet ID from NanoAOD")
         # Define the new corrected Jet_jetId branch
         self.out.branch("Jet_jetId", "b", lenVar="nJet", title="Corrected Jet ID based on manual recipe for NanoAODv12")
+        self.has_jetId=hasattr(inputTree,'Jet_jetId') #FIXME hack while we implement the correctionlib module
 
     def analyze(self, event):
         jets = Collection(event, 'Jet')
@@ -23,26 +24,17 @@ class jetIdUpdate(Module):
         original_jetId = []
 
         for ijet, jet in enumerate(jets):
-            #has_jetId = hasattr(jet, 'jetId')
-            has_jetId = True # Set to true or the moment until we debug jetid_from_json from NATmodules
-            jetid_value = getattr(jet, 'jetId', -1)
-            original_jetId.append(jetid_value)
+            if self.has_jetId :
+                original_jetId.append(jet.jetId)
+            else :
+                original_jetId.append(0)
 
             # Initialize Jet ID flags
             Jet_passJetIdTight = False
             Jet_passJetIdTightLepVeto = False
 
-            if not has_jetId:
-                 print(has_jetId)
-#                Jet_passJetIdTight, Jet_passJetIdTightLepVeto = get_jetid_flags(jet, jetType="AK4PUPPI")
-#                print(f"[INFO] Jet[{ijet}] has no jetId. Using evaluator JSON.", flush=True)
-#                nTotalMult = jet.chMultiplicity + jet.neMultiplicity
-#                Jet_passJetIdTight = evaluator["AK4PUPPI_Tight"].evaluate(
-#                    jet.eta, jet.chHEF, jet.neHEF, jet.chEmEF, jet.neEmEF, jet.muEF, jet.chMultiplicity, jet.neMultiplicity, nTotalMult
-#                 )
-#                Jet_passJetIdTightLepVeto = evaluator["AK4PUPPI_TightLeptonVeto"].evaluate(
-#                    jet.eta, jet.chHEF, jet.neHEF, jet.chEmEF, jet.neEmEF, jet.muEF, jet.chMultiplicity, jet.neMultiplicity, nTotalMult
-#                )
+            if not self.has_jetId:
+                pass # Will be replaced by a dedicated NATModule
 
             else:
 
