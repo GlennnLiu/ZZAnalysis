@@ -27,8 +27,8 @@ DATA_TAG = getConf("DATA_TAG", "" ) # used to distinguish different subperiods/r
                                     # "ULAPV", (used by LeptonSFHelper)
                                     # "pre_EE" (used by LeptonSFHelper, eleScaleResProducer, muonScaleResProducer, puWeightProducer, jetJERC)
                                     # "2022E", "2022F", "2022G" (used by jetJERC)
-#NANOVERSION = getConf("NANOVERSION", 12)
-NANOVERSION = getConf("NANOVERSION", 15)
+NANOVERSION = getConf("NANOVERSION", 12)
+#NANOVERSION = getConf("NANOVERSION", 15)
 if not (LEPTON_SETUP == 2016 or LEPTON_SETUP == 2017 or LEPTON_SETUP == 2018 or LEPTON_SETUP == 2022 or LEPTON_SETUP == 2023 or LEPTON_SETUP == 2024 or LEPTON_SETUP == 2025) :
     print("Invalid LEPTON_SETUP", LEPTON_SETUP)
     exit(1)
@@ -37,7 +37,7 @@ PD = getConf("PD", "")
 XSEC = getConf("XSEC", 1.)
 SYNCMODE = getConf("SYNCMODE", False) # fake smearing in Run2 correction modules, for synchronization purposes. No longer needed for Run3 modules.
 runMELA = getConf("runMELA", True)
-bestCandByMELA = getConf("bestCandByMELA", False) # requires also runMELA=True
+bestCandByMELA = getConf("bestCandByMELA", True) # requires also runMELA=True
 TRIGPASSTHROUGH = getConf("TRIGPASSTHROUGH", False) # Do not filter events that do not pass triggers (HLT_passZZ4l records if they did)
 PROCESS_CR = getConf("PROCESS_CR", False) # fill control regions
 PROCESS_ZL = getConf("PROCESS_ZL", False) # fill ZL control region
@@ -196,19 +196,17 @@ if APPLYELECORR and LEPTON_SETUP >=2022 :
     insertBefore(reco_sequence, 'lepFiller', getEleScaleRes(LEPTON_SETUP, DATA_TAG, IsMC, overwritePt=True))
 
 # Update of JetId from manual recipe for NanoAOD v12
-#if NANOVERSION == 12:
+if NANOVERSION == 12:
 
-from ZZAnalysis.NanoAnalysis.jetIdUpdate import *
-insertBefore(reco_sequence, 'jetFiller', jetIdUpdate())
+    from ZZAnalysis.NanoAnalysis.jetIdUpdate import *
+    insertBefore(reco_sequence, 'jetFiller', jetIdUpdate())
 #if NANOVERSION == 15:
 #    from PhysicsTools.NATModules.modules.jetidJSON import *
 #    insertBefore(reco_sequence, 'jetFiller', )
 # Add jet corrections for Run 3
 if APPLYJETCORR and LEPTON_SETUP >=2022 :
-    print("YOU ARE NOT RUNNING ON NANOAODV12")
     from ZZAnalysis.NanoAnalysis.modules.jetJERC import getJetCorrected
     insertBefore(reco_sequence, 'jetFiller', getJetCorrected(LEPTON_SETUP, DATA_TAG, IsMC, overwritePt=True))
-    print("jetJERC applied")
     from ZZAnalysis.NanoAnalysis.modules.jetVMAP import getJetVetoMap
     insertBefore(reco_sequence, 'jetFiller', getJetVetoMap(LEPTON_SETUP, DATA_TAG))
 
