@@ -87,7 +87,7 @@ def getJetCorrected(era, tag, is_mc, overwritePt=True) :
             JERKey = None
             JERsfKey = None
 
-    elif era == 2023 or era == 2025:
+    elif era == 2023:
         if is_mc :
             if "pre_BPix" in tag:
                 folderKey = "2023_Summer23"
