@@ -3,7 +3,7 @@ import os
 def getJetCorrected(era, tag, is_mc, overwritePt=True) :
     from PhysicsTools.NATModules.modules.jetCorr import jetJERC
 
-    if era not in [2022, 2023, 2024, 2025]:
+    if era not in [2022, 2023, 2024]:
         raise ValueError("getJetCorrected: Era", era, "not supported")
 
     if era == 2022:

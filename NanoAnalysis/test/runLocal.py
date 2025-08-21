@@ -12,10 +12,15 @@ from ZZAnalysis.AnalysisStep.validateCheckout import validateCheckout
 if not validateCheckout() :
     exit(1)
 
+#SampleToRun = "MCsync_2018Rereco" # for mini vs nano sync
+#SampleToRun = "MCsync_2017UL" # for mini vs nano sync
+#SampleToRun = "Data2022"
+SampleToRun = "MC2022"
+#SampleToRun = "MC2023postBPix"
+#SampleToRun = "MELA_Test"
 #SampleToRun = "ggh125_2018UL"
 #SampleToRun = "forNanoDoc" # To prepare variable lists with inspectNanoFile.py
-
-SampleToRun = "Data2024"
+#SampleToRun = "Data2024"
 
 ### Customize processing variables.
 #setConf("runMELA", False)
