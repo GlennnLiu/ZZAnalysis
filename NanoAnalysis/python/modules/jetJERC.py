@@ -75,7 +75,7 @@ def getJetCorrected(era, tag, is_mc, overwritePt=True) :
                 raise ValueError("getJetCorrected: tag", era, "not supported")
     elif era == 2024:
         if is_mc :
-            print("MC")
+            raise ValueError("getJetCorrected: 2024 MC not yet supported")
         else :
             folderKey = "2024_Winter24"
             L1Key = "Winter24Prompt24_V3_DATA_L1FastJet_AK4PFPuppi"
