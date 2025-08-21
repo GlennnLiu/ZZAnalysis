@@ -4,7 +4,7 @@ import os
 def getMuonScaleRes(era, tag, is_mc, overwritePt=True) :
     from PhysicsTools.NATModules.modules.muonScaleRes import muonScaleRes 
 
-    if era not in [2022, 2023, 2024, 2025]:
+    if era not in [2022, 2023, 2024]:
         raise ValueError(f"getMuonScaleRes: Era {era} is not supported")
 
     if era == 2022:

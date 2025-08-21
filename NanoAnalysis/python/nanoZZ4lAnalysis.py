@@ -196,13 +196,10 @@ if APPLYELECORR and LEPTON_SETUP >=2022 :
     insertBefore(reco_sequence, 'lepFiller', getEleScaleRes(LEPTON_SETUP, DATA_TAG, IsMC, overwritePt=True))
 
 # Update of JetId from manual recipe for NanoAOD v12
-if NANOVERSION == 12:
-
+if NANOVERSION >= 12:
     from ZZAnalysis.NanoAnalysis.jetIdUpdate import *
     insertBefore(reco_sequence, 'jetFiller', jetIdUpdate())
-#if NANOVERSION == 15:
-#    from PhysicsTools.NATModules.modules.jetidJSON import *
-#    insertBefore(reco_sequence, 'jetFiller', )
+
 # Add jet corrections for Run 3
 if APPLYJETCORR and LEPTON_SETUP >=2022 :
     from ZZAnalysis.NanoAnalysis.modules.jetJERC import getJetCorrected
@@ -220,7 +217,7 @@ if IsMC:
     from ZZAnalysis.NanoAnalysis.modules.puWeightProducer import *
     from ZZAnalysis.NanoAnalysis.lepDataMCWeight import *
     insertBefore(reco_sequence, 'ZZExtraFiller', lepDataMCWeight(LEPTON_SETUP, DATA_TAG))
-    
+
     # Weights computation, to be placed in pre or post sequences based on the configuration
     from ZZAnalysis.NanoAnalysis.weightFiller import weightFiller
     weights = weightFiller(XSEC, APPLY_K_NNLOQCD_ZZGG, APPLY_K_NNLOQCD_ZZQQB, APPLY_K_NNLOEW_ZZQQB, APPLY_QCD_GGF_UNCERT)

@@ -3,7 +3,7 @@ import os
 def getJetVetoMap(era, tag) :
     from PhysicsTools.NATModules.modules.jetVetoMap import jetVMAP
 
-    if era not in [2022,2023,2024,2025]:
+    if era not in [2022,2023,2024]:
         raise ValueError("getJetvetoMap: Era", era, "not supported")
 
     if era == 2022:

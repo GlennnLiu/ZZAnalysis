@@ -6,10 +6,10 @@ def getEleScaleRes(era, tag, is_mc, overwritePt=True, EtDependent=None):
 
     # Set default behavior: Standard for 2022, EtDependent for 2023
     if EtDependent is None:
-        EtDependent = (era in [2022, 2023, 2024, 2025])
+        EtDependent = (era in [2022, 2023, 2024])
 
     # Check for supported eras
-    if era not in [2022, 2023, 2024, 2025]:
+    if era not in [2022, 2023, 2024]:
         raise ValueError(f"getEleScaleRes: Era {era} not supported")
 
     if era == 2022:

@@ -43,8 +43,21 @@ setConf("SYNCMODE", True) # Force muon resolution correction with fixed +1 sigma
 
 json = None #replace this if needed
 
-if SampleToRun == "Data2024" : ### 2018 UL test sample
+################################################################################
+if SampleToRun == "Data2022" :
+    # 2022 data sample from /MuonEG/Run2022D-PromptNanoAODv10_v1-v1/NANOAOD
+    setConf("IsMC", False)
+    setConf("LEPTON_SETUP", 2022)
+    setConf("PD", "any")
+    setConf("SAMPLENAME", "test")
+    setConf("TRIGPASSTHROUGH", True)
+    setConf("store","root://cms-xrd-global.cern.ch/")
+    setConf("fileNames",[
+        "/store/data/Run2022D/MuonEG/NANOAOD/PromptNanoAODv10_v2-v1/50000/68f42f42-3274-46ec-b23d-bfadc13012c2.root",
+        ])
 
+################################################################################
+elif SampleToRun == "Data2024" :
     setConf("DATA_TAG","")
     setConf("PD","MuEG")
     setConf("PROCESS_CR",True)
@@ -60,8 +73,18 @@ if SampleToRun == "Data2024" : ### 2018 UL test sample
     setConf("XSEC",-1.0)
     setConf("fileNames",['root://cms-xrd-global.cern.ch//store/data/Run2024C/MuonEG/NANOAOD/MINIv6NANOv15-v1/2530000/694ee48f-c22e-4ae3-83f8-19f98edb481b.root', 'root://cms-xrd-global.cern.ch//store/data/Run2024C/MuonEG/NANOAOD/MINIv6NANOv15-v1/2530000/d5d27820-494a-4dba-aadb-d1d210a90a33.root'])
 
+################################################################################
+elif SampleToRun == "ggh125_2018UL" : ### 2018 UL test sample
+    setConf("SAMPLENAME", "ggH125")
+    setConf("XSEC", 48.58*0.0002745)
+    setConf("LEPTON_SETUP", 2018)
+    setConf("NANOVERSION", 9)    
+    setConf("DATA_TAG", "UL")
+    setConf("store","root://cms-xrd-global.cern.ch/")
+    setConf("fileNames",[
+        "/store/mc/RunIISummer20UL18NanoAODv2/WplusH_HToZZTo4L_M125_TuneCP5_13TeV_powheg2-minlo-HWJ_JHUGenV7011_pythia8/NANOAODSIM/106X_upgrade2018_realistic_v15_L1v1-v1/270000/3B6A5CB5-2B7C-924D-85B4-FC3B0C1F4909.root",
+        ])
 
-'''
 ################################################################################
 elif SampleToRun == "MCsync_2017UL" :
     # Custom-reprocessed Rereco nanoAOD file with updated FSR and electron MVA,
@@ -188,21 +211,6 @@ def customizeProcessForLocal(p) :
     
 setConf("customizations", customizeProcessForLocal, append=True) 
 
-=======
-    setConf("DATA_TAG","")
-    setConf("PD","MuEG")
-    setConf("PROCESS_CR",True)
-    setConf("PROCESS_ZL",True)
-    setConf("FILTER_EVENTS","Z")
-    setConf("LEPTON_SETUP",2025)
-    setConf("APPLYELECORR",True)
-    setConf("APPLYMUCORR",True)
-    setConf("APPLYJETCORR",False)
-    setConf("IsMC",False)
-    setConf("SAMPLENAME","MuonEG2025Dv1")
-    setConf("XSEC",-1.0)
-    setConf("fileNames",['root://cms-xrd-global.cern.ch//store/data/Run2025D/MuonEG/NANOAOD/PromptReco-v1/000/394/663/00000/508c34c6-0a3a-4f5f-9bad-409656c18680.root', 'root://cms-xrd-global.cern.ch//store/data/Run2025D/MuonEG/NANOAOD/PromptReco-v1/000/394/637/00000/a1ec80e8-7f0b-47ed-a65e-7de62a86aacb.root'])
-'''
 
 #####################################################################
 ### This import should be done AFTER all configuration (setConf calls)
