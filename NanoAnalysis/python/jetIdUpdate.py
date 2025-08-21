@@ -1,10 +1,6 @@
 from __future__ import print_function
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
-#from correctionlib._core import CorrectionSet
-#from PhysicsTools.NATModules.modules.jetid_from_json import get_jetid_flags
-#evaluator = CorrectionSet.from_file("/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/JME/2024_Winter24/jetid.json.gz")
-
 
 class jetIdUpdate(Module):
     def __init__(self):
