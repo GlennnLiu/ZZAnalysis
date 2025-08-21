@@ -20,7 +20,7 @@ SampleToRun = "MC2022"
 #SampleToRun = "MELA_Test"
 #SampleToRun = "ggh125_2018UL"
 #SampleToRun = "forNanoDoc" # To prepare variable lists with inspectNanoFile.py
-
+#SampleToRun = "Data2024"
 
 ### Customize processing variables.
 #setConf("runMELA", False)
@@ -61,6 +61,22 @@ if SampleToRun == "Data2022" :
         "/store/data/Run2022D/MuonEG/NANOAOD/PromptNanoAODv10_v2-v1/50000/68f42f42-3274-46ec-b23d-bfadc13012c2.root",
         ])
 
+################################################################################
+elif SampleToRun == "Data2024" :
+    setConf("DATA_TAG","")
+    setConf("PD","MuEG")
+    setConf("PROCESS_CR",True)
+    setConf("PROCESS_ZL",True)
+    setConf("FILTER_EVENTS","Z")
+    setConf("NANOVERSION",15)
+    setConf("LEPTON_SETUP",2024)
+    setConf("APPLYELECORR",False)
+    setConf("APPLYMUCORR",True)
+    setConf("APPLYJETCORR",True)
+    setConf("IsMC",False)
+    setConf("SAMPLENAME","MuonEG2024Cv1")
+    setConf("XSEC",-1.0)
+    setConf("fileNames",['root://cms-xrd-global.cern.ch//store/data/Run2024C/MuonEG/NANOAOD/MINIv6NANOv15-v1/2530000/694ee48f-c22e-4ae3-83f8-19f98edb481b.root', 'root://cms-xrd-global.cern.ch//store/data/Run2024C/MuonEG/NANOAOD/MINIv6NANOv15-v1/2530000/d5d27820-494a-4dba-aadb-d1d210a90a33.root'])
 
 ################################################################################
 elif SampleToRun == "ggh125_2018UL" : ### 2018 UL test sample

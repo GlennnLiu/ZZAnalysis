@@ -3,7 +3,7 @@ import os
 def getJetVetoMap(era, tag) :
     from PhysicsTools.NATModules.modules.jetVetoMap import jetVMAP
 
-    if era not in [2022,2023]:
+    if era not in [2022,2023,2024]:
         raise ValueError("getJetvetoMap: Era", era, "not supported")
 
     if era == 2022:
@@ -21,6 +21,10 @@ def getJetVetoMap(era, tag) :
             else:
                 folderKey = "2023_Summer23BPix"
                 corrName = "Summer23BPixPrompt23_RunD_V1"
+
+    elif era == 2024:
+       folderKey = "2024_Winter24"
+       corrName = "Winter24Prompt2024BCDEFGHI_V1"
 
     json_JVMAP = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/JME/%s/jetvetomaps.json.gz" % (folderKey)
     veto_map_name= "jetvetomap"
