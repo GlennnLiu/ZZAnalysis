@@ -136,10 +136,11 @@ def getJetCorrected(era, tag, is_mc, overwritePt=True) :
     json_JERC = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/JME/%s/jet_jerc.json.gz" % (folderKey)
     json_JERsmear = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/JME/jer_smear.json.gz"
 
-    print("***jetJERC: era:", era, "tag:", tag, "is MC:", is_mc, "overwritePt:", overwritePt, "json_JERC:", json_JERC, "json_JERsmear:", json_JERsmear)
     # Determine usePhiDependentJEC based on the tag
-    usePhiDependentJEC = not ("pre_BPix" in tag) # False in pre_BPix, True in post_BPix
+    usePhiDependentJEC = era >= 2023 and not ("pre_BPix" in tag) # False up to 2023 pre_BPix, True in 2023 post_BPix and afterwards
     # Apply run-dependent JEC only for 2023 data (not MC)
     useRunDependentJEC = (era == 2023 or era == 2024 or era == 2025) and (not is_mc)
 
+    print("***jetJERC: era:", era, "tag:", tag, "is MC:", is_mc, "overwritePt:", overwritePt, "phiDependent:", usePhiDependentJEC, "runDependent:", useRunDependentJEC, "json_JERC:", json_JERC, "json_JERsmear:", json_JERsmear)
+    
     return jetJERC(json_JERC, json_JERsmear, L1Key, L2Key, L3Key, L2L3Key, scaleTotalKey, smearKey, JERKey, JERsfKey, overwritePt, usePhiDependentJEC, useRunDependentJEC)
