@@ -1,5 +1,3 @@
-import os
-
 def getJetVetoMap(era, tag) :
     from PhysicsTools.NATModules.modules.jetVetoMap import jetVMAP
 
@@ -28,7 +26,6 @@ def getJetVetoMap(era, tag) :
 
     json_JVMAP = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/JME/%s/jetvetomaps.json.gz" % (folderKey)
     veto_map_name= "jetvetomap"
-    print("folder key",folderKey)
-    print("***jetJVMAP: era:", era, "tag:", tag)
+    print("***jetJVMAP: era:", era, "tag:", tag, "corrName:", corrName, "json:", json_JVMAP)
 
     return jetVMAP(json_JVMAP, corrName, veto_map_name)

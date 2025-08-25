@@ -1,10 +1,11 @@
-## This is derived from  PhysicsTools/NanoAODTools/python/postprocessing/modules/common/muonScaleResProducer.py
-## with modifications to:
-## - add sync mode
-## - replace lepton pT instead of adding a new variable (overwritePt=true)
-## - take RoccoR from the CJLST library instead than recompiling it
+"""
+This is derived from  PhysicsTools/NanoAODTools/python/postprocessing/modules/common/muonScaleResProducer.py
+with modifications to:
+- add sync mode
+- replace lepton pT instead of adding a new variable (overwritePt=true)
+- take RoccoR from the CJLST library instead than recompiling it
+"""
 
-from __future__ import print_function
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 import os

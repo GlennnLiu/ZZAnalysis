@@ -195,10 +195,13 @@ if APPLYELECORR and LEPTON_SETUP >=2022 :
     from ZZAnalysis.NanoAnalysis.modules.eleScaleResProducer import getEleScaleRes
     insertBefore(reco_sequence, 'lepFiller', getEleScaleRes(LEPTON_SETUP, DATA_TAG, IsMC, overwritePt=True))
 
-# Update of JetId from manual recipe for NanoAOD v12
-if NANOVERSION >= 12:
+# Update of JetId: manual recipe for NanoAOD v12, using JSON for v13 onwards, cf https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13p6TeV#nanoAOD_Flags
+if NANOVERSION == 12 :
     from ZZAnalysis.NanoAnalysis.jetIdUpdate import *
     insertBefore(reco_sequence, 'jetFiller', jetIdUpdate())
+elif NANOVERSION >=13 :
+    from ZZAnalysis.NanoAnalysis.modules.jetIdProducer import getJetIdProducer
+    insertBefore(reco_sequence, 'jetFiller', getJetIdProducer(LEPTON_SETUP, DATA_TAG))   
 
 # Add jet corrections for Run 3
 if APPLYJETCORR and LEPTON_SETUP >=2022 :
