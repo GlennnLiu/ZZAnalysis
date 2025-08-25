@@ -1,5 +1,3 @@
-import os
-
 def getJetCorrected(era, tag, is_mc, overwritePt=True) :
     from PhysicsTools.NATModules.modules.jetCorr import jetJERC
 
