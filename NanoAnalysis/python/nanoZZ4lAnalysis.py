@@ -15,7 +15,7 @@ from ZZAnalysis.NanoAnalysis.lepFiller import *
 from ZZAnalysis.NanoAnalysis.jetFiller import *
 from ZZAnalysis.NanoAnalysis.ZZFiller import *
 from ZZAnalysis.NanoAnalysis.ZZExtraFiller import *
-
+from ZZAnalysis.NanoAnalysis.genXSFiller import * 
 
 ### Get processing customizations, if defined in the including .py; use defaults otherwise
 DEBUG = getConf("DEBUG", False)
@@ -69,6 +69,10 @@ CANDSTOSTORE = getConf("CANDSTOSTORE", 'BestCandOnly') # which candidates should
 
 # MELA Probabilities Dictionary:
 MELAprobabilities = getConf("probabilities", None) 
+
+# Keep GenXS and GenBr for properly scaling samples with AC. 
+genXS = getConf("GENXSEC", 1.)
+genBR = getConf("GENBR", 1.)
 
 from ZZAnalysis.NanoAnalysis.initializeMELA import * 
 mela, melaSettings = initializeMELA(runMELA, LEPTON_SETUP, probabilities=MELAprobabilities)
@@ -228,6 +232,7 @@ if IsMC:
                         weights, 
                         genFiller(mela, dump=False),
                         LHEAngProbFiller(mela, NANOVERSION, melaSettings),
+                        genXSFiller(genXS,genBR),
                         cloneBranches(treeName='AllEvents',
                                       varlist=['run', 'luminosityBlock', 'event',
                                                'GenDressedLepton_*',
@@ -315,6 +320,8 @@ if IsMC:
                           'keep HTXS_njets30',
                           'keep Pileup*',
                           'keep GenJet_*',
+                          'keep genxsec', 
+                          'keep genbr',
                           #'keep Generator*',
                           #'keep PV*',
                         ])
@@ -326,6 +333,8 @@ if IsMC:
                               'keep passedFiducial',
                               'keep LHEPart*',
                               'keep LHEMela*'
+                              'keep genxsec', 
+                              'keep genbr',
                               ])
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
