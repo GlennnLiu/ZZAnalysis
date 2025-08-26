@@ -3,10 +3,7 @@
 ##
 from __future__ import print_function
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
-from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
-import os
-import ROOT
-ROOT.PyConfig.IgnoreCommandLineOptions = True
+
 
 class genXSFiller(Module):
     def __init__(self, GENXS, GENBR):
@@ -15,7 +12,6 @@ class genXSFiller(Module):
         self.GENXS = GENXS
         self.GENBR = GENBR
 
-        basePath='%s/src/ZZAnalysis/AnalysisStep/' % os.environ['CMSSW_BASE']
 
 
 
