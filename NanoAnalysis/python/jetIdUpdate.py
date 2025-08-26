@@ -1,6 +1,11 @@
-from __future__ import print_function
+"""
+This module recomputes the JetId as recommended for nanoAODv12 based on the example:
+https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13p6TeV#nanoAOD_Flags
+For nanoAODv13 and later, the correctionlib-based module should be used instead (see python/modules/jetIdProducer.py)
+"""
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
+from array import array
 
 class jetIdUpdate(Module):
     def __init__(self):
@@ -8,18 +13,21 @@ class jetIdUpdate(Module):
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
-        # Rename the original Jet_jetId branch
-        self.out.branch("Jet_jetIdOriginal", "b", lenVar="nJet", title="Original Jet ID from NanoAOD")
-        # Define the new corrected Jet_jetId branch
+        self.has_jetId=hasattr(inputTree,'Jet_jetId')
+        # Define the new corrected Jet_jetId branch. "b" = UChar_t in ROOT
         self.out.branch("Jet_jetId", "b", lenVar="nJet", title="Corrected Jet ID based on manual recipe for NanoAODv12")
+        if self.has_jetId:
+            # Rename the original Jet_jetId branch
+            self.out.branch("Jet_jetIdOriginal", "b", lenVar="nJet", title="Original Jet ID from NanoAOD")
 
     def analyze(self, event):
         jets = Collection(event, 'Jet')
-        new_jetId = []
-        original_jetId = []
+        new_jetId = array('B', event.nJet*[0]) # Note: UChar_t is uppercase 'B' in python array
+        original_jetId = array('B', event.nJet*[0])
 
         for ijet, jet in enumerate(jets):
-            original_jetId.append(jet.jetId)
+            if self.has_jetId :
+                original_jetId[ijet] = jet.jetId
 
             # Initialize Jet ID flags
             Jet_passJetIdTight = False
@@ -41,14 +49,15 @@ class jetIdUpdate(Module):
 
             # Determine the new jet ID
             if Jet_passJetIdTight and not Jet_passJetIdTightLepVeto:
-                new_jetId.append(2)
+                new_jetId[ijet] = 2
             elif Jet_passJetIdTight and Jet_passJetIdTightLepVeto:
-                new_jetId.append(6)
+                new_jetId[ijet] = 6
             else:
-                new_jetId.append(0)
+                new_jetId[ijet] = 0
 
         # Fill the original and new jet ID branches
-        self.out.fillBranch("Jet_jetIdOriginal", original_jetId)
         self.out.fillBranch("Jet_jetId", new_jetId)
+        if self.has_jetId :
+            self.out.fillBranch("Jet_jetIdOriginal", original_jetId)
 
         return True

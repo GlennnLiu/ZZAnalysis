@@ -100,6 +100,12 @@ def listFiles(sample, path, rec = False, full_info = False):
     """
     result = []
 
+    # -- treat "sample" as ;-separated list of files --
+    if path=="pylist" :
+        for file in sample.split(";") :
+            result.append(file)
+        return result
+    
     # -- list from a local file --
     if path=="list" :
         with open(sample) as f:

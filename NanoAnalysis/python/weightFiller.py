@@ -82,8 +82,7 @@ class weightFiller(Module):
             self.out.branch("ggH_NNLOPS_Weight", "F", title="Reweighting for ggH as a function of njets and pT")
 
             
-        self.out.branch("overallEventWeight", "F") #Overall weight, including relevant k-factors and corrections
-
+        self.out.branch("overallEventWeight", "F", title="Event weight: Generator_weight*XS*puWeight*(relevant k-factors where applicable). Must be normalized by sum of genEventSumw in the Runs tree")
 
     def analyze(self, event):
         KFactor_EW_qqZZ =1.        

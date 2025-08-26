@@ -4,7 +4,7 @@ import os
 def getMuonScaleRes(era, tag, is_mc, overwritePt=True) :
     from PhysicsTools.NATModules.modules.muonScaleRes import muonScaleRes 
 
-    if era not in [2022, 2023]:  # Add support for 2023
+    if era not in [2022, 2023, 2024]:
         raise ValueError(f"getMuonScaleRes: Era {era} is not supported")
 
     if era == 2022:
@@ -17,10 +17,13 @@ def getMuonScaleRes(era, tag, is_mc, overwritePt=True) :
             fname = "2023_Summer23.json.gz"
         else:
             fname = "2023_Summer23BPix.json.gz"
+    elif era == 2024:
+        print(f"WARNING {era} muonScaleRes - for now using 2023BPix")
+        fname = "2023_Summer23BPix.json.gz"
 
     # Json files for Muons Scale and Smearing corrections are taken from https://gitlab.cern.ch/cms-muonPOG/muonscarekit/-/tree/master/corrections
     json = "%s/src/ZZAnalysis/NanoAnalysis/data/MuonScale/%s" % (os.environ['CMSSW_BASE'], fname)
 
     print("***muonScaleRes: era:", era, "tag:", tag, "is MC:", is_mc, "overwritePt:", overwritePt, "json:", json)
-    return muonScaleRes(json, is_mc, overwritePt)
+    return muonScaleRes(json, is_mc, overwritePt, minPt=3.)
 
