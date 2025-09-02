@@ -228,9 +228,11 @@ if IsMC:
     # Weights computation, to be placed in pre or post sequences based on the configuration
     from ZZAnalysis.NanoAnalysis.weightFiller import weightFiller
     weights = weightFiller(XSEC, APPLY_K_NNLOQCD_ZZGG, APPLY_K_NNLOQCD_ZZQQB, APPLY_K_NNLOEW_ZZQQB, APPLY_QCD_GGF_UNCERT)
-
-    from ZZAnalysis.NanoAnalysis.genXSFiller import * 
-    genXSEC = genXSFiller(genXS,genBR)
+    
+    #Protect against writing a bunch of 1's. 
+    if (genXS != 1) and (genBR != 1): 
+        from ZZAnalysis.NanoAnalysis.genXSFiller import * 
+        post_sequence.append(genXSFiller(genXS,genBR))
     
 
     from ZZAnalysis.NanoAnalysis.mcTruthAnalyzer import *
@@ -274,7 +276,6 @@ if IsMC:
     else : # Add them at the end, so that they are run only for selected events
         post_sequence.extend([puWeight(LEPTON_SETUP,DATA_TAG),
                               weights,
-                              genXSEC
                               #genFiller(mela, dump=False), # Not required when ADD_ALLEVENTS = False?
                               ])
 else : # Data
