@@ -20,7 +20,7 @@ def getJetIdProducer(era, tag) :
             folderKey = "2023_Summer23BPix" # Note: file is a link to the 2022_Summer22 file
 
     elif era == 2024:
-       folderKey = "2024_Winter24" # Note: file is a link to the 2022_Summer22 file
+       folderKey = "2024_Summer24" # Note: file is a link to the 2022_Summer22 file
 
     json = f"/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/JME/{folderKey}/jetid.json.gz"
     print("***jetId: era:", era, "tag:", tag, "json:", json)

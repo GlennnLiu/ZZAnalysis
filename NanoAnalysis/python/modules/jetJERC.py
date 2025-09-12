@@ -122,11 +122,16 @@ def getJetCorrected(era, tag, is_mc, overwritePt=True) :
         if is_mc :
             raise ValueError("getJetCorrected: 2024 MC not yet supported")
         else :
-            folderKey = "2024_Winter24" # JERC file md5sum: a0c4f7f29e09162f56c07a9b5fb97d1e
-            L1Key = "Winter24Prompt24_V3_DATA_L1FastJet_AK4PFPuppi"
-            L2Key = "Winter24Prompt24_V3_DATA_L2Relative_AK4PFPuppi"
-            L3Key = "Winter24Prompt24_V3_DATA_L3Absolute_AK4PFPuppi"
-            L2L3Key = "Winter24Prompt24_V3_DATA_L2L3Residual_AK4PFPuppi"
+            # folderKey = "2024_Winter24" # JERC file md5sum: a0c4f7f29e09162f56c07a9b5fb97d1e
+            # L1Key = "Winter24Prompt24_V3_DATA_L1FastJet_AK4PFPuppi"
+            # L2Key = "Winter24Prompt24_V3_DATA_L2Relative_AK4PFPuppi"
+            # L3Key = "Winter24Prompt24_V3_DATA_L3Absolute_AK4PFPuppi"
+            # L2L3Key = "Winter24Prompt24_V3_DATA_L2L3Residual_AK4PFPuppi"
+            folderKey = "2024_Summer24" # JERC file md5sum: 754fd45c85b197ff9f7d33f68e7cd9a2
+            L1Key = "Summer24Prompt24_V1_DATA_L1FastJet_AK4PFPuppi"
+            L2Key = "Summer24Prompt24_V1_DATA_L2Relative_AK4PFPuppi"
+            L3Key = "Summer24Prompt24_V1_DATA_L3Absolute_AK4PFPuppi"
+            L2L3Key = "Summer24Prompt24_V1_DATA_L2L3Residual_AK4PFPuppi"
             scaleTotalKey = None
             smearKey = None
             JERKey = None
