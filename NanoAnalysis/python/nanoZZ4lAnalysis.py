@@ -272,7 +272,7 @@ if IsMC:
                         ] + pre_sequence
         if NANOVERSION >= 15:
             from ZZAnalysis.NanoAnalysis.LHEFiller import * 
-            insertBefore(pre_sequence, 'cloneBranches', LHEFiller())
+            insertBefore(pre_sequence, 'LHEAngProbFiller', LHEFiller())
         
         
 
