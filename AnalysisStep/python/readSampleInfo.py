@@ -63,7 +63,8 @@ def readSamplesInfo(infoFilePath = 'samples_8TeV.csv', indexBy = 'identifier'):
                 else:
                   dictionary[bareelement[0]] = checkBool(bareelement[1])
               else:
-                dictionary[bareelement[0]] = bareelement[0]
+                # dictionary[bareelement[0]] = bareelement[0]
+                raise ValueError("ERROR: failed to parse variables list '" + self.options_.variables + "': cannot parse: '" + v + "'")
 
 #          print "Variables dictionary: ", dictionary
           info[key]           = dictionary

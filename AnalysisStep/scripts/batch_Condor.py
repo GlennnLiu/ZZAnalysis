@@ -367,7 +367,8 @@ class MyBatchManager:
                 else:
                   self.addVariables[bareelement[0]] = checkBool(bareelement[1])
               else:
-                self.addVariables[bareelement[0]] = bareelement[0]
+                  # self.addVariables[bareelement[0]] = bareelement[0]
+                  raise ValueError("ERROR: failed to parse -a '" + self.options_.variables + "': cannot parse: '" + v + "'")
 
     def mkdir( self, dirname ):
        mkdir = 'mkdir -p %s' % dirname
