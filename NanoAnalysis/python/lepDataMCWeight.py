@@ -47,7 +47,8 @@ class lepDataMCWeight(Module):
         '''Return lepton efficiency scale factor'''
 
         if self.year > 2023 : #FIXME: 2023/2024 SFs not yet implemented!
-            return 1.
+            # Return a list, otherwise unpacking in L.36 breaks. 
+            return [1, 1]
         myLepID = abs(lep.pdgId)
         mySCeta = lep.eta
         isCrack = False # FIXME: isGap() is not available in nanoAODs, and cannot be recomputed easily based on eta, phi. We thus use the non-gap SFs for all electrons.

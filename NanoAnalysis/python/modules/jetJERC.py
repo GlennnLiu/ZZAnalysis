@@ -120,7 +120,17 @@ def getJetCorrected(era, tag, is_mc, overwritePt=True) :
 
     elif era == 2024:
         if is_mc :
-            raise ValueError("getJetCorrected: 2024 MC not yet supported")
+            folderKey = "2024_Summer24"
+            L1Key = "Summer24Prompt24_V1_MC_L1FastJet_AK4PFPuppi"
+            L2Key = "Summer24Prompt24_V1_MC_L2Relative_AK4PFPuppi"
+            L3Key = "Summer24Prompt24_V1_MC_L3Absolute_AK4PFPuppi"
+            L2L3Key = "Summer24Prompt24_V1_MC_L2L3Residual_AK4PFPuppi"
+            scaleTotalKey = "Summer24Prompt24_V1_MC_Total_AK4PFPuppi"
+            smearKey = "JERSmear"
+            # It appears the most recent 23Bpix files are used in the following cases: 
+            JERKey = "Summer23BPixPrompt23_RunD_JRV1_MC_PtResolution_AK4PFPuppi"
+            JERsfKey = "Summer23BPixPrompt23_RunD_JRV1_MC_ScaleFactor_AK4PFPuppi"
+ 
         else :
             # folderKey = "2024_Winter24" # JERC file md5sum: a0c4f7f29e09162f56c07a9b5fb97d1e
             # L1Key = "Winter24Prompt24_V3_DATA_L1FastJet_AK4PFPuppi"
