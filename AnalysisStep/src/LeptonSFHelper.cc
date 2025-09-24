@@ -103,7 +103,7 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
       f_eleReco_midPt  = "/eos/cms/store/group/phys_egamma/ScaleFactors/Data2024/EleReco/midPt/egammaEffi.txt_EGM2D.root"; //md5sum: 2c2e7580a331cec6dbe1c0704aeffbc9
       f_eleReco_lowPt  = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/SF_prompt_2023_19012024/lowpT/Run3_2023D_New_lowpT_mergeEta_Added_symmetrizationsystEta_29052024/passingRECO/egammaEffi.txt_EGM2D.root"; //md5sum: 50dae0da2428c0fd92548bcfe968cb92
 
-  } else if (year<2016) {
+  } else if (year<2016 or year>2024) {
     edm::LogError("LeptonSFHelper::") << "Ele SFs for " << year << " is not supported!";
     abort();
   }
