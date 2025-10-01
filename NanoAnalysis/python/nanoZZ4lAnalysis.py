@@ -44,7 +44,7 @@ PROCESS_ZL = getConf("PROCESS_ZL", False) # fill ZL control region
 APPLYMUCORR = getConf("APPLYMUCORR", True) # apply muon momentum scale/resolution corrections
 APPLYELECORR = getConf("APPLYELECORR", True) # apply electron momentum scale/resolution corrections
 APPLYJETCORR = getConf("APPLYJETCORR", True) # apply jet corrections
-MUON_ID_BYMVA = getConf("MUON_ID_BYMVA", False) # if false - standard selection for muons ; if true - new WP (Muon_mvalowPt > -0.6, sip < 8, no iso)
+MUON_ID_BYMVA = getConf("MUON_ID_BYMVA", True) # if false - standard selection for muons ; if true - new WP (Muon_mvalowPt > -0.6, sip < 8, no iso)
 # ggH NNLOPS weight
 APPLY_QCD_GGF_UNCERT = getConf("APPLY_QCD_GGF_UNCERT", False)
 # K factors for ggZZ (and old NLO ggH samples) 0:None; 1: NNLO/LO; 2: NNLO/NLO; 3: NLO/LO
@@ -87,7 +87,9 @@ cuts = dict(
     ### lepton ID cuts
     muPt = 5.,
     elePt = 7.,
-    relIso = 0.35,
+    #relIso = 0.35,
+    relIso_ele = 1e9,
+    relIso_mu = (1e9 if MUON_ID_BYMVA else 0.35),
     sip3d_ele = 4.,
     sip3d_mu = (8. if MUON_ID_BYMVA else 4.),
     dxy =  0.5,
@@ -110,18 +112,18 @@ cuts = dict(
 
     passEleBDT = getEleBDTCut(LEPTON_SETUP, DATA_TAG, NANOVERSION, APPLYELECORR),
 
-    passMuID = (lambda l: (l.isPFcand or (l.highPtId>0 and l.pt>200.))),
+    passMuID = ((lambda l: ((l.isPFcand or (l.highPtId>0 and l.pt>200.))) and l.mvaLowPt > cuts["muMva"]) if MUON_ID_BYMVA else (lambda l: (l.isPFcand or (l.highPtId>0 and l.pt>200.)))),
 
     # Relaxed IDs used for CRs for fake rate method
     muRelaxedId  = (lambda l : cuts["muRelaxedIdNoSIP"](l) and abs(l.sip3d) < cuts["sip3d_mu"]),
     eleRelaxedId = (lambda l : cuts["eleRelaxedIdNoSIP"](l) and abs(l.sip3d) < cuts["sip3d_ele"]),
 
     # Full ID except for SIP (without isolation: FSR-corrected iso has to be applied on top, for muons)
-    muFullIdNoSIP  = (lambda l, era : cuts["muRelaxedIdNoSIP"](l) and (l.isPFcand or (l.highPtId>0 and l.pt>200.))),
+    muFullIdNoSIP  = (lambda l, era : cuts["muRelaxedIdNoSIP"](l) and cuts["passMuID"](l)),
     eleFullIdNoSIP = (lambda l, era : cuts["eleRelaxedIdNoSIP"](l) and cuts["passEleBDT"](l)),
 
     # Full ID (without isolation: FSR-corrected iso has to be applied on top, for muons)
-    muFullId  = (lambda l, era : cuts["muRelaxedId"](l) and (l.isPFcand or (l.highPtId>0 and l.pt>200.))),
+    muFullId  = (lambda l, era : cuts["muRelaxedId"](l) and cuts["passMuID"](l)),
     eleFullId = (lambda l, era : cuts["eleRelaxedId"](l) and cuts["passEleBDT"](l)),
     )
 
@@ -272,7 +274,7 @@ if IsMC:
                         ] + pre_sequence
         if NANOVERSION >= 15:
             from ZZAnalysis.NanoAnalysis.LHEFiller import * 
-            insertBefore(pre_sequence, 'LHEAngProbFiller', LHEFiller())
+            insertBefore(pre_sequence, 'cloneBranches', LHEFiller())
         
         
 
