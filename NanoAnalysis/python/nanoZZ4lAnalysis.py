@@ -44,7 +44,7 @@ PROCESS_ZL = getConf("PROCESS_ZL", False) # fill ZL control region
 APPLYMUCORR = getConf("APPLYMUCORR", True) # apply muon momentum scale/resolution corrections
 APPLYELECORR = getConf("APPLYELECORR", True) # apply electron momentum scale/resolution corrections
 APPLYJETCORR = getConf("APPLYJETCORR", True) # apply jet corrections
-MUON_ID_BYMVA = getConf("MUON_ID_BYMVA", True) # if false - standard selection for muons ; if true - new WP (Muon_mvalowPt > -0.6, sip < 8, no iso)
+MUON_ID_BYMVA = getConf("MUON_ID_BYMVA", False) # if false - standard selection for muons ; if true - new WP (Muon_mvalowPt > -0.6, sip < 8, no iso)
 # ggH NNLOPS weight
 APPLY_QCD_GGF_UNCERT = getConf("APPLY_QCD_GGF_UNCERT", False)
 # K factors for ggZZ (and old NLO ggH samples) 0:None; 1: NNLO/LO; 2: NNLO/NLO; 3: NLO/LO
@@ -274,7 +274,7 @@ if IsMC:
                         ] + pre_sequence
         if NANOVERSION >= 15:
             from ZZAnalysis.NanoAnalysis.LHEFiller import * 
-            insertBefore(pre_sequence, 'cloneBranches', LHEFiller())
+            insertBefore(pre_sequence, 'LHEAngProbFiller', LHEFiller())
         
         
 
