@@ -339,8 +339,7 @@ if IsMC:
                           'keep GenZZ*',
                           'keep *eight', # Generator_weight + custom weights
                           'keep puWeight*',
-                          'keep HTXS_Higgs*',
-                          'keep HTXS_njets30',
+                          'keep HTXS_*',
                           'keep Pileup*',
                           'keep GenJet_*',
                           'keep genxsec', 
