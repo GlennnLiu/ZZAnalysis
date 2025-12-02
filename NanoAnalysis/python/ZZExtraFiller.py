@@ -13,6 +13,7 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 #from PhysicsTools.NanoAODTools.postprocessing.tools import deltaR
 from ctypes import c_float
+import heapq
 import Mela
 
 class ZZExtraFiller(Module):
@@ -32,8 +33,8 @@ class ZZExtraFiller(Module):
     def bookExtra(self, collName) :
         theLenVar="n"+collName
         self.out.branch(collName+"_nExtraLep", "I", lenVar=theLenVar, title="number of extra leptons passing H4l full sel")
-        self.out.branch(collName+"_extraLep1Idx", "S", lenVar=theLenVar, title="index of the first extra lepton")
-        self.out.branch(collName+"_extraLep2Idx", "S", lenVar=theLenVar, title="index of the second extra lepton")
+        self.out.branch(collName+"_extraLep1Idx", "S", lenVar=theLenVar, title="index of the first extra lepton (ordered by descending pT)")
+        self.out.branch(collName+"_extraLep2Idx", "S", lenVar=theLenVar, title="index of the second extra lepton (ordered by descending pT)")
         self.out.branch(collName+"_nExtraZ", "I", lenVar=theLenVar, title="number of extra Zs passing H4l full sel")
         if self.isMC:
             self.out.branch(collName+"_dataMCWeight", "F", lenVar=theLenVar, title="data/MC efficiency correction weight", limitedPrecision=12)
@@ -91,10 +92,12 @@ class ZZExtraFiller(Module):
                 if Z.l1Idx in theCandLepIdxs or Z.l2Idx in theCandLepIdxs : continue
                 extraZs.append(iZ)
             nExtraLeps[iCand] = len(extraLeps)
+            # Take the two highest-pT additional leptons
+            leadingLeps = (heapq.nlargest(2, extraLeps, key=lambda x: self.leps[x].pt) + [-1, -1])[:2]
             if nExtraLeps[iCand] > 0:
-                extraLep1Idx[iCand] = extraLeps[0]
+                extraLep1Idx[iCand] = leadingLeps[0]
             if nExtraLeps[iCand] > 1:
-                extraLep2Idx[iCand] = extraLeps[1]
+                extraLep2Idx[iCand] = leadingLeps[1]
             nExtraZs[iCand] = len(extraZs)
 
             theCandLeps = [self.leps[i] for i in theCandLepIdxs] 
