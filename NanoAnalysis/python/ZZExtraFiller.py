@@ -32,8 +32,8 @@ class ZZExtraFiller(Module):
     def bookExtra(self, collName) :
         theLenVar="n"+collName
         self.out.branch(collName+"_nExtraLep", "I", lenVar=theLenVar, title="number of extra leptons passing H4l full sel")
-        self.out.branch(collName+"_extraLepIdx1", "S", lenVar=theLenVar, title="index of the first extra lepton")
-        self.out.branch(collName+"_extraLepIdx2", "S", lenVar=theLenVar, title="index of the second extra lepton")
+        self.out.branch(collName+"_extraLep1Idx", "S", lenVar=theLenVar, title="index of the first extra lepton")
+        self.out.branch(collName+"_extraLep2Idx", "S", lenVar=theLenVar, title="index of the second extra lepton")
         self.out.branch(collName+"_nExtraZ", "I", lenVar=theLenVar, title="number of extra Zs passing H4l full sel")
         if self.isMC:
             self.out.branch(collName+"_dataMCWeight", "F", lenVar=theLenVar, title="data/MC efficiency correction weight", limitedPrecision=12)
@@ -62,8 +62,8 @@ class ZZExtraFiller(Module):
         fsrPhotons = Collection(event, "FsrPhoton")
 
         nExtraLeps = [-1]*len(cands)
-        extraLepIdx1 = [-1]*len(cands)
-        extraLepIdx2 = [-1]*len(cands)
+        extraLep1Idx = [-1]*len(cands)
+        extraLep2Idx = [-1]*len(cands)
         nExtraZs = [-1]*len(cands)
         wDataMC = [-1]*len(cands)
 
@@ -91,10 +91,10 @@ class ZZExtraFiller(Module):
                 if Z.l1Idx in theCandLepIdxs or Z.l2Idx in theCandLepIdxs : continue
                 extraZs.append(iZ)
             nExtraLeps[iCand] = len(extraLeps)
-            if len(extraLeps) > 0:
-                extraLepIdx1[iCand] = extraLeps[0]
-            if len(extraLeps) > 1:
-                extraLepIdx2[iCand] = extraLeps[1]
+            if nExtraLeps[iCand] > 0:
+                extraLep1Idx[iCand] = extraLeps[0]
+            if nExtraLeps[iCand] > 1:
+                extraLep2Idx[iCand] = extraLeps[1]
             nExtraZs[iCand] = len(extraZs)
 
             theCandLeps = [self.leps[i] for i in theCandLepIdxs] 
@@ -134,8 +134,8 @@ class ZZExtraFiller(Module):
                 mZ2s[iCand] = mZ2
         
         self.out.fillBranch(collName+"_nExtraLep", nExtraLeps)
-        self.out.fillBranch(collName+"_extraLepIdx1", extraLepIdx1)
-        self.out.fillBranch(collName+"_extraLepIdx2", extraLepIdx2)
+        self.out.fillBranch(collName+"_extraLep1Idx", extraLep1Idx)
+        self.out.fillBranch(collName+"_extraLep2Idx", extraLep2Idx)
         self.out.fillBranch(collName+"_nExtraZ", nExtraZs)
         if self.isMC:
             self.out.fillBranch(collName+"_dataMCWeight", wDataMC)    
