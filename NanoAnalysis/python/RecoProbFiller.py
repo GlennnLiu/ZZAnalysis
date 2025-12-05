@@ -36,9 +36,21 @@ class RecoProbFiller(Module):
         cands = Collection(event, 'ZZCand')
         leps = Collection(event, 'Lepton')
         fsrPhotons = Collection(event, "FsrPhoton")
+        jets = Collection(event, 'Jet')
+
+        # Add leading and sub-leadig jets, if present
+        jets_idx = [i for i in (event.JetLeadingIdx, event.JetSubleadingIdx) if i >= 0]
+        jets_MELA = Mela.SimpleParticleCollection_t()
+        for idx in jets_idx:
+            jet = jets[idx]
+            p4 = jet.p4()
+            jets_MELA.add_particle(Mela.SimpleParticle_t(0, p4.Px(), p4.Py(), p4.Pz(), p4.E()))
+
         # Cache the daughters for each candidate
         candsDaughters = [Mela.SimpleParticleCollection_t()]*len(cands)
-        candsAssociated = [None]*len(cands) # FIXME to be added
+        # The jets are the same for every candidate
+        candsAssociated = [copy.deepcopy(jets_MELA)]*len(cands)
+
         for iCand, aCand in enumerate(cands):
             theCandLepIdxs = [aCand.Z1l1Idx, aCand.Z1l2Idx, aCand.Z2l1Idx, aCand.Z2l2Idx]  
             theCandLeps = [leps[i] for i in theCandLepIdxs]
