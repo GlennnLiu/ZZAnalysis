@@ -63,6 +63,12 @@ class RecoProbFiller(Module):
             daughters.add_particle(Mela.SimpleParticle_t(theCandLeps[2].pdgId, dressedLepsp4[2].Px(), dressedLepsp4[2].Py(), dressedLepsp4[2].Pz(), dressedLepsp4[2].E()))
             daughters.add_particle(Mela.SimpleParticle_t(theCandLeps[3].pdgId, dressedLepsp4[3].Px(), dressedLepsp4[3].Py(), dressedLepsp4[3].Pz(), dressedLepsp4[3].E()))
 
+            extralep_idx = [i for i in (event.ZZCand_extraLep1Idx[iCand], event.ZZCand_extraLep2Idx[iCand]) if i >= 0]
+            for idx in extralep_idx:
+                lep = leps[idx]
+                p4 = lep.p4()
+                associated.add_particle(Mela.SimpleParticle_t(lep.pdgId, p4.Px(), p4.Py(), p4.Pz(), p4.E()))
+
         self.ProbHelper.fillProbs(candsDaughters, candsAssociated, None)
 
         return True
