@@ -34,6 +34,7 @@ class MELAProbHelper():
                 "decaymode": "CandidateDecay_ZZ",
                 "separatewwzz":False,
                 "useconstant":False,
+                "addPAux":False,
                 "match_mX":False,
                 "lepton_interference":"DefaultLeptonInterf",
                 "ispm4l": None,
@@ -104,7 +105,8 @@ class MELAProbHelper():
                         self.out.branch(prob["branchname"]+"_SystDown", "F", lenVar = "nZZCand", limitedPrecision=16, title="User-defined Reco-level m4l probability with Systematic uncertainties down")
                     if prob["computeprop"]: 
                         self.out.branch(prob["branchname"]+"_prop", "F", lenVar = "nZZCand", limitedPrecision=16, title="User-defined weight to translate from POWHEG complex propagator scheme to JHUGen Breit-Wigner scheme")
-    
+                    if prob["addPAux"]:
+                        self.out.branch(prob["branchname"]+"_aux", "F", lenVar = "nZZCand", limitedPrecision=16, title="User-defined auxiliary probability")
     def fillProbs(self, candDaughters, candAssociated, candMothers): 
         if len(self.sortedSettings) == 0: return True
         else: 
@@ -126,14 +128,12 @@ class MELAProbHelper():
                 MELA_ispm4l = prob["ispm4l"]
                 MELA_divideP_idx = prob["dividep_idx"]
                 MELA_branchname = prob["branchname"]
+                MELA_addPAux = prob["addPAux"]
 
                 ### Configure MELA for the event. 
                 self.MELA.setProcess(MELA_Process, MELA_MatrixElement, MELA_Production)
                 self.MELA.differentiate_HWW_HZZ = MELA_separatewwzz
                 self.MELA.setMelaLeptonInterference(MELA_leptoninterference)                    
-
-                
-
                 
 
                 # Define arrays to fill with the probabilites for each candidate
@@ -146,7 +146,9 @@ class MELAProbHelper():
                 if MELA_computeprop and (MELA_prod or MELA_dec): 
                     probPropVec = [-999.]*len(candDaughters)
 
-                
+                if MELA_addPAux:
+                    probVec_PAux = [-999.]*len(candDaughters)
+
                 # Compute prob for each candidate
                 for iCand, aCand in enumerate(candDaughters):
                     
@@ -163,7 +165,7 @@ class MELAProbHelper():
                         self.MELA.setInputEvent(candDaughters[iCand], candAssociated[iCand], candMothers[iCand], 1)
                     else: 
                         self.MELA.setInputEvent(candDaughters[iCand], candAssociated[iCand], None, 0)
-
+                        
                     if MELA_prod and MELA_dec: 
                         probVec[iCand] = self.MELA.computeProdDecP(MELA_useconstant)
                     elif MELA_prod: 
@@ -184,6 +186,9 @@ class MELAProbHelper():
                             probPropVec[iCand] = self.MELA.getXPropagator(MELA_propscheme)
                         elif MELA_computeprop: 
                             probVec[iCand] = self.MELA.getXPropagator(MELA_propscheme)
+
+                    if MELA_addPAux:
+                        probVec_PAux[iCand] = self.MELA.getPAux()
 
                     # Handle divideP
                     if self.ModuleContext == "LHE": 
@@ -219,6 +224,9 @@ class MELAProbHelper():
                             
                     if MELA_computeprop and (MELA_prod or MELA_dec): 
                         self.out.fillBranch(MELA_branchname+"_prop", probPropVec)
+
+                    if MELA_addPAux:
+                        self.out.fillBranch(MELA_branchname+"_aux", probVec_PAux)
                 
                 
         return True
