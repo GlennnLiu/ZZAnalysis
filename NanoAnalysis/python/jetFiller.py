@@ -62,29 +62,27 @@ class jetFiller(Module):
             jet_lepPtF[ij] /= jet.pt
             if jet_lepPtF[ij] > self.EFthreshold :                
                 mask[ij] = True
-            else : 
-                # Decide pt cut based on jet eta:
-                if 2.5 < abs(jet.eta) < 3.0:
-                    pt_cut = 50.0
-                else:
-                    pt_cut = 30.0
-                if jet.pt > pt_cut : nCleanedJetsPt30 += 1
-                #FIXME: add jesUp, jesDn
-
-                # NOTE: The 50 GeV pT cut in the forward eta region (2.5 < |eta| < 3.0)
-                # was introduced following JME recommendations
-                # Ref: https://gitlab.cern.ch/cms-jetmet/coordination/coordination/-/issues/113
-                # TODO: This should be removed once a JSON-level fix is implemented.
+            else :
+                # Consider only jets passing  tight ID and tightLepVeto ID, cf. https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13p6TeV#nanoAOD_Flags
+                # FIXME: To be checked/updated for Run2 
+                if jet.jetId == 6 :
+                    # Eta-dependent PT cut. NOTE: The 50 GeV pT cut in the forward eta region (2.5 < |eta| < 3.0)
+                    # was introduced following JME recommendations
+                    # Ref: https://gitlab.cern.ch/cms-jetmet/coordination/coordination/-/issues/113
+                    if jet.pt > 50 or (jet.pt > 30 and not (2.5 < abs(jet.eta) < 3.0)) :
+                        nCleanedJetsPt30 += 1
+                        #FIXME: add jesUp, jesDn
                 
-                # Note: we cannot rely on the fact that the jet collection is sorted by pt since JES can change this.  
-                if jet.pt > leadingJetPt:
-                    subleadingJetPt = leadingJetPt
-                    subleadingJetIdx = leadingJetIdx
-                    leadingJetPt = jet.pt
-                    leadingJetIdx = ij
-                elif jet.pt > subleadingJetPt :
-                    subleadingJetPt = jet.pt
-                    subleadingJetIdx = ij
+                        # IDX of Leading/subleading jets passing all selections (including pT).
+                        # Note: we cannot rely on the fact that the jet collection is sorted by pt since JES can change this.  
+                        if jet.pt > leadingJetPt:
+                            subleadingJetPt = leadingJetPt
+                            subleadingJetIdx = leadingJetIdx
+                            leadingJetPt = jet.pt
+                            leadingJetIdx = ij
+                        elif jet.pt > subleadingJetPt :
+                            subleadingJetPt = jet.pt
+                            subleadingJetIdx = ij
         
         self.out.fillBranch("Jet_ZZMask", mask)
         self.out.fillBranch("Jet_ZZLepEF", jet_lepPtF)

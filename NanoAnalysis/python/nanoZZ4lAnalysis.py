@@ -158,8 +158,15 @@ localPath = os.environ['CMSSW_BASE']+"/src/ZZAnalysis/NanoAnalysis/"
 ### JSON
 jsonFile = None
 if not IsMC :
-    if LEPTON_SETUP == 2018 :
-        jsonFile = localPath+"test/prod/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt"
+    if "UL" in DATA_TAG :
+        if LEPTON_SETUP == 2016 :
+            jsonFile = localPath+"Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"
+        if LEPTON_SETUP == 2017 :
+            jsonFile = localPath+"Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"
+        if LEPTON_SETUP == 2018 :
+            jsonFile = localPath+"Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"
+#    elif LEPTON_SETUP == 2018 : #pre-UL, for comparisons with HIG-19-001; kept commented for future reference
+#        jsonFile = localPath+"test/prod/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt"
     elif LEPTON_SETUP == 2022 :
         jsonFile = localPath+"test/prod/Cert_Collisions2022_355100_362760_Golden.json"
     elif LEPTON_SETUP == 2023 :
