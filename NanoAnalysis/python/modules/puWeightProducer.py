@@ -249,7 +249,7 @@ def puWeight(era, data_tag):
 
 
     elif era == 2024:
-        from PhysicsTools.NATModules.modules.puWeightProducer import puWeightProducer as puWeightProducer_corrlib # FIXME: preliminary file (priv. comm); must be replaced with the one from jsonpog-integration/POG/LUM once it will be released
+        from PhysicsTools.NATModules.modules.puWeightProducer import puWeightProducer as puWeightProducer_corrlib
         json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2025-12-02/puWeights_BCDEFGHI.json.gz" % os.environ['CMSSW_BASE']
         key = "Collisions2024_378981_386951_GoldenJson"
         return puWeightProducer_corrlib(json, key)
