@@ -61,14 +61,14 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
 
      f_eleReco_highPt  = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/New_SF_19122023/highpT/Run3_2022BCD_New_highpt6/passingRECO/egammaEffi.txt_EGM2D.root"; //md5sum: 62342dcf014bcc737ae53e0a866c3d02
      f_eleReco_midPt   = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/New_SF_19122023/midpT/Run3_2022BCD_New_midpT7/passingRECO/egammaEffi.txt_EGM2D.root"; //md5sum: 7734c3dc688da66c5a94b2368506436f
-     f_eleReco_lowPt   = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/New_SF_19122023/lowpT/Run3_2022BCD_PreEEMC/passingRECO/egammaEffi.txt_EGM2D.root"; //md5sum: 5e871afa376cd2e837f635a606351f04
+     f_eleReco_lowPt   = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/SF_2022_rerecoBCD_rerecoE_PromptFG_RMS_30052022/lowpT/Run3_2022BCD_New_lowpT_mergeEta/passingRECO/egammaEffi.txt_EGM2D.root";
 
    } else { // 2022 postEE
      f_eleID           = basePath+"SF2022eleID_postEE.root";
 
      f_eleReco_highPt  = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/New_SF_19122023/highpT/Run3_2022EFG_New_highpt5/passingRECO/egammaEffi.txt_EGM2D.root"; //md5sum: aee0d53f73f0af0bf8ac1c2aa18ddba5
      f_eleReco_midPt   = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/New_SF_19122023/midpT/Run3_2022EFG_New_midpT5/passingRECO/egammaEffi.txt_EGM2D.root"; //md5sum: 8069bdb4014e6e2c622c829dda336952
-     f_eleReco_lowPt   = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/New_SF_19122023/lowpT/Run3_2022EFG_PostEEMC/passingRECO/egammaEffi.txt_EGM2D.root"; //md5sum: dc040a1d86cf83a8344a391a30646686
+     f_eleReco_lowPt   = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/SF_2022_rerecoBCD_rerecoE_PromptFG_RMS_30052022/lowpT/Run3_2022EFG_New_lowpT_mergeEta/passingRECO/egammaEffi.txt_EGM2D.root";
    }
    
   } else if (year == 2023) {
@@ -102,7 +102,7 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
       //TO FIX: at the moment 2024 Ele RECO SF for pt below 20 GeV are not available yet, using 2023postBPix for now
       f_eleReco_highPt = "/eos/cms/store/group/phys_egamma/ScaleFactors/Data2024/EleReco/highPt/egammaEffi.txt_EGM2D.root"; //md5sum: 6f5574bf1ec83d6c9bdc7225bfffe633
       f_eleReco_midPt  = "/eos/cms/store/group/phys_egamma/ScaleFactors/Data2024/EleReco/midPt/egammaEffi.txt_EGM2D.root"; //md5sum: 2c2e7580a331cec6dbe1c0704aeffbc9
-      f_eleReco_lowPt  = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/SF_prompt_2023_19012024/lowpT/Run3_2023D_New_lowpT_mergeEta_Added_symmetrizationsystEta_29052024/passingRECO/egammaEffi.txt_EGM2D.root"; //md5sum: 50dae0da2428c0fd92548bcfe968cb92
+      f_eleReco_lowPt  = "/eos/cms/store/group/phys_egamma/ScaleFactors/Data2024/EleReco/lowPt/egammaEffi.txt_EGM2D.root"; //md5sum: 6a78fc31f3161229aa855ea0df7d7b0c
 
   } else if (year<2016 or year>2024) {
     edm::LogError("LeptonSFHelper::") << "Ele SFs for " << year << " is not supported!";
@@ -207,8 +207,15 @@ pair<float, float> LeptonSFHelper::getSF(int flav, float pt, float eta, float SC
    // Electron reconstruction SFs
    if(abs(flav) == 11) {
      if(pt < 20.) {
-       RecoSF     = h_Ele_Reco_lowPt->GetBinContent(h_Ele_Reco_lowPt->GetXaxis()->FindBin(SCeta),h_Ele_Reco_lowPt->GetYaxis()->FindBin(15.));// FIXME: the histogram contains 1 pt bin only
-       RecoSF_Unc = h_Ele_Reco_lowPt->GetBinError  (h_Ele_Reco_lowPt->GetXaxis()->FindBin(SCeta),h_Ele_Reco_lowPt->GetYaxis()->FindBin(15.));
+      float SCeta_lowPt = SCeta;
+
+      if (theYear == 2022)
+          {
+              SCeta_lowPt = std::abs(SCeta); //simmetrise lowPt for 2022preEE and postEE only
+          }
+
+       RecoSF     = h_Ele_Reco_lowPt->GetBinContent(h_Ele_Reco_lowPt->GetXaxis()->FindBin(SCeta_lowPt),h_Ele_Reco_lowPt->GetYaxis()->FindBin(15.));// FIXME: the histogram contains 1 pt bin only
+       RecoSF_Unc = h_Ele_Reco_lowPt->GetBinError  (h_Ele_Reco_lowPt->GetXaxis()->FindBin(SCeta_lowPt),h_Ele_Reco_lowPt->GetYaxis()->FindBin(15.));
      } else if(pt < 75. && h_Ele_Reco_midPt!= nullptr) {
        RecoSF     = h_Ele_Reco_midPt->GetBinContent(h_Ele_Reco_midPt->GetXaxis()->FindBin(SCeta),h_Ele_Reco_midPt->GetYaxis()->FindBin(std::min(pt,75.f)));
        RecoSF_Unc = h_Ele_Reco_midPt->GetBinError  (h_Ele_Reco_midPt->GetXaxis()->FindBin(SCeta),h_Ele_Reco_midPt->GetYaxis()->FindBin(std::min(pt,75.f)));
