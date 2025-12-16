@@ -100,6 +100,7 @@ class LHEAngProbFiller(Module):
         mothers = Mela.SimpleParticleCollection_t()
         daughters = Mela.SimpleParticleCollection_t()
         associated = Mela.SimpleParticleCollection_t()
+        hMass = -999.
 
 
         ## Only run if mother-daughter associations are available, i.e. nanoAODv15 or newer. 
