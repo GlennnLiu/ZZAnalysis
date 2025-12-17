@@ -1,3 +1,4 @@
+
 # Legacy implementation based on root histograms, kept for older MC
 # Imported from the standalone version of PhysicsTools.NanoAODTools.postprocessing.modules.common.
 #
@@ -250,8 +251,8 @@ def puWeight(era, data_tag):
 
     elif era == 2024:
         from PhysicsTools.NATModules.modules.puWeightProducer import puWeightProducer as puWeightProducer_corrlib
-        json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2025-12-02/puWeights_BCDEFGHI.json.gz" % os.environ['CMSSW_BASE']
-        key = "Collisions2024_378981_386951_GoldenJson"
+        json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2025-12-02/puWeights_BCDEFGHI.json.gz"
+        key = "Collisions24_BCDEFGHI_goldenJSON"
         return puWeightProducer_corrlib(json, key)
 
     else:
