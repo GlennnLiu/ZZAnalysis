@@ -59,7 +59,7 @@ setConf("probabilities", {
     "useconstant": True # This argument affects the normalization, and should generally be set to true for reconstructed events, false forgenerator level events. [from https://spin.pha.jhu.edu/Manual.pdf]
     }, append=True)
 
-# https://github.com/CJLST/ZZAnalysis/blob/e1dd72d210d05e248873389c97da5ff9c9fcb94a/AnalysisStep/test/prod/pyFragments/RecoProbabilities.py#L159
+# https://github.com/CJLST/ZZAnalysis/blob/e1dd72d210d05e248873389c97da5ff9c9fcb94a/AnalysisStep/test/prod/pyFragments/RecoProbabilities.py#L171
 setConf("probabilities", {
     "Name": "HadWH_SIG_ghw1_1_JHUGen_JECNominal",
     "Process": "HSMHiggs", 
@@ -71,7 +71,26 @@ setConf("probabilities", {
     "ispm4l": False, # TBC (I set it to False from what it is written in the exampleProbabilities.py)
     "context": "Reco", 
     "computeprop": False, # TBC
-    "useconstant": True # This argument affects the normalization, and should generally be set to true for reconstructed events, false forgenerator level events. [from https://spin.pha.jhu.edu/Manual.pdf]
+    "useconstant": True, # This argument affects the normalization, and should generally be set to true for reconstructed events, false forgenerator level events. [from https://spin.pha.jhu.edu/Manual.pdf]
+    "ispmavjj": True,
+    "ispmvajj_true": True
+    }, append=True)
+
+# https://github.com/CJLST/ZZAnalysis/blob/e1dd72d210d05e248873389c97da5ff9c9fcb94a/AnalysisStep/test/prod/pyFragments/RecoProbabilities.py#L168
+setConf("probabilities", {
+    "Name": "HadZH_SIG_ghz1_1_JHUGen_JECNominal",
+    "Process": "HSMHiggs", 
+    "Production": "Had_ZH", 
+    "MatrixElement": "JHUGen", 
+    "Couplings": {}, # TBC 
+    "Prod": True, # TBC (I set it to True, it is a production probability for me)
+    "Dec": False,  # TBC (I set it to False)
+    "ispm4l": False, # TBC (I set it to False from what it is written in the exampleProbabilities.py)
+    "context": "Reco", 
+    "computeprop": False, # TBC
+    "useconstant": True, # This argument affects the normalization, and should generally be set to true for reconstructed events, false forgenerator level events. [from https://spin.pha.jhu.edu/Manual.pdf]
+    "ispmavjj": True,
+    "ispmvajj_true": True
     }, append=True)
 
 # https://github.com/CJLST/ZZAnalysis/blob/e1dd72d210d05e248873389c97da5ff9c9fcb94a/AnalysisStep/test/prod/pyFragments/RecoProbabilities.py#L165
