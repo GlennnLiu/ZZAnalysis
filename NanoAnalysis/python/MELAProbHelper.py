@@ -151,7 +151,7 @@ class MELAProbHelper():
                     probVec_ScaleDown = [-999.]*len(candDaughters)
                     probVec_SystUp = [-999.]*len(candDaughters)
                     probVec_SystDown = [-999.]*len(candDaughters)
-                if MELA_computeprop and (MELA_prod or MELA_dec): 
+                if MELA_computeprop: 
                     probPropVec = [-999.]*len(candDaughters)
 
                 if MELA_addPAux:
@@ -194,11 +194,9 @@ class MELAProbHelper():
                     elif MELA_computeprop==False :
                         raise KeyError(f"MELAProbHelper: need to specify either (production and/or decay) or pm4l or computeprop for {MELA_Name}")
 
-                    if MELA_computeprop and not MELA_ispm4l:
-                        if (MELA_prod or MELA_dec): 
-                            probPropVec[iCand] = self.MELA.getXPropagator(MELA_propscheme)
-                        elif MELA_computeprop: 
-                            probVec[iCand] = self.MELA.getXPropagator(MELA_propscheme)
+                    if MELA_computeprop:
+                        probPropVec[iCand] = self.MELA.getXPropagator(MELA_propscheme)
+
 
                     if MELA_addPAux:
                         probVec_PAux[iCand] = self.MELA.getPAux()
@@ -229,7 +227,7 @@ class MELAProbHelper():
                         self.out.fillBranch(MELA_branchname+"_ScaleDown", probVec_ScaleDown[0])
                         self.out.fillBranch(MELA_branchname+"_SystUp", probVec_SystUp[0])
                         self.out.fillBranch(MELA_branchname+"_SystDown", probVec_SystDown[0])
-                    if MELA_computeprop and (MELA_prod or MELA_dec): 
+                    if MELA_computeprop: 
                         self.out.fillBranch(MELA_branchname+"_prop", probPropVec[0])
                 else: 
                     self.out.fillBranch(MELA_branchname, probVec)
@@ -240,7 +238,7 @@ class MELAProbHelper():
                         self.out.fillBranch(MELA_branchname+"_SystUp", probVec_SystUp)
                         self.out.fillBranch(MELA_branchname+"_SystDown", probVec_SystDown)
                             
-                    if MELA_computeprop and (MELA_prod or MELA_dec): 
+                    if MELA_computeprop: 
                         self.out.fillBranch(MELA_branchname+"_prop", probPropVec)
 
                     if MELA_addPAux:
