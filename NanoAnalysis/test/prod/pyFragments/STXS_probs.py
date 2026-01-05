@@ -72,8 +72,8 @@ setConf("probabilities", {
     "context": "Reco", 
     "computeprop": False, # TBC
     "useconstant": True, # This argument affects the normalization, and should generally be set to true for reconstructed events, false forgenerator level events. [from https://spin.pha.jhu.edu/Manual.pdf]
-    "ispmavjj": True,
-    "ispmvajj_true": True
+    "addPmavjj": True,
+    "addPmavjj_true": True
     }, append=True)
 
 # https://github.com/CJLST/ZZAnalysis/blob/e1dd72d210d05e248873389c97da5ff9c9fcb94a/AnalysisStep/test/prod/pyFragments/RecoProbabilities.py#L168
@@ -89,8 +89,8 @@ setConf("probabilities", {
     "context": "Reco", 
     "computeprop": False, # TBC
     "useconstant": True, # This argument affects the normalization, and should generally be set to true for reconstructed events, false forgenerator level events. [from https://spin.pha.jhu.edu/Manual.pdf]
-    "ispmavjj": True,
-    "ispmvajj_true": True
+    "addPmavjj": True,
+    "addPmavjj_true": True
     }, append=True)
 
 # https://github.com/CJLST/ZZAnalysis/blob/e1dd72d210d05e248873389c97da5ff9c9fcb94a/AnalysisStep/test/prod/pyFragments/RecoProbabilities.py#L165

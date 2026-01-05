@@ -38,8 +38,8 @@ class MELAProbHelper():
                 "match_mX":False,
                 "lepton_interference":"DefaultLeptonInterf",
                 "ispm4l": None,
-                'ispmavjj': False,
-                'ispmvajj_true': False,
+                'addPmavjj': False,
+                'addPmavjj_true': False,
                 "dividep": None
             }
         
@@ -109,9 +109,9 @@ class MELAProbHelper():
                         self.out.branch(prob["branchname"]+"_prop", "F", lenVar = "nZZCand", limitedPrecision=16, title="User-defined weight to translate from POWHEG complex propagator scheme to JHUGen Breit-Wigner scheme")
                     if prob["addPAux"]:
                         self.out.branch(prob["branchname"]+"_aux", "F", lenVar = "nZZCand", limitedPrecision=16, title="User-defined auxiliary probability")
-                    if prob["ispmavjj"]:
+                    if prob["addPmavjj"]:
                         self.out.branch(prob["branchname"]+"_mavjj", "F", lenVar = "nZZCand", title="User-defined mavjj probability")
-                    if prob["ispmvajj_true"]:
+                    if prob["addPmavjj_true"]:
                         self.out.branch(prob["branchname"]+"_mvajj_true", "F", lenVar = "nZZCand", title="User-defined mvajj_true probability")
     def fillProbs(self, candDaughters, candAssociated, candMothers): 
         if len(self.sortedSettings) == 0: return True
@@ -132,8 +132,8 @@ class MELAProbHelper():
                 MELA_matchMx = prob["match_mX"]
                 MELA_leptoninterference = check_enum(prob["lepton_interference"], Mela.LeptonInterference)
                 MELA_ispm4l = prob["ispm4l"]
-                MELA_ispmavjj = prob["ispmavjj"]
-                MELA_ispmvajj_true = prob["ispmvajj_true"]
+                MELA_addPmavjj = prob["addPmavjj"]
+                MELA_addPmavjj_true = prob["addPmavjj_true"]
                 MELA_divideP_idx = prob["dividep_idx"]
                 MELA_branchname = prob["branchname"]
                 MELA_addPAux = prob["addPAux"]
@@ -157,9 +157,9 @@ class MELAProbHelper():
                 if MELA_addPAux:
                     probVec_PAux = [-999.]*len(candDaughters)
 
-                if MELA_ispmavjj:
+                if MELA_addPmavjj:
                     probVec_mavjj = [-999.]*len(candDaughters)
-                if MELA_ispmvajj_true:
+                if MELA_addPmavjj_true:
                     probVec_mvajj_true = [-999.]*len(candDaughters)
 
                 # Compute prob for each candidate
@@ -203,9 +203,9 @@ class MELAProbHelper():
                     if MELA_addPAux:
                         probVec_PAux[iCand] = self.MELA.getPAux()
 
-                    if MELA_ispmavjj:
+                    if MELA_addPmavjj:
                         probVec_mavjj[iCand] = self.MELA.computeDijetConvBW(False)
-                    if MELA_ispmvajj_true:
+                    if MELA_addPmavjj_true:
                         probVec_mvajj_true[iCand] = self.MELA.computeDijetConvBW(True)
 
                     # Handle divideP
@@ -246,9 +246,9 @@ class MELAProbHelper():
                     if MELA_addPAux:
                         self.out.fillBranch(MELA_branchname+"_aux", probVec_PAux)
 
-                    if MELA_ispmavjj:
+                    if MELA_addPmavjj:
                         self.out.fillBranch(MELA_branchname+"_mavjj", probVec_mavjj)
-                    if MELA_ispmvajj_true:
+                    if MELA_addPmavjj_true:
                         self.out.fillBranch(MELA_branchname+"_mvajj_true", probVec_mvajj_true)
                 
                 
