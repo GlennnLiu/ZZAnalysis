@@ -19,6 +19,7 @@ class LHEAngProbFiller(Module):
         self.MELASettings = MELASettings
         self.sortedSettings = []
         self.ProbHelper = MELAProbHelper(self.MELA, self.MELASettings, "LHE")
+        print("***LHEAngProbFiller: set for: ", self.ProbHelper.names, flush=True)
 
         # if MELASettings != None:
         #     defaults = {
@@ -72,9 +73,9 @@ class LHEAngProbFiller(Module):
         
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
-        self.out.branch("LHEMela_qH", "F", title="The mass of the Higgs candidate as reconstructed by the 4-leptons at LHE-level.")
-        self.out.branch("LHEMela_mZ1", "F", title="The mass of the first decay particle as reconstructed by 2 of the LHE-level leptons.")
-        self.out.branch("LHEMela_mZ2", "F", title="The mass of the second decay particle as reconstructed by 2 of the LHE-level leptons.")
+        # self.out.branch("LHEMela_qH", "F", title="The mass of the Higgs candidate as reconstructed by the 4-leptons at LHE-level.")
+        # self.out.branch("LHEMela_mZ1", "F", title="The mass of the first decay particle as reconstructed by 2 of the LHE-level leptons.")
+        # self.out.branch("LHEMela_mZ2", "F", title="The mass of the second decay particle as reconstructed by 2 of the LHE-level leptons.")
         self.out.branch("LHEMela_costheta1", "F", limitedPrecision=16, title="In the Higgs' rest frame, theta_1 is the angle between the momentum of Z1 and the momentum of one of its decay products.")
         self.out.branch("LHEMela_costheta2", "F", limitedPrecision=16, title="In the Higgs' rest frame, theta_2 is the angle between the momentum of Z2 and the momentum of one of its decay products.")
         self.out.branch("LHEMela_Phi", "F", limitedPrecision=16, title="In the Higgs' rest frame, phi is the angle between the planes formed by the decay products of the two Z bosons.")
@@ -156,16 +157,20 @@ class LHEAngProbFiller(Module):
             # self.MELA.setInputEvent(daughters, associated, mothers, 1)
             self.MELA.setInputEvent(daughters, None, None, 0)
             qH, mZ1, mZ2, costheta1, costheta2, Phi, costhetastar, Phi1 = self.MELA.computeDecayAngles()
-            self.out.fillBranch("LHEMela_costheta1", costheta1)
-            self.out.fillBranch("LHEMela_costheta2", costheta2)
-            self.out.fillBranch("LHEMela_Phi", Phi)
-            self.out.fillBranch("LHEMela_Phi1", Phi1)
-            self.out.fillBranch("LHEMela_costhetastar", costhetastar)
         else: 
+            qH, mZ1, mZ2, costheta1, costheta2, Phi, costhetastar, Phi1 = 0.,0.,0.,-999.,-999.,-999.,-999.,-999.
             if len(daughters.toList()) != 4: 
                 print(f"WARNING: LHEAngProbFiller: {len(daughters.toList())} LHE-leptons were selected for this event (4 expected)!")
-            elif abs(hMass - daughters.MTotal()) < 0.01: 
+            else :
                 print(f"WARNING: LHEAngProbFiller: The invariant mass of the four LHE-leptons, {daughters.MTotal()}, is too different from the mass of the LHE-Higgs {hMass}! Expected a difference of less than 0.01, obtained a difference of ", hMass - daughters.MTotal())
+
+        # self.out.fillBranch("LHEMela_qH", qH)
+        # self.out.fillBranch("LHEMela_mZ1", mZ1)
+        # self.out.fillBranch("LHEMela_mZ2", mZ2)
+        self.out.fillBranch("LHEMela_costheta2", costheta2)
+        self.out.fillBranch("LHEMela_Phi", Phi)
+        self.out.fillBranch("LHEMela_Phi1", Phi1)
+        self.out.fillBranch("LHEMela_costhetastar", costhetastar)
 
         self.MELA.resetInputEvent()
 
