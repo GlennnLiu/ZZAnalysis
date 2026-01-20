@@ -19,6 +19,7 @@ SampleToRun = "MC2022EE"
 #SampleToRun = "Data2024"
 #SampleToRun = "MC2024"
 #SampleToRun = "MELA_Test"
+#SampleToRun = "MELA_VBS_ZZjj-EWK"
 #SampleToRun = "forNanoDoc" # To prepare variable lists with inspectNanoFile.py
 
 ### Obsolete Run2 samples
@@ -229,6 +230,29 @@ elif SampleToRun == "MELA_Test" :
         "/store/mc/RunIII2024Summer24NanoAODv15/GluGluH-Hto2Zto4L_Par-M-125_TuneCP5_13p6TeV_powheg-jhugen-pythia8/NANOAODSIM/150X_mcRun3_2024_realistic_v2-v2/110000/a9e03ff9-2146-4aff-bd26-69abcb98359f.root" # 10000 evts
     ])
     
+
+elif SampleToRun.startswith("MELA_VBS"):
+    setConf("LEPTON_SETUP", 2024)
+    setConf("IsMC", True)
+    setConf("NANOVERSION", 15)
+    setConf("store", "root://cms-xrd-global.cern.ch/")
+
+    setConf("probabilities", [])
+    import prod.pyFragments.VBS_probs
+
+    if(SampleToRun == "MELA_VBS_ZZjj-EWK"):
+        setConf("SAMPLENAME", "ZZjj-EWK")
+        setConf("fileNames", [
+            "/store/mc/RunIII2024Summer24NanoAODv15/ZZJJto4L-EWK_TuneCP5_13p6TeV_madgraph-pythia8/NANOAODSIM/150X_mcRun3_2024_realistic_v2-v2/110000/3ef8745a-d896-4db5-98cc-a6992fd2636d.root"
+        ])
+    elif(SampleToRun == "MELA_VBS_ZZjj-QCD"):
+        setConf("SAMPLENAME", "ZZjj-QCD")
+        setConf("fileNames", [
+            "/store/mc/RunIII2024Summer24NanoAODv15/ZZJJto4L-QCD_TuneCP5_13p6TeV_madgraph-pythia8/NANOAODSIM/150X_mcRun3_2024_realistic_v2-v2/120000/a92b9c18-7301-41a9-b932-00fae13831de.root"
+        ])
+    else:
+        raise ValueError("unknown sample %s" %(sample))
+
 
 ################################################################################
 ### Tweak postprocessor parameters as necessary
