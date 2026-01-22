@@ -237,4 +237,4 @@ def getJetCorrected(era, tag, is_mc, overwritePt=True) :
 
     print("***jetJERC: era:", era, "tag:", tag, "is MC:", is_mc, "overwritePt:", overwritePt, "phiDependent:", usePhiDependentJEC, "runDependent:", useRunDependentJEC, "JesSplittingScheme11:", useJesSplittingScheme11,"json_JERC:", json_JERC, "json_JERsmear:", json_JERsmear)
     
-    return jetJERC(json_JERC, json_JERsmear, L1Key, L2Key, L3Key, L2L3Key, scaleKey, smearKey, JERKey, JERsfKey, overwritePt, usePhiDependentJEC, useRunDependentJEC)
+    return jetJERC(era, json_JERC, json_JERsmear, L1Key, L2Key, L3Key, L2L3Key, scaleKey, smearKey, JERKey, JERsfKey, overwritePt, usePhiDependentJEC, useRunDependentJEC)

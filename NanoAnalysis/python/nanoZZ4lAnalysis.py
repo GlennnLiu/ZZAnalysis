@@ -193,7 +193,7 @@ reco_sequence = [lepFiller(cuts, LEPTON_SETUP, MUON_ID_BYMVA), # FSR and FSR-cor
                           filter=FILTER_EVENTS,
                           candsToStore=CANDSTOSTORE,
                           debug=DEBUG), # Build ZZ candidates; choose best candidate; filter events with candidates
-                 jetFiller(), # Jets cleaning with leptons
+                 jetFiller(year=LEPTON_SETUP), # Jets cleaning with leptons
                  ZZExtraFiller(mela, IsMC, LEPTON_SETUP, DATA_TAG, PROCESS_CR), # Additional variables to selected candidates
                  ]
 
