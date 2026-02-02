@@ -421,7 +421,7 @@ class MyBatchManager:
                    self.max_materialize = 0
                else :
                    self.jobmem = '3000M'
-                   self.max_materialize = 150
+                   self.max_materialize = 400
 
        if self.jobflavour == None:
            if batchManager.options_.jobflavour != None:

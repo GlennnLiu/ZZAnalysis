@@ -7,7 +7,7 @@
 # chmod u+x ${TMPDIR}/checkout.csh
 # ${TMPDIR}/checkout.csh
 
-############## For CMSSW_13_3_3 (2022 data/MC) or CMSSW_14_1_6 (2023 data/MC)
+############## For CMSSW_14_1_6
 
 #exit when any command fails
 set -e
@@ -69,6 +69,10 @@ sed -i '/#include "RooMinuit.h"/d' KinZfitter/KinZfitter/interface/KinZfitter.h
 git cms-addpkg PhysicsTools/NanoAODTools
 git fetch https://github.com/namapane/cmssw.git NAT-dev2:namapane_NAT-dev2
 git cherry-pick aa9ecbd04d6 98f8692142f
+
+#Fix more memory issues (PR pending)
+git fetch https://github.com/namapane/cmssw.git NanoAODTools_ownership_1416:namapane_NAT-dev3
+git cherry-pick 9fbcc9f349a
 
 if [[ $CMSSW_VERSION == CMSSW_13_3_* ]]; then
  #Pick the fix from #43536 (haddNano.py); in release since 13_0_18, 14_0_2, 14_1_0; it was not backported to 13_3_X
