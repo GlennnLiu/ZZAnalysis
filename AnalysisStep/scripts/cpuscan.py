@@ -10,6 +10,8 @@ import re
 import sys
 from optparse import OptionParser
 
+use_walltime = True
+
 if __name__ == '__main__':
 
     parser = OptionParser()
@@ -34,20 +36,38 @@ if __name__ == '__main__':
     datasets = {}
     for file in files:
         chunkname = os.path.basename(os.path.dirname((os.path.dirname(file))))
-        dataset = re.sub("_Chunk.*$","",chunkname)  
+        dataset = re.sub("_Chunk.*$","",chunkname)
+        cpu = -1
         with open(file, 'r') as f:
             for line in f.readlines():
-                if "Total Remote Usage" in line:
-                    cpustring=line.split()[2]
-                    cpustring=cpustring.replace(",","")
-                    tt=time.strptime(cpustring,"%H:%M:%S")
-                    cpu=tt.tm_hour*3600 + tt.tm_min*60 + tt.tm_sec
-#                    print(chunkname, dataset,  line.split()[2], cpu)
-                    if dataset in datasets:
-                        datasets[dataset] = [min(cpu,datasets[dataset][0]),cpu+datasets[dataset][1],max(cpu,datasets[dataset][2]),datasets[dataset][3]+1]
-                    else:
-                        datasets[dataset] = [cpu, cpu, cpu, 1]
+                if use_walltime:
+                    if "TimeExecute (s)" in line:
+                        cpustring=line.split()[-1]
+                        cpu=int(cpustring)
+                        break
+                else: 
+                    if "Total Remote Usage" in line:
+                        cpustring=line.split()[2]
+                        cpustring=cpustring.replace(",","")
+                        tt=time.strptime(cpustring,"%H:%M:%S")
+                        cpu=tt.tm_hour*3600 + tt.tm_min*60 + tt.tm_sec
+                        # print(chunkname, dataset,  line.split()[2], cpu)
+                        break
+            if cpu != -1 :
+                if dataset in datasets:
+                    datasets[dataset] = [min(cpu,datasets[dataset][0]),cpu+datasets[dataset][1],max(cpu,datasets[dataset][2]),datasets[dataset][3]+1]
+                else:
+                    datasets[dataset] = [cpu, cpu, cpu, 1]
     
-    print("CPU usage: njobs, min/avg/max (s):")
+    print("CPU usage: njobs, min/avg/max (h):")
     for dataset in datasets:
-        print(dataset,  datasets[dataset][3], "{:.1f}/{:.1f}/{:.1f}".format(datasets[dataset][0],datasets[dataset][1]/datasets[dataset][3],datasets[dataset][2]))
+        print(dataset,  datasets[dataset][3], "{:.1f}/{:.1f}/{:.1f}".format(datasets[dataset][0]/3600.,datasets[dataset][1]/3600./datasets[dataset][3],datasets[dataset][2]/3600.))
+    mex = """/m JobFlavours are:
+espresso     = 20 minutes
+microcentury = 1 hour
+longlunch    = 2 hours
+workday      = 8 hours
+tomorrow     = 1 day
+testmatch    = 3 days
+nextweek     = 1 week"""
+    print(mex)
