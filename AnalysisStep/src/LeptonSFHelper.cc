@@ -9,24 +9,23 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
   theDataTag(data_tag),
   h_Ele_ID(nullptr),
   h_Ele_ID_HoleBPix(nullptr),
-  h_Ele_ID_Cracks(nullptr),
   h_Ele_ID_Gap(nullptr),
   h_Ele_Reco_lowPt(nullptr),
   h_Ele_Reco_midPt(nullptr),
   h_Ele_Reco_highPt(nullptr),
   h_Mu_SF(nullptr),
-  h_Mu_Unc(nullptr) {
+  h_Mu_Unc(nullptr),
+  isPostBPix_(theDataTag.find("post_BPix") != std::string::npos) {
 
   TString basePath = Form("$CMSSW_BASE/src/ZZAnalysis/AnalysisStep/data/LeptonEffScaleFactors/");
 
   // -----ELECTRONS
-  TString f_eleID, f_eleID_HoleBPix, f_eleID_Cracks, f_eleReco_lowPt, f_eleReco_midPt, f_eleReco_highPt, f_eleID_Gap; // filenames
+  TString f_eleID, f_eleID_HoleBPix, f_eleReco_lowPt, f_eleReco_midPt, f_eleReco_highPt, f_eleID_Gap; // filenames
   
   if (year == 2016) {
     // 2016 preVFP Electrons
     if(data_tag.find("ULAPV") != std::string::npos) {
       f_eleID          = basePath+"ElectronSF_UL2016preVFP_nogap.root";
-      f_eleID_Cracks   = basePath+"ElectronSF_UL2016preVFP_gap.root";
 
       f_eleReco_highPt = basePath+"egammaEffi_ptAbove20.txt_EGM2D_UL2016preVFP.root";
       f_eleReco_lowPt  = basePath+"egammaEffi_ptBelow20.txt_EGM2D_UL2016preVFP.root";
@@ -34,7 +33,6 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
 
     } else { // 2016 postVFP Electrons
       f_eleID          = basePath+"ElectronSF_UL2016postVFP_nogap.root";
-      f_eleID_Cracks   = basePath+"ElectronSF_UL2016postVFP_gap.root";
 
       f_eleReco_highPt = basePath+"egammaEffi_ptAbove20.txt_EGM2D_UL2016postVFP.root";
       f_eleReco_lowPt  = basePath+"egammaEffi_ptBelow20.txt_EGM2D_UL2016postVFP.root"; 
@@ -42,7 +40,6 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
     }
   } else if (year == 2017) { // 2017 Electrons
     f_eleID            = basePath+"ElectronSF_UL2017_nogap.root";
-    f_eleID_Cracks     = basePath+"ElectronSF_UL2017_gap.root";
 
     f_eleReco_highPt   = basePath+"egammaEffi_ptAbove20.txt_EGM2D_UL2017.root";
     f_eleReco_lowPt    = basePath+"egammaEffi_ptBelow20.txt_EGM2D_UL2017.root";
@@ -50,7 +47,6 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
     
   } else if (year == 2018) { // 2018 Electrons
     f_eleID            = basePath+"ElectronSF_UL2018_nogap.root";
-    f_eleID_Cracks     = basePath+"ElectronSF_UL2018_gap.root";
 
     f_eleReco_highPt   = basePath+"egammaEffi_ptAbove20.txt_EGM2D_UL2018.root";
     f_eleReco_lowPt    = basePath+"egammaEffi_ptBelow20.txt_EGM2D_UL2018.root";
@@ -125,13 +121,6 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
     h_Ele_ID_HoleBPix->SetDirectory(nullptr); // This is required to detach the clone from the file
     root_file->Close();
    }
-  
-  if (f_eleID_Cracks != "") {
-    root_file = TFile::Open(f_eleID_Cracks.Data(),"READ");
-    h_Ele_ID_Cracks = (TH2F*) root_file->Get("EGamma_SF2D")->Clone("h_Ele_ID_Cracks");
-    h_Ele_ID_Cracks->SetDirectory(nullptr);
-    root_file->Close();
-  }
 
   if (f_eleID_Gap != "") { // to handle Gap regions [-1.556, -1.444], [1.444, 1.556] in 2023 and 2024 
   TFile* root_file = TFile::Open(f_eleID_Gap.Data(), "READ");
@@ -214,6 +203,11 @@ LeptonSFHelper::~LeptonSFHelper() {}
 
 pair<float, float> LeptonSFHelper::getSF(int flav, float pt, float eta, float SCeta, float phi, bool isCrack) const
 {
+
+  if (isCrack) {
+        throw std::runtime_error("LeptonSFHelper::getSF - Run2 Crack electrons are not supported!");
+    }
+
    float RecoSF = 1.0;
    float SelSF = 1.0;
    float SF = 1.0;
@@ -221,8 +215,6 @@ pair<float, float> LeptonSFHelper::getSF(int flav, float pt, float eta, float SC
    float RecoSF_Unc = 0.0;
    float SelSF_Unc = 0.0;
    float SFError = 0.0;
-   
-   //   cout << " flav = " << flav << " pt = " << pt << " eta = " << eta << " SCeta = " << SCeta << " isCrack = " << isCrack << endl;
    
    // Electron reconstruction SFs
    if(abs(flav) == 11) {
@@ -256,14 +248,11 @@ pair<float, float> LeptonSFHelper::getSF(int flav, float pt, float eta, float SC
                     h_Ele_ID_Gap->FindFixBin(SCeta, std::min(pt,499.f)));
 
       // 2023postBPix Gap region: double the uncertainty
-      if (theDataTag.find("post_BPix") != std::string::npos) {
+      if (isPostBPix_) {
         SelSF_Unc *= 2.0;
       }
      }
-     else if (isCrack && h_Ele_ID_Cracks!=nullptr) {
-       SelSF     = h_Ele_ID_Cracks->GetBinContent(h_Ele_ID_Cracks->FindFixBin(SCeta, std::min(pt,499.f)));
-       SelSF_Unc = h_Ele_ID_Cracks->GetBinError  (h_Ele_ID_Cracks->FindFixBin(SCeta, std::min(pt,499.f)));
-     }
+
      else if (h_Ele_ID_HoleBPix!=nullptr && (SCeta > -1.5 && SCeta < 0.0 && phi > -1.2 && phi < -0.8)) { //BPix hole region
        SelSF     = h_Ele_ID_HoleBPix->GetBinContent(h_Ele_ID_HoleBPix->FindFixBin(SCeta, std::min(pt,499.f)));
        SelSF_Unc = h_Ele_ID_HoleBPix->GetBinError  (h_Ele_ID_HoleBPix->FindFixBin(SCeta, std::min(pt,499.f)));
