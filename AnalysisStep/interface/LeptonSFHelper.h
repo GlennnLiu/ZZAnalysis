@@ -27,10 +27,12 @@ class LeptonSFHelper
    
  private:
   int theYear;
+  std::string theDataTag;
  
   TH2F *h_Ele_ID;
   TH2F *h_Ele_ID_HoleBPix;
   TH2F *h_Ele_ID_Cracks;
+  TH2F *h_Ele_ID_Gap;
   TH2F *h_Ele_Reco_lowPt;
   TH2F *h_Ele_Reco_midPt;
   TH2F *h_Ele_Reco_highPt;
