@@ -36,7 +36,7 @@ PD = getConf("PD", "")
 XSEC = getConf("XSEC", 1.)
 SYNCMODE = getConf("SYNCMODE", False) # fake smearing in Run2 correction modules, for synchronization purposes. No longer needed for Run3 modules.
 runMELA = getConf("runMELA", True)
-bestCandByMELA = getConf("bestCandByMELA", False) # requires also runMELA=True
+bestCandByMELA = getConf("bestCandByMELA", True) # requires also runMELA=True
 TRIGPASSTHROUGH = getConf("TRIGPASSTHROUGH", False) # Do not filter events that do not pass triggers (HLT_passZZ4l records if they did)
 PROCESS_CR = getConf("PROCESS_CR", False) # fill control regions
 PROCESS_ZL = getConf("PROCESS_ZL", False) # fill ZL control region
@@ -284,6 +284,7 @@ if IsMC:
                                                'puWeight*',
                                                'overallEventWeight',
                                                'Pileup_nTrueInt',
+                                               'HTXS_*',
                                                'GenJet*',
                                                *(['ggH_NNLOPS_Weight'] if APPLY_QCD_GGF_UNCERT else []),
                                                ],
@@ -365,6 +366,7 @@ if IsMC:
                               'keep FidZ*',
                               'keep passedFiducial',
                               'keep LHEPart*',
+                              'keep HTXS_*',
                               'keep LHEMela*'
                               ])
 
