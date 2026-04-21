@@ -284,6 +284,7 @@ if IsMC:
                                                'puWeight*',
                                                'overallEventWeight',
                                                'Pileup_nTrueInt',
+                                               'HTXS_*',
                                                'GenJet*',
                                                *(['ggH_NNLOPS_Weight'] if APPLY_QCD_GGF_UNCERT else []),
                                                ],
@@ -365,6 +366,7 @@ if IsMC:
                               'keep FidZ*',
                               'keep passedFiducial',
                               'keep LHEPart*',
+                              'keep HTXS_*',
                               'keep LHEMela*'
                               ])
 

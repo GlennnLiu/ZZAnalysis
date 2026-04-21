@@ -137,6 +137,8 @@ class ZZFiller(Module):
         self.out.branch("ZZCand_Z2mass", "F", lenVar="nZZCand", title="Z2 mass")
         self.out.branch("ZZCand_Z2flav", "I", lenVar="nZZCand", title="Product of the pdgIds of the 2 Z2 daughters")
         self.out.branch("ZZCand_KD", "F", lenVar="nZZCand", title="Kinematic discriminant for the choice of best candidate", limitedPrecision=12)
+        self.out.branch("ZZCand_P_GG_SIG_ghg2_1_ghz1_1_JHUGen", "F", lenVar="nZZCand", title="p_GG_SIG_ghg2_1_ghz1_1_JHUGen probability for KD", limitedPrecision=12)
+        self.out.branch("ZZCand_P_QQB_BKG_MCFM", "F", lenVar="nZZCand", title="p_QQB_BKG_MCFM probability for Kinematic discriminant", limitedPrecision=12)
         self.out.branch("ZZCand_Z2sumpt", "F", lenVar="nZZCand", title="sum of Z2 daughter pts (used in the choice of best candidate)", limitedPrecision=10)
         # Note: lepton indices are numbered for leps=list(electrons)+list(muons) and run up to nlep=len(leps);
         # no special ordering of l1, l2 is applied
@@ -419,6 +421,8 @@ class ZZFiller(Module):
         ZZCand_Z2l1Idx = [-1]*len(ZZs)
         ZZCand_Z2l2Idx = [-1]*len(ZZs)
         ZZCand_KD = [0.]*len(ZZs)
+        ZZCand_p_GG_SIG_ghg2_1_ghz1_1_JHUGen = [0.]*len(ZZs)
+        ZZCand_p_QQB_BKG_MCFM = [0.]*len(ZZs)
         ZZCand_Z2sumpt = [0.]*len(ZZs)
 
         for iZZ, ZZ in enumerate(ZZs) :
@@ -437,6 +441,8 @@ class ZZFiller(Module):
             ZZCand_Z2l1Idx[iZZ] = ZZ.Z2.l1Idx
             ZZCand_Z2l2Idx[iZZ] = ZZ.Z2.l2Idx
             ZZCand_KD[iZZ] = ZZ.KD
+            ZZCand_p_GG_SIG_ghg2_1_ghz1_1_JHUGen[iZZ] = ZZ.p_GG_SIG_ghg2_1_ghz1_1_JHUGen
+            ZZCand_p_QQB_BKG_MCFM[iZZ] = ZZ.p_QQB_BKG_MCFM
             ZZCand_Z2sumpt[iZZ] = ZZ.Z2.sumpt()
 
         self.out.fillBranch("ZZCand_mass", ZZCand_mass)
@@ -450,6 +456,8 @@ class ZZFiller(Module):
         self.out.fillBranch("ZZCand_Z2mass", ZZCand_Z2mass)
         self.out.fillBranch("ZZCand_Z2flav", ZZCand_Z2flav)
         self.out.fillBranch("ZZCand_KD", ZZCand_KD)
+        self.out.fillBranch("ZZCand_P_GG_SIG_ghg2_1_ghz1_1_JHUGen", ZZCand_p_GG_SIG_ghg2_1_ghz1_1_JHUGen)
+        self.out.fillBranch("ZZCand_P_QQB_BKG_MCFM", ZZCand_p_QQB_BKG_MCFM)
         self.out.fillBranch("ZZCand_Z2sumpt", ZZCand_Z2sumpt)
         self.out.fillBranch("ZZCand_Z1l1Idx", ZZCand_Z1l1Idx)
         self.out.fillBranch("ZZCand_Z1l2Idx", ZZCand_Z1l2Idx)
