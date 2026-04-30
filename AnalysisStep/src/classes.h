@@ -12,3 +12,4 @@ pat::UserHolder<std::vector<edm::Ptr<pat::PFParticle> > > dummy2;
 
 #include <JHUGenMELA/MELA/interface/Mela.h>
 #include <JHUGenMELA/MELA/interface/TUtil.hh>
+#include <ZZAnalysis/AnalysisStep/interface/Category.h>
