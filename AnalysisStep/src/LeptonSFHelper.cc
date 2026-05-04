@@ -71,8 +71,6 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
    
   } else if (year == 2023) {
     if(data_tag.find("pre_BPix") != std::string::npos) { // 2023 preBPix
-      //ID - for now using 2022 postEE
-      std::cout<<"WARNING 2023 preBPix Electron ID SFs - preliminary version"<<std::endl;
       f_eleID          = basePath+"SF2023eleID_preBPix.root"; // final, taken from egammaEffi.txt_EGM2D.root in https://mmanoni.web.cern.ch/HZZ_EleIDSF_2023_v2/2023preBPix/hzzSummer18UL/2023preBPixResults_sipdzdxy_el3charge_cut60/passingMVASummer18ULwpHZZ_sipdzdxy/
       f_eleID_Gap      = basePath+"SF2023eleID_Gap_preBPix.root"; //final, taken from egammaEffi.txt_EGM2D.root in https://mmanoni.web.cern.ch/HZZ_EleIDSF_GapRegion/ 
 
@@ -82,8 +80,6 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
       f_eleReco_lowPt  = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/SF_prompt_2023_19012024/lowpT/Run3_2023C_New_lowpT_mergeEta_Added_symmetrizationsystEta_29052024/passingRECO/egammaEffi.txt_EGM2D.root"; //md5sum: c957e0c3f7a1f77bd5ce76e2088fd435 
 
     } else { // 2023 postBPix
-      //ID - for now using 2022 postEE
-      std::cout<<"WARNING 2023 postBPix Electron ID SFs - preliminary version "<<std::endl;
       f_eleID          = basePath+"SF2023eleID_postBPix.root"; // (Hole excluded) final, taken from egammaEffi.txt_EGM2D.root in https://mmanoni.web.cern.ch/HZZ_EleIDSF_2023_v2/2023postBPix_NO_HOLE_REGION/
       f_eleID_HoleBPix = basePath+"SF2023eleID_postBPix_Hole.root"; // (Hole region only) final, taken from egammaEffi.txt_EGM2D.root in https://mmanoni.web.cern.ch/HZZ_EleIDSF_2023_v2/2023postBPix_HOLE_REGION/
       f_eleID_Gap      = basePath+"SF2023eleID_Gap_preBPix.root"; //final, taken from egammaEffi.txt_EGM2D.root in https://mmanoni.web.cern.ch/HZZ_EleIDSF_GapRegion/
@@ -95,8 +91,10 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
       f_eleReco_lowPt  = "/eos/cms/store/group/phys_egamma/validation/web/Run3_egm_reco_SF/SF_prompt_2023_19012024/lowpT/Run3_2023D_New_lowpT_mergeEta_Added_symmetrizationsystEta_29052024/passingRECO/egammaEffi.txt_EGM2D.root"; //md5sum: 50dae0da2428c0fd92548bcfe968cb92
     }
 
-  } else if (year == 2024) {
-      std::cout<<"WARNING 2024 Electron ID SFs - preliminary version"<<std::endl;
+  } else if (year >= 2024) {
+    if (year>=2025) {
+      std::cout<<"WARNING 2025 ele SFs not yet available, using 2024 ones"<<std::endl;
+    }
       f_eleID          = basePath+"SF2024eleID.root"; // final , taken from: https://mmanoni.web.cern.ch/HZZ_EleIDSF_2024_v1/hzzWinter22/2024Results/passingMVAhzzWinter22/
       f_eleID_Gap      = basePath+"SF2024eleID_Gap.root"; //final , taken from: https://mmanoni.web.cern.ch/HZZ_EleIDSF_GapRegion/
       
@@ -150,6 +148,11 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
   // -----MUONS
   TString f_mu;
 
+  bool MUON_ID_BYMVA = false;
+  if (data_tag.find("MUON_ID_BYMVA") != std::string::npos) {
+    MUON_ID_BYMVA = true;
+  }
+
   if (year==2016) { // 2016 Muons
     f_mu = basePath+"final_HZZ_SF_2016UL_mupogsysts_newLoose.root";
   } else if (year==2017) { // 2017 Muons
@@ -158,29 +161,39 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
     f_mu = basePath+"final_HZZ_SF_2018UL_mupogsysts_newLoose.root";
   } else if (year==2022) { // 2022 Muons
     if(data_tag.find("pre_EE") != std::string::npos) { // 2022 Muons preEE
-      if (data_tag.find("MUON_ID_BYMVA") != std::string::npos) {
-	f_mu = basePath+"final_HZZ_SF_Run3_2022_mupogsysts_newLoose_abseta3_fix_BCD_RMS_lowPtMVA.root"; // from /afs/cern.ch/user/y/yujil/public/SF2022PreEEMVA/final_HZZ_SF_Run3_2022_mupogsysts_newLoose_abseta3_fix_BCD_RMS.root (md5sum: b8b3f35c3bbbda3c006b92c0c316d69e)
+      if (MUON_ID_BYMVA) {
+	f_mu = basePath+"Muon_LowPtMVA/final_HZZ_SF_Run3_2022_mupogsysts_newLoose_abseta3_fix_BCD_RMS.root"; // from /afs/cern.ch/user/y/yujil/public/SF2022PreEEMVA (md5sum: b8b3f35c3bbbda3c006b92c0c316d69e)
       } else {
 	f_mu = basePath+"final_HZZ_SF_Run3_2022_mupogsysts_newLoose_abseta3_fix_BCD_RMS.root"; // from /afs/cern.ch/user/y/yujil/public/SF2022/final_HZZ_SF_Run3_2022_mupogsysts_newLoose_abseta3_fix_BCD_RMS.root (md5sum: 99c9a42be5dadfe6d9c2659089a00b0e)
       }
     } else { // 2022 Muons postEE
-      if (data_tag.find("MUON_ID_BYMVA") != std::string::npos) { 
-        f_mu = basePath+"final_HZZ_SF_Run3_2022_mupogsysts_newLoose_abseta3_fix_EFG_RMS_lowPtMVA.root"; // from /afs/cern.ch/user/y/yujil/public/SF2022EEMVA/final_HZZ_SF_Run3_2022_mupogsysts_newLoose_abseta3_fix_EFG_RMS.root (md5sum: 7825c9ee5086a936965e04407b73598d)
+      if (MUON_ID_BYMVA) { 
+        f_mu = basePath+"Muon_LowPtMVA/final_HZZ_SF_Run3_2022_mupogsysts_newLoose_abseta3_fix_EFG_RMS.root"; // from /afs/cern.ch/user/y/yujil/public/SF2022EEMVA/ (md5sum: 7825c9ee5086a936965e04407b73598d)
       } else {
         f_mu = basePath+"final_HZZ_SF_Run3_2022_mupogsysts_newLoose_abseta3_fix_EFG_RMS.root"; // from /afs/cern.ch/user/y/yujil/public/SF2022/final_HZZ_SF_Run3_2022_mupogsysts_newLoose_abseta3_fix_EFG_RMS.root (md5sum: 5439d35ff138bb65f0fe3aca0461923b)
       }
     }
   } else if (year==2023) { // 2023 Muons
     // 2023 Muons preBPix/postBPix - root files taken from /afs/cern.ch/user/y/yujil/public/SF2023/
-    if(data_tag.find("pre_BPix") != std::string::npos) { 
-      f_mu = basePath+"final_HZZ_SF_2023C_RMS_mupogsysts.root"; // md5sum: e66052503a1f6a02caec1edd6c16097b
-    } else {
-      f_mu = basePath+"final_HZZ_SF_2023D_RMS_mupogsysts.root"; // md5sum: 20a4b2522bc53c2260a94fc35f69f1d9
+    if(data_tag.find("pre_BPix") != std::string::npos) {
+      if (MUON_ID_BYMVA) { 
+        throw std::runtime_error("LeptonSFHelper::getSF - MUON_ID_BYMVA not yet available for 2023!");
+      } else {
+	f_mu = basePath+"final_HZZ_SF_2023C_RMS_mupogsysts.root"; // md5sum: e66052503a1f6a02caec1edd6c16097b
+      }
+    } else { // post_BPix
+      if (MUON_ID_BYMVA) { 
+        throw std::runtime_error("LeptonSFHelper::getSF - MUON_ID_BYMVA not yet available for 2023!");
+      } else {
+	f_mu = basePath+"final_HZZ_SF_2023D_RMS_mupogsysts.root"; // md5sum: 20a4b2522bc53c2260a94fc35f69f1d9
+      }
     }
-  } else if (year==2024 ) {
-    std::cout<<"WARNING 2024 muon ID SFs - preliminary version"<<std::endl;
-    if (data_tag.find("MUON_ID_BYMVA") != std::string::npos) {
-      f_mu = basePath+"prelimiary_HZZ_SF_2024_RMS_mupogsystsC_lowPtMVA.root"; // from /afs/cern.ch/user/y/yujil/public/SF2024LowpTMVA/HZZ_HZZ_SF_2024_RMS_mupogsystsC.root (md5sum: 49213f9776c22a58c14267dbd4d8aaac)
+  } else if (year>=2024 ) {
+    if (year>=2025) {
+      std::cout<<"WARNING 2025 Muon ID SFs not yet available, using 2024 ones"<<std::endl;
+    }
+    if (MUON_ID_BYMVA) {
+      f_mu = basePath+"Muon_LowPtMVA/HZZ_HZZ_SF_2024_RMS_mupogsystsC.root"; // from /afs/cern.ch/user/y/yujil/public/SF2024LowpTMVA/HZZ_HZZ_SF_2024_RMS_mupogsystsC.root (md5sum: 49213f9776c22a58c14267dbd4d8aaac)
     } else {
       f_mu = basePath+"HZZ_HZZ_SF_2024_RMS_mupogsystsC.root"; // from  /afs/cern.ch/user/y/yujil/public/Tahir/SF2024/HZZ_HZZ_SF_2024_RMS_mupogsystsC.root (md5sum: 3b3522770e1c71e213285e261ec2b980)
     }
@@ -196,7 +209,14 @@ LeptonSFHelper::LeptonSFHelper(int year, std::string const &data_tag) :
   h_Mu_Unc->SetDirectory(nullptr);
   root_file->Close();
 
-  cout << "[LeptonSFHelper] SF maps opened from root files for " << year << " " << data_tag << endl;
+  cout << "[LeptonSFHelper] SF maps opened from root files for " << year << " " << data_tag << " : " << endl;
+  cout << "  e ID:         " << f_eleID << endl 
+       << "  e ID gap:     " << f_eleID_Gap << endl
+       << "  e ID holeBpix:" << f_eleID_HoleBPix << endl
+       << "  e reco lowPT: " << f_eleReco_lowPt << endl
+       << "  e reco midPT: " << f_eleReco_midPt << endl
+       << "  e reco hiPT:  " << f_eleReco_highPt << endl;
+  cout << "  mu reco:      " << f_mu << endl;
 }
 
 LeptonSFHelper::~LeptonSFHelper() {}
