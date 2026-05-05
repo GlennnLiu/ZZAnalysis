@@ -143,11 +143,11 @@ else :
             postPresel = lambda evt : (evt.nMuon+evt.nElectron>=4)
     else : # Set a preselection for the postprocessor
         if FILTER_EVENTS == 'Z' :
-            preselection = "(nMuon>=2 || nElectron>=2) && (Sum$(Muon_pt > {muPt}-2.)>=2 || Sum$(Electron_pt>{elePt}-2.)>=2)".format(**cuts)
+            preselection = "(nMuon>=2 || nElectron>=2)"
         elif PROCESS_ZL or FILTER_EVENTS == '3L_20_10' :
-            preselection = "nMuon+nElectron >= 3 && Sum$(Muon_pt > {muPt}-2.)+Sum$(Electron_pt>{elePt}-2.)>= 3".format(**cuts)
+            preselection = "nMuon+nElectron >= 3"
         else :
-            preselection = "nMuon+nElectron >= 4 && Sum$(Muon_pt > {muPt}-2.)+Sum$(Electron_pt>{elePt}-2.)>= 4".format(**cuts)
+            preselection = "nMuon+nElectron >= 4"
 
 ### Input file specification
 store = getConf("store","") # "/eos/cms/" for files available on eos; "root://cms-xrd-global.cern.ch/" for remote files
@@ -176,9 +176,9 @@ if not IsMC :
     elif LEPTON_SETUP == 2024 :
         jsonFile = localPath+"test/prod/Cert_Collisions2024_378981_386951_Golden.json"
     elif LEPTON_SETUP == 2025 :
-        jsonFile = localPath+"test/prod/Cert_Collisions2025_391658_393446_Golden.json"
+        jsonFile = localPath+"test/prod/Cert_Collisions2025_391658_398903_Golden.json"
     else:        
-        exit(1) #2016-17 to be implemented
+        exit(1) #2016-17 pre-UL not supported
 
 ### Modules to be run
 

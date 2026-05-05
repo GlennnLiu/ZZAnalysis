@@ -110,7 +110,7 @@ class MELAProbHelper():
                 if prob["addPmavjj"]:
                     self.out.branch(prob["branchname"]+"_mavjj", "F", lenVar=lenVar_, title="User-defined mavjj probability")
                 if prob["addPmavjj_true"]:
-                    self.out.branch(prob["branchname"]+"_mvajj_true", "F", lenVar=lenVar_, title="User-defined mvajj_true probability")
+                    self.out.branch(prob["branchname"]+"_mavjj_true", "F", lenVar=lenVar_, title="User-defined mavjj_true probability")
     def fillProbs(self, candDaughters, candAssociated, candMothers): 
         if len(self.sortedSettings) == 0: return True
         else: 
@@ -157,7 +157,7 @@ class MELAProbHelper():
                 if MELA_addPmavjj:
                     probVec_mavjj = [-999.]*len(candDaughters)
                 if MELA_addPmavjj_true:
-                    probVec_mvajj_true = [-999.]*len(candDaughters)
+                    probVec_mavjj_true = [-999.]*len(candDaughters)
 
                 # Compute prob for each candidate
                 for iCand, aCand in enumerate(candDaughters):
@@ -201,7 +201,7 @@ class MELAProbHelper():
                     if MELA_addPmavjj:
                         probVec_mavjj[iCand] = self.MELA.computeDijetConvBW(False)
                     if MELA_addPmavjj_true:
-                        probVec_mvajj_true[iCand] = self.MELA.computeDijetConvBW(True)
+                        probVec_mavjj_true[iCand] = self.MELA.computeDijetConvBW(True)
 
                     # Handle divideP
                     if self.ModuleContext == "LHE": 
@@ -229,7 +229,7 @@ class MELAProbHelper():
                     if MELA_addPmavjj:
                         probVec_mavjj = probVec_mavjj[0]
                     if MELA_addPmavjj_true:
-                        probVec_mvajj_true = probVec_mvajj_true[0]
+                        probVec_mavjj_true = probVec_mavjj_true[0]
 
                 self.out.fillBranch(MELA_branchname, probVec)
 
@@ -247,7 +247,7 @@ class MELAProbHelper():
                 if MELA_addPmavjj:
                     self.out.fillBranch(MELA_branchname+"_mavjj", probVec_mavjj)
                 if MELA_addPmavjj_true:
-                    self.out.fillBranch(MELA_branchname+"_mvajj_true", probVec_mvajj_true)
+                    self.out.fillBranch(MELA_branchname+"_mavjj_true", probVec_mavjj_true)
                 
         return True
         
