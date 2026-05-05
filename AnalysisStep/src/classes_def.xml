@@ -8,4 +8,5 @@
   <class name="TUtil"/>
   <class name="WeightCalculatorFromHistogram"/>
   <class name="Dataset"/>
+  <function name="categoryMor18"/>
 </lcgdict>

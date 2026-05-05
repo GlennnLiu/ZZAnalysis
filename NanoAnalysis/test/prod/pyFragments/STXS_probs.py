@@ -107,3 +107,10 @@ setConf("probabilities", {
     "computeprop": False,
     "useconstant": True # This argument affects the normalization, and should generally be set to true for reconstructed events, false forgenerator level events. [from https://spin.pha.jhu.edu/Manual.pdf]
     }, append=True)
+
+
+# Add categoryMor18, as a reference
+from ZZAnalysis.NanoAnalysis.ZZCategorization import *
+def customizeForCategorization_(p) :
+    p.modules.extend([ZZCategorization(False)])
+setConf("customizations", customizeForCategorization_, append=True) 
