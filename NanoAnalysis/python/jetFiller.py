@@ -3,7 +3,6 @@
 # Cleaning is based on the fraction of jet pt that is carried by all leptons passing full sel
 # and their FSR photons in dR < 0.4. The jet is masked if the fraction is > 0.5.
 # TODO:
-# - Add b-tagging info (?)
 # - take into account jet veto maps for nCleanedJetsPt30, JetLeadingIdx, etc?
 ###
 
@@ -28,7 +27,19 @@ class jetFiller(Module):
         self.out.branch("nCleanedJetsPt30", "B", title="number of cleaned jets above 30 GeV")
         self.out.branch("nCleanedJetsPt30_jesUp", "B", title="number of cleaned jets, up JES variation")
         self.out.branch("nCleanedJetsPt30_jesDn", "B", title="number of cleaned jets, down JES variation")
+        self.out.branch("nCleanedJetsPt30BTagged", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement")
+        self.out.branch("nCleanedJetsPt30BTagged_bTagSF", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF applied")
+        self.out.branch("nCleanedJetsPt30BTagged_bTagSFUp", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF up variation applied")
+        self.out.branch("nCleanedJetsPt30BTagged_bTagSFDn", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF down variation applied")
         # up/down variations...
+
+    def getJetAttr(self, jet, name, default=False):
+        try:
+            return getattr(jet, name)
+        except RuntimeError as err:
+            if "Unknown branch Jet_%s" % name in str(err):
+                return default
+            raise
 
     def analyze(self, event):
         jets = Collection(event, 'Jet')
@@ -45,13 +56,17 @@ class jetFiller(Module):
         subleadingJetIdx =-1
         leadingJetPt = 0.
         subleadingJetPt = 0.
-        nCleanedJetsPt30=0
-        nCleanedJetsPt30_jesDn=0
-        nCleanedJetsPt30_jesUp=0
+        nCleanedJetsPt30 = 0
+        nCleanedJetsPt30_jesDn = 0
+        nCleanedJetsPt30_jesUp = 0
+        nCleanedJetsPt30BTagged = 0
+        nCleanedJetsPt30BTagged_bTagSF = 0
+        nCleanedJetsPt30BTagged_bTagSFUp = 0
+        nCleanedJetsPt30BTagged_bTagSFDn = 0
 
         # According to the analysis recipe at https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsZZ4lRunIILegacy#Jets, "[jets] must be cleaned with a DeltaR>0.4 cut wrt all tight leptons in the event passing the SIP and isolation cut computed after FSR correction, as well as with all FSR collected photons attached to these leptons."
         # Note: the current implementation on miniAODs (https://github.com/CJLST/ZZAnalysis/blob/Run2UL_22_nano/AnalysisStep/plugins/JetsWithLeptonsRemover.cc) probably does something different than this. To be reviewed.
-        for ij, jet in enumerate(jets) :            
+        for ij, jet in enumerate(jets) :
             for lep in leps :
                 if not lep.ZZFullSel : continue
                 if deltaR(lep.eta, lep.phi, jet.eta, jet.phi) < self.dRMin :
@@ -61,7 +76,7 @@ class jetFiller(Module):
                     if deltaR(fsr.eta, fsr.phi, jet.eta, jet.phi) < self.dRMin :
                         jet_lepPtF[ij] += fsr.pt
             jet_lepPtF[ij] /= jet.pt
-            if jet_lepPtF[ij] > self.EFthreshold :                
+            if jet_lepPtF[ij] > self.EFthreshold :
                 mask[ij] = True
             else :
                 # Consider only jets passing  tight ID and tightLepVeto ID, cf. https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13p6TeV#nanoAOD_Flags
@@ -80,6 +95,19 @@ class jetFiller(Module):
                     if jet.pt > pt_cut:
                         nCleanedJetsPt30 += 1
                         #FIXME: add jesUp, jesDn
+                        isBtagged = self.getJetAttr(jet, "isBtagged", False)
+                        isBtaggedSF = self.getJetAttr(jet, "isBtaggedwithSF", isBtagged)
+                        isBtaggedSFUp = self.getJetAttr(jet, "isBtaggedwithSF_up_correlated", isBtaggedSF)
+                        isBtaggedSFDn = self.getJetAttr(jet, "isBtaggedwithSF_down_correlated", isBtaggedSF)
+
+                        if isBtagged:
+                            nCleanedJetsPt30BTagged += 1
+                        if isBtaggedSF:
+                            nCleanedJetsPt30BTagged_bTagSF += 1
+                        if isBtaggedSFUp:
+                            nCleanedJetsPt30BTagged_bTagSFUp += 1
+                        if isBtaggedSFDn:
+                            nCleanedJetsPt30BTagged_bTagSFDn += 1
                 
                         # IDX of Leading/subleading jets passing all selections (including pT).
                         # Note: we cannot rely on the fact that the jet collection is sorted by pt since JES can change this.  
@@ -99,5 +127,9 @@ class jetFiller(Module):
         self.out.fillBranch("nCleanedJetsPt30", nCleanedJetsPt30)
         self.out.fillBranch("nCleanedJetsPt30_jesUp", nCleanedJetsPt30_jesUp)
         self.out.fillBranch("nCleanedJetsPt30_jesDn", nCleanedJetsPt30_jesDn)
+        self.out.fillBranch("nCleanedJetsPt30BTagged", nCleanedJetsPt30BTagged)
+        self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSF", nCleanedJetsPt30BTagged_bTagSF)
+        self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSFUp", nCleanedJetsPt30BTagged_bTagSFUp)
+        self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSFDn", nCleanedJetsPt30BTagged_bTagSFDn)
         
         return True
