@@ -1,4 +1,7 @@
 from ZZAnalysis.NanoAnalysis.tools import setConf
+
+setConf("bestCandByMELA",True)
+
 setConf("probabilities", {
     "Name": "m4l_BKG",
     "Process": "bkgZZ", 
