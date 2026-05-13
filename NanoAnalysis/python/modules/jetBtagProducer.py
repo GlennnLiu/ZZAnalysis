@@ -25,17 +25,16 @@ def getJetBtagProducer(era, tag, is_mc, WP="M"):
         tagger_name = "btagPNetB"
         if "pre_BPix" in tag:
             json_SF = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2023_Summer23/btagging.json.gz"
-            eff_year = "2023"
+            json_eff = os.path.join(data_dir, "btag_2022EE.json.gz") ## FIXME
         else:
             json_SF = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2023_Summer23BPix/btagging.json.gz"
-            eff_year = "2023BPix"
-        json_eff = os.path.join(data_dir, "btag_%s.json.gz" % eff_year)
+            json_eff = os.path.join(data_dir, "btag_2022EE.json.gz") ## FIXME
 
     elif era == 2024:
         tagger = "UParTAK4"
         tagger_name = "btagUParTAK4B"
         json_SF = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2024_Summer24/btagging.json.gz"
-        json_eff = os.path.join(data_dir, "btag_2024.json.gz")
+        json_eff = os.path.join(data_dir, "btag_2022EE.json.gz") ## FIXME
 
     elif era >= 2016 and era <= 2018:
         # FIXME: official Run 2 SF JSONs and local efficiencies should be wired when available.
