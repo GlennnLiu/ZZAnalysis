@@ -48,7 +48,7 @@ class ZZFiller(Module):
 
         self.addSSCR = processCR
         self.addOSCR = processCR
-        self.addSIPCR = processCR
+        self.addSIPCR = False # Switched off for the time being
         self.addZLCR = addZL
 
         self.DATA_TAG = data_tag
@@ -165,10 +165,11 @@ class ZZFiller(Module):
             self.out.branch("ZLLCand_Z2l1Idx", "S", lenVar="nZLLCand")
             self.out.branch("ZLLCand_Z2l2Idx", "S", lenVar="nZLLCand")
             self.out.branch("ZLLCand_KD", "F", lenVar="nZLLCand", limitedPrecision=12)
-            self.out.branch("ZLLbestSSIdx", "S", title="best candidate for the SS CR")
-            self.out.branch("ZLLbest2P2FIdx", "S", title="best candidate for the 2P2F CR")
-            self.out.branch("ZLLbest3P1FIdx", "S", title="best candidate for the 3P1F CR")
-            self.out.branch("ZLLbestSIPCRIdx", "S", title="best candidate for the SIP CR")
+            if self.addSSCR: self.out.branch("ZLLbestSSIdx", "S", title="best candidate for the SS CR")
+            if self.addOSCR:
+                self.out.branch("ZLLbest2P2FIdx", "S", title="best candidate for the 2P2F CR")
+                self.out.branch("ZLLbest3P1FIdx", "S", title="best candidate for the 3P1F CR")
+            if self.addSIPCR: self.out.branch("ZLLbestSIPCRIdx", "S", title="best candidate for the SIP CR")
 
         if self.addZLCR :            
             self.out.branch("ZLCand_lepIdx", "S", title="Index of extra lep for the ZL CR")
