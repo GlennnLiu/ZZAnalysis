@@ -9,22 +9,24 @@ def getMuonScaleRes(era, tag, is_mc, overwritePt=True) :
 
     if era == 2022:
         if "pre_EE" in tag :
-            fname = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/MUO/2022_Summer22/muon_scalesmearing.json.gz" # md5sum: 415165703d2ca3724f1cd0f97bdf31fe
+            fname = "/cvmfs/cms-griddata.cern.ch/cat/metadata/MUO/Run3-22CDSep23-Summer22-NanoAODv12/2026-04-28/muon_scalesmearing.json.gz"
 
         else :
-            fname = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/MUO/2022_Summer22EE/muon_scalesmearing.json.gz" # md5sum: 8cb780c7e1b4507263a9edecf9b38fc2
+            fname = "/cvmfs/cms-griddata.cern.ch/cat/metadata/MUO/Run3-22EFGSep23-Summer22EE-NanoAODv12/2026-04-28/muon_scalesmearing.json.gz" 
 
     elif era == 2023:
         if "pre_BPix" in tag:
-            fname = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/MUO/2023_Summer23/muon_scalesmearing.json.gz" # md5sum: e7612461ea9416447ae9fb4a038d82cd
+            fname = "/cvmfs/cms-griddata.cern.ch/cat/metadata/MUO/Run3-23CSep23-Summer23-NanoAODv12/2026-04-28/muon_scalesmearing.json.gz"
 
         else:
-            fname = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/MUO/2023_Summer23BPix/muon_scalesmearing.json.gz" # md5sum: 50684fe80408116aa9f59c308433b8d6
+            fname = "/cvmfs/cms-griddata.cern.ch/cat/metadata/MUO/Run3-23DSep23-Summer23BPix-NanoAODv12/2026-04-28/muon_scalesmearing.json.gz"
 
-    elif era >= 2024:
-        print(f"WARNING {era} muonScaleRes - preliminary, unreleased version")
-        fname = f"{os.environ['CMSSW_BASE']}/src/ZZAnalysis/NanoAnalysis/data/MuonScale/2024_muon_scalesmearing_preliminary.json.gz"
+    elif era == 2024:
+        fname = "/cvmfs/cms-griddata.cern.ch/cat/metadata/MUO/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-04-28/muon_scalesmearing.json.gz"
 
+    elif era == 2025:
+        fname = "/cvmfs/cms-griddata.cern.ch/cat/metadata/MUO/Run3-25Prompt-Summer24-NanoAODv15/2026-04-28/muon_scalesmearing.json.gz"
+        
     print("***muonScaleRes: era:", era, "tag:", tag, "is MC:", is_mc, "overwritePt:", overwritePt, "json:", fname)
     return muonScaleRes(fname, is_mc, overwritePt, minPt=3.)
 
