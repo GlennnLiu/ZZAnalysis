@@ -52,7 +52,9 @@ APPLY_K_NNLOQCD_ZZGG = getConf("APPLY_K_NNLOQCD_ZZGG", 0)
 APPLY_K_NNLOQCD_ZZQQB = getConf("APPLY_K_NNLOQCD_ZZQQB", False)
 APPLY_K_NNLOEW_ZZQQB  = getConf("APPLY_K_NNLOEW_ZZQQB", False)
 # Add separate tree with gen info for all events
-ADD_ALLEVENTS = getConf("ADD_ALLEVENTS", False)
+
+IsSIGNAL = getConf("IsSIGNAL", False)
+ADD_ALLEVENTS = getConf("ADD_ALLEVENTS", IsSIGNAL) # if true, add a separate tree with gen-level variables for all events (not just those passing the candidate selection); by default, this is done for signal samples
 ADD_LHE_PROB = getConf("ADD_LHE_PROB", ADD_ALLEVENTS) # Add LHE angles and probabilities. This is in general the case whenever ADD_ALLEVENTS is true (ie for signals)
 
 FILTER_EVENTS = getConf("FILTER_EVENTS", 'Cands') # Filter to be applied on events. Currently supported:
@@ -231,6 +233,10 @@ if APPLYJETCORR and LEPTON_SETUP >=2022 :
     from ZZAnalysis.NanoAnalysis.modules.jetVMAP import getJetVetoMap
     insertBefore(reco_sequence, 'jetFiller', getJetVetoMap(LEPTON_SETUP, DATA_TAG))
 
+if LEPTON_SETUP >=2022 :
+    from ZZAnalysis.NanoAnalysis.modules.jetBtagProducer import getJetBtagProducer
+    insertBefore(reco_sequence, 'jetFiller', getJetBtagProducer(LEPTON_SETUP, DATA_TAG, IsMC, IsSIGNAL))
+
 # Special modules to be applied before the reco_sequence, that may filter events
 pre_sequence = [triggerAndSkim(isMC=IsMC, PD=PD, era=LEPTON_SETUP, passThru=TRIGPASSTHROUGH),  # Filter for good PV and trigger requirements; apply PD precedence rules for data
                 ]
@@ -398,5 +404,3 @@ print ("", flush=True)
 
 ### Run command should be issued by the calling scripy
 # p.run()
-
-
