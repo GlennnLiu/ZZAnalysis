@@ -304,7 +304,7 @@ class ZZFiller(Module):
                     if Z1.isSR : 
                         for iZ2,Z2 in enumerate(Zs):
                             if Z2.is1FCR or Z2.is2FCR or Z2.isSSCR or Z2.isSIPCR :
-                                ZLL = self.makeCand(Z1, Z2, sortZsByMass=False, fillIDVars=False)
+                                ZLL = self.makeCand(Z1, Z2, sortZsByMass=False)
                                 if ZLL == None: continue
                                 if ZLL.Z2.is2FCR  and (best2P2FCRIdx<0 or self.bestCandCmp(ZLL,ZLLsTemp[best2P2FCRIdx]) < 0) : best2P2FCRIdx = len(ZLLsTemp)
                                 if ZLL.Z2.is1FCR  and (best3P1FCRIdx<0 or self.bestCandCmp(ZLL,ZLLsTemp[best3P1FCRIdx]) < 0) : best3P1FCRIdx = len(ZLLsTemp)
@@ -607,7 +607,7 @@ class ZZFiller(Module):
         else: return 1
         
 
-    def makeCand(self, Za, Zb, sortZsByMass=True, fillIDVars=True) :
+    def makeCand(self, Za, Zb, sortZsByMass=True) :
         '''Build a ZZ object from given Za, Zb pair, if it passes selection cuts; None is returned otherwise.
         All relevant candidate variables are computed for the candidate. Options:
         sortZsByMass : set Z1 and Z2 according to closest-Mz criteria (for SR); otherwise, specified order is

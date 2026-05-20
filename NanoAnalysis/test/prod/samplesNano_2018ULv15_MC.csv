@@ -42,7 +42,6 @@ ggTo2mu2tau_Contin_MCFM701,,0.0031942,    ,,/GluGluToContinToZZTo2mu2tau_TuneCP5
 # VBFToContinToZZTo4l,,3.5485771E-06,,,/VBFToContinToZZTo4l_13TeV_JHUGenV730_MCFM701_pythia8/RunIISummer20UL18NanoAODv15-150X_mc2018_realistic_v1-v1/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,1,GENXSEC=3.5485771E-03;GENBR=1;PROCESS_CR=False;NANOVERSION=15;LEPTON_SETUP=2018,,
 
 ###,,,,,,,,,,,EW backgrounds: tribosons (~16% of EW bkg)
-#FIXME
 # ZZZ,,0.01398, ,,/ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIIAutumn18NanoAODv7-Nano02Apr2020_102X_upgrade2018_realistic_v21_ext1-v1/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,2,GENXSEC=1;GENBR=1;PROCESS_CR=True;NANOVERSION=15;LEPTON_SETUP=2018,,
 # WZZ,,0.05565, ,,/WZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIIAutumn18NanoAODv7-Nano02Apr2020_102X_upgrade2018_realistic_v21_ext1-v1/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,2,GENXSEC=1;GENBR=1;PROCESS_CR=True;NANOVERSION=15;LEPTON_SETUP=2018,,
 # WWZ,,0.1651,  ,,/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIIAutumn18NanoAODv7-Nano02Apr2020_102X_upgrade2018_realistic_v21_ext1-v1/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,2,GENXSEC=1;GENBR=1;PROCESS_CR=True;NANOVERSION=15;LEPTON_SETUP=2018,,
