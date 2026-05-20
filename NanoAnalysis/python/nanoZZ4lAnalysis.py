@@ -226,7 +226,6 @@ elif NANOVERSION >=13 :
     insertBefore(reco_sequence, 'jetFiller', getJetIdProducer(LEPTON_SETUP, DATA_TAG))   
 
 # Add jet corrections for Run 3
-# FIXME: jet corrs for Run2 v15 to be added
 if APPLYJETCORR and LEPTON_SETUP >=2022 :
     from ZZAnalysis.NanoAnalysis.modules.jetJERC import getJetCorrected
     insertBefore(reco_sequence, 'jetFiller', getJetCorrected(LEPTON_SETUP, DATA_TAG, IsMC, overwritePt=True))
@@ -259,7 +258,8 @@ if IsMC:
     
 
     from ZZAnalysis.NanoAnalysis.mcTruthAnalyzer import *
-    post_sequence.append(mcTruthAnalyzer()) # Gen final state etc.
+    mcTruth = mcTruthAnalyzer() # Gen final state etc.
+
     # from ZZAnalysis.NanoAnalysis.genExtraFiller import *
     # post_sequence.append(genExtraFiller(mela)) Gen-level angles (not to be confused with LHE-level angles, filled by LHEAngProbFiller
     
@@ -279,6 +279,7 @@ if IsMC:
         pre_sequence = [puWeight(LEPTON_SETUP, DATA_TAG),
                         weights, 
                         genFiller(mela, dump=False),
+                        mcTruth, # for GenZZ_FinalState
                         cloneBranches(treeName='AllEvents',
                                       varlist=['run', 'luminosityBlock', 'event',
                                                'GenDressedLepton_*',
@@ -293,6 +294,7 @@ if IsMC:
                                                'HTXS_*',
                                                'GenJet*',
                                                *(['ggH_NNLOPS_Weight'] if APPLY_QCD_GGF_UNCERT else []),
+                                               'GenZZ_FinalState',
                                                ],
                                       #Stop further processing for events that don't have 4 reco leps
                                       continueFor = postPresel
@@ -302,6 +304,7 @@ if IsMC:
     else : # Add them at the end, so that they are run only for selected events
         post_sequence.extend([puWeight(LEPTON_SETUP,DATA_TAG),
                               weights,
+                              mcTruth,
                               #genFiller(mela, dump=False), # Not required when ADD_ALLEVENTS = False?
                               ])
 else : # Data
