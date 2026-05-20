@@ -1,4 +1,4 @@
-\identifier,process,crossSection=-1,BR=1,execute=True,dataset,prefix,pattern,splitLevel,::variables,::pyFragments,comment
+identifier,process,crossSection=-1,BR=1,execute=True,dataset,prefix,pattern,splitLevel,::variables,::pyFragments,comment
 ###,,,,,,,,,,,xsec for H125 samples is taken from this ad interim prescription: https://twiki.cern.ch/twiki/bin/view/LHCPhysics/LHCHWG136TeVxsec_extrap
 ###,,,,,,,,,,,for the other mass points the xsec is scaled from 13 TeV to 13.6 TeV following this prescription: xsec_13p6 = xsec_13 * 0.4 + xsec_14 * 0.6 https://indico.cern.ch/event/1169286/contributions/5126668/attachments/2557560/4416316/HXSWG.pdf#page=5
 ###,,,,,,,,,,,MC situation evolving here https://docs.google.com/spreadsheets/d/1StPLK3iVXZMx694qgEkl8QrZutFszvqT6ecN-MFZZKY/edit#gid=0
