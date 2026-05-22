@@ -4,7 +4,6 @@ Instantiate the correctionlib-based b-tagging module.
 
 import os
 
-
 def getJetBtagProducer(era, tag, is_mc, is_signal, WP="M"):
     from PhysicsTools.NATModules.modules.jetBtag import jetBtag
 
@@ -72,4 +71,4 @@ def getJetBtagProducer(era, tag, is_mc, is_signal, WP="M"):
         json_eff,
     )
 
-    return jetBtag(is_mc, tagger, tagger_name, WP, json_SF, json_eff)
+    return jetBtag(is_mc, tagger, tagger_name, WP, ["correlated","uncorrelated"], json_SF, json_eff)
