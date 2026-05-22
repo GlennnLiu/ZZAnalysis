@@ -47,7 +47,8 @@ class weightFiller(Module):
         # ggH NNLOPS weights
         if self.APPLY_QCD_GGF_UNCERT :
             if self.LEPTON_SETUP >= 2022:
-                NNLOPS_weight_file = ROOT.TFile.Open(basePath+'data/ggH_NNLOPS_Weights/NNLOPS_reweight_13p6.root')
+                NNLOPS_weight_file = ROOT.TFile.Open(basePath+'data/ggH_NNLOPS_Weights/NNLOPS_reweight.root')
+                print("WARNING: since the current NNLOPS weights for ggF signals didn't consider the finite top mass effects (from Adinda), we still use the 13 TeV one.")
             else:
                 NNLOPS_weight_file = ROOT.TFile.Open(basePath+'data/ggH_NNLOPS_Weights/NNLOPS_reweight.root')
             self.gr_NNLOPSratio_pt_powheg_0jet = NNLOPS_weight_file.Get("gr_NNLOPSratio_pt_powheg_0jet")
@@ -120,7 +121,7 @@ class weightFiller(Module):
             htxsNJets = event.HTXS_njets30
             htxsHPt = event.HTXS_Higgs_pt
             if htxsNJets==0 :
-                ggH_NNLOPS_Weight = self.gr_NNLOPSratio_pt_powheg_0jet.Eval(min(htxsHPt, 125.0))
+                ggH_NNLOPS_Weight = self.gr_NNLOPSratio_pt_powheg_0jet.Eval(min(htxsHPt,125.0))
             elif htxsNJets==1 :
                 ggH_NNLOPS_Weight = self.gr_NNLOPSratio_pt_powheg_1jet.Eval(min(htxsHPt,625.0))
             elif htxsNJets==2 :
