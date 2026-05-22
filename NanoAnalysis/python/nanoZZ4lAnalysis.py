@@ -56,6 +56,7 @@ APPLY_K_NNLOEW_ZZQQB  = getConf("APPLY_K_NNLOEW_ZZQQB", False)
 IsSIGNAL = getConf("IsSIGNAL", False)
 ADD_ALLEVENTS = getConf("ADD_ALLEVENTS", IsSIGNAL) # if true, add a separate tree with gen-level variables for all events (not just those passing the candidate selection); by default, this is done for signal samples
 ADD_LHE_PROB = getConf("ADD_LHE_PROB", ADD_ALLEVENTS) # Add LHE angles and probabilities. This is in general the case whenever ADD_ALLEVENTS is true (ie for signals)
+JES_SPLITTING = getConf("JES_SPLITTING", True) # Whether to split JES variations into 11 components (if false, only up/down variations are produced, by summing all components in quadrature)
 
 FILTER_EVENTS = getConf("FILTER_EVENTS", 'Cands') # Filter to be applied on events. Currently supported:
                                                   # 'Cands' = any event with a SR or CR candidate (default)
@@ -228,7 +229,7 @@ elif NANOVERSION >=13 :
 # Add jet corrections for Run 3
 if APPLYJETCORR and LEPTON_SETUP >=2022 :
     from ZZAnalysis.NanoAnalysis.modules.jetJERC import getJetCorrected
-    insertBefore(reco_sequence, 'jetFiller', getJetCorrected(LEPTON_SETUP, DATA_TAG, IsMC, overwritePt=True))
+    insertBefore(reco_sequence, 'jetFiller', getJetCorrected(LEPTON_SETUP, DATA_TAG, IsMC, JES_SPLITTING, overwritePt=True))
     from ZZAnalysis.NanoAnalysis.modules.jetVMAP import getJetVetoMap
     insertBefore(reco_sequence, 'jetFiller', getJetVetoMap(LEPTON_SETUP, DATA_TAG))
 
