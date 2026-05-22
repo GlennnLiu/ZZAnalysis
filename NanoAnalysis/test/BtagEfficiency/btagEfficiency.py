@@ -22,11 +22,15 @@ parser.add_argument("-y", "--year", default="2022EE")
 parser.add_argument("-l", "--lumi", default=26.7)
 parser.add_argument("-i", "--input", default="/eos/user/a/atarabin/STXS_samples/PROD_samplesNano_2022EE_MC_8d4c03f7/")
 parser.add_argument("-m", "--hist-mode", choices=["make", "read"], default="make", help="Make histograms from NanoAOD inputs or read them from the saved ROOT file.")
+parser.add_argument("-s", "--is-signal", )
 args = parser.parse_args()
 
 class btagEffCalculator():
-    def __init__(self, year, lumi, input_dir):
-        self.processes = ["ggH125","VBFH125","WplusH125","WminusH125","ZH125","ttH125","ZZTo4l","ggTo2e2mu_Contin_MCFM701","ggTo2e2tau_Contin_MCFM701","ggTo2mu2tau_Contin_MCFM701","ggTo4e_Contin_MCFM701","ggTo4mu_Contin_MCFM701","ggTo4tau_Contin_MCFM701","WWZ","WZZ","ZZZ","TTWW","TTZZ"]
+    def __init__(self, year, lumi, input_dir, isSignal=True):
+        if isSignal:
+            self.processes = ["ggH125","VBFH125","WplusH125","WminusH125","ZH125","ttH125"]
+        else:
+            self.processes = ["ZZTo4l","ggTo2e2mu_Contin_MCFM701","ggTo2e2tau_Contin_MCFM701","ggTo2mu2tau_Contin_MCFM701","ggTo4e_Contin_MCFM701","ggTo4mu_Contin_MCFM701","ggTo4tau_Contin_MCFM701","WWZ","WZZ","ZZZ","TTWW","TTZZ"]
 
         self.year = year
         self.lumi = float(lumi)
@@ -132,6 +136,9 @@ class btagEffCalculator():
         h_all = {}
         h_tagged = {}
         h_eff = {}
+        h_all_err = {}
+        h_tagged_err = {}
+        h_eff_err = {}
 
         for name, mask in flavor_masks.items():
 
@@ -142,6 +149,13 @@ class btagEffCalculator():
                 bins=[self.pt_edges, self.eta_edges],
                 weights=weight[mask]
             )
+            h_all_sumw2, _, _ = np.histogram2d(
+                pt[mask],
+                eta[mask],
+                bins=[self.pt_edges, self.eta_edges],
+                weights=weight[mask] * weight[mask]
+            )
+            h_all_err[name] = np.sqrt(h_all_sumw2)
 
             # tagged jets
             tagged_mask = mask & (tagger > self.WP)
@@ -152,31 +166,56 @@ class btagEffCalculator():
                 bins=[self.pt_edges, self.eta_edges],
                 weights=weight[tagged_mask]
             )
+            h_tagged_sumw2, _, _ = np.histogram2d(
+                pt[tagged_mask],
+                eta[tagged_mask],
+                bins=[self.pt_edges, self.eta_edges],
+                weights=weight[tagged_mask] * weight[tagged_mask]
+            )
+            h_tagged_err[name] = np.sqrt(h_tagged_sumw2)
             h_eff[name] = np.divide(
                 h_tagged[name],
                 h_all[name],
                 out=np.zeros_like(h_tagged[name], dtype=float),
                 where=h_all[name] > 0
             )
+            h_untagged_sumw2 = np.maximum(h_all_sumw2 - h_tagged_sumw2, 0.0)
+            h_eff_var = np.divide(
+                ((1.0 - h_eff[name]) ** 2) * h_tagged_sumw2
+                + (h_eff[name] ** 2) * h_untagged_sumw2,
+                h_all[name] * h_all[name],
+                out=np.zeros_like(h_eff[name], dtype=float),
+                where=h_all[name] > 0
+            )
+            h_eff_err[name] = np.sqrt(np.maximum(h_eff_var, 0.0))
 
-        return h_all, h_tagged, h_eff
+        return h_all, h_tagged, h_eff, h_all_err, h_tagged_err, h_eff_err
 
     def read_histograms(self, filename):
         if not os.path.exists(filename):
             raise FileNotFoundError(f"Histogram file not found: {filename}")
 
-        def th2_to_array(hist):
+        def th2_to_arrays(hist):
             nx = hist.GetNbinsX()
             ny = hist.GetNbinsY()
-            out = np.zeros((nx, ny), dtype=float)
+            content = np.zeros((nx, ny), dtype=float)
+            error = np.zeros((nx, ny), dtype=float)
+            has_stored_errors = hist.GetSumw2N() > 0
+            if not has_stored_errors:
+                print(f"[read_histograms] Histogram '{hist.GetName()}' has no stored bin errors; using zero errors.")
             for ix in range(nx):
                 for iy in range(ny):
-                    out[ix, iy] = hist.GetBinContent(ix + 1, iy + 1)
-            return out
+                    content[ix, iy] = hist.GetBinContent(ix + 1, iy + 1)
+                    if has_stored_errors:
+                        error[ix, iy] = hist.GetBinError(ix + 1, iy + 1)
+            return content, error
 
         h_all = {}
         h_tagged = {}
         h_eff = {}
+        h_all_err = {}
+        h_tagged_err = {}
+        h_eff_err = {}
 
         f = ROOT.TFile.Open(filename)
         if not f or f.IsZombie():
@@ -193,29 +232,38 @@ class btagEffCalculator():
                 if not hist:
                     f.Close()
                     raise KeyError(f"Missing histogram '{hname}' in {filename}")
-                target[flav] = th2_to_array(hist)
+                content, error = th2_to_arrays(hist)
+                target[flav] = content
+                {
+                    "all": h_all_err,
+                    "tagged": h_tagged_err,
+                    "eff": h_eff_err,
+                }[suffix][flav] = error
 
         f.Close()
-        return h_all, h_tagged, h_eff
+        return h_all, h_tagged, h_eff, h_all_err, h_tagged_err, h_eff_err
 
-    def save_to_root(self, h_all, h_tagged, h_eff, filename):
+    def save_to_root(self, h_all, h_tagged, h_eff, filename, h_all_err=None, h_tagged_err=None, h_eff_err=None):
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         f = ROOT.TFile(filename, "RECREATE")
 
         for flav in h_all.keys():
-            for hname, hdata in [
-                (f"{flav}_all",    h_all[flav]),
-                (f"{flav}_tagged", h_tagged[flav]),
-                (f"{flav}_eff",    h_eff[flav]),
+            for hname, hdata, herr in [
+                (f"{flav}_all",    h_all[flav],    None if h_all_err is None else h_all_err[flav]),
+                (f"{flav}_tagged", h_tagged[flav], None if h_tagged_err is None else h_tagged_err[flav]),
+                (f"{flav}_eff",    h_eff[flav],    None if h_eff_err is None else h_eff_err[flav]),
             ]:
                 nx = len(self.pt_edges) - 1
                 ny = len(self.eta_edges) - 1
                 h = ROOT.TH2F(hname, hname,
                             nx, array('d', self.pt_edges),
                             ny, array('d', self.eta_edges))
+                h.Sumw2()
                 for ix in range(nx):
                     for iy in range(ny):
                         h.SetBinContent(ix + 1, iy + 1, hdata[ix, iy])
+                        if herr is not None:
+                            h.SetBinError(ix + 1, iy + 1, herr[ix, iy])
                 h.Write()
 
         f.Close()
@@ -295,12 +343,13 @@ class btagEffCalculator():
             else:
                 json.dump(cset.dict(exclude_unset=True), f, indent=2)
 
-    def plot_2d_hist(self, hist, name, outname, zmin=None, zmax=None, cmap="viridis"):
+    def plot_2d_hist(self, hist, name, outname, hist_err=None, zmin=None, zmax=None, cmap="viridis"):
 
         pt_edges = np.array(self.pt_edges)
         eta_edges = np.array(self.eta_edges)
 
         h = np.array(hist, dtype=float)
+        h_err = None if hist_err is None else np.array(hist_err, dtype=float)
         h_plot = np.ma.masked_less_equal(h, 0.0)
         positive = h[h > 0]
         log_vmin = zmin if zmin is not None and zmin > 0 else (positive.min() if positive.size else 1e-6)
@@ -319,6 +368,23 @@ class btagEffCalculator():
 
         fig.colorbar(mesh, ax=ax, label=name, pad=0.01)
 
+        if h_err is not None:
+            for ix in range(len(pt_edges) - 1):
+                x = 0.5 * (pt_edges[ix] + pt_edges[ix + 1])
+                for iy in range(len(eta_edges) - 1):
+                    if h[ix, iy] <= 0:
+                        continue
+                    y = 0.5 * (eta_edges[iy] + eta_edges[iy + 1])
+                    ax.text(
+                        x,
+                        y,
+                        f"{h[ix, iy]:.3g}\n+/- {h_err[ix, iy]:.2g}",
+                        ha="center",
+                        va="center",
+                        fontsize=10,
+                        color="white" if h[ix, iy] > np.sqrt(log_vmin * log_vmax) else "black",
+                    )
+
         ax.set_xlabel(r"$p_T$ [GeV]")
         ax.set_ylabel(r"$|\eta|$")
         hep.cms.label("Preliminary", data=False, lumi=self.lumi, com=13.6, ax=ax)
@@ -330,18 +396,32 @@ class btagEffCalculator():
 
         plt.close(fig)
 
-    def plot_1d_hist(self, hist, name, outname, ymin=1e-3, ymax=1.0):
+    def plot_1d_hist(self, hist, name, outname, hist_err=None, ymin=1e-3, ymax=1.0):
 
         pt_edges = np.array(self.pt_edges, dtype=float)
         eta_edges = np.array(self.eta_edges, dtype=float)
+        pt_centers = 0.5 * (pt_edges[:-1] + pt_edges[1:])
+        pt_widths = np.diff(pt_edges)
         h = np.array(hist, dtype=float)
+        h_err = None if hist_err is None else np.array(hist_err, dtype=float)
 
         fig, ax = plt.subplots(figsize=(11, 9))
 
         for i_eta in range(len(eta_edges) - 1):
-            y = np.ma.masked_less_equal(h[:, i_eta], 0.0)
+            valid = h[:, i_eta] > 0.0
+            y = np.ma.masked_where(~valid, h[:, i_eta])
             label = rf"${eta_edges[i_eta]:g} \leq |\eta| < {eta_edges[i_eta + 1]:g}$"
             ax.stairs(y, pt_edges, label=label, linewidth=2.5)
+            if h_err is not None:
+                ax.errorbar(
+                    pt_centers[valid],
+                    h[valid, i_eta],
+                    yerr=h_err[valid, i_eta],
+                    xerr=0.5 * pt_widths[valid],
+                    fmt="none",
+                    capsize=2,
+                    linewidth=1.5,
+                )
 
         ax.set_xlabel(r"$p_T$ [GeV]")
         ax.set_ylabel(name)
@@ -358,10 +438,12 @@ class btagEffCalculator():
 
         plt.close(fig)
 
-    def plot_1d_all_flavors(self, h_eff, outname, ymin=1e-3, ymax=1.0):
+    def plot_1d_all_flavors(self, h_eff, outname, h_eff_err=None, ymin=1e-3, ymax=1.0):
 
         pt_edges = np.array(self.pt_edges, dtype=float)
         eta_edges = np.array(self.eta_edges, dtype=float)
+        pt_centers = 0.5 * (pt_edges[:-1] + pt_edges[1:])
+        pt_widths = np.diff(pt_edges)
         flavors = ["light", "c", "b"]
         line_styles = {
             "light": "-",
@@ -375,8 +457,10 @@ class btagEffCalculator():
 
         for flav in flavors:
             h = np.array(h_eff[flav], dtype=float)
+            h_err = None if h_eff_err is None else np.array(h_eff_err[flav], dtype=float)
             for i_eta, color in enumerate(eta_colors):
-                y = np.ma.masked_less_equal(h[:, i_eta], 0.0)
+                valid = h[:, i_eta] > 0.0
+                y = np.ma.masked_where(~valid, h[:, i_eta])
                 ax.stairs(
                     y,
                     pt_edges,
@@ -384,6 +468,17 @@ class btagEffCalculator():
                     linestyle=line_styles[flav],
                     linewidth=2.5,
                 )
+                if h_err is not None:
+                    ax.errorbar(
+                        pt_centers[valid],
+                        h[valid, i_eta],
+                        yerr=h_err[valid, i_eta],
+                        xerr=0.5 * pt_widths[valid],
+                        fmt="none",
+                        ecolor=color,
+                        capsize=2,
+                        linewidth=1.2,
+                    )
 
         eta_handles = [
             Line2D(
@@ -453,15 +548,15 @@ class btagEffCalculator():
         plt.close(fig)
 
 
-btag = btagEffCalculator(args.year, args.lumi, args.input)
+btag = btagEffCalculator(args.year, args.lumi, args.input, args.is_signal)
 root_file = f"../../data/btagEff/btag_{args.year}.root"
 if args.hist_mode == "make":
-    h_all, h_tagged, h_eff = btag.make_histograms()
-    btag.save_to_root(h_all, h_tagged, h_eff, root_file)
+    h_all, h_tagged, h_eff, h_all_err, h_tagged_err, h_eff_err = btag.make_histograms()
+    btag.save_to_root(h_all, h_tagged, h_eff, root_file, h_all_err, h_tagged_err, h_eff_err)
 else:
-    h_all, h_tagged, h_eff = btag.read_histograms(root_file)
-btag.save_to_correctionlib_json(h_eff, f"../../data/btagEff/btag_{args.year}.json.gz")
-for flav in h_eff.keys():
-    btag.plot_2d_hist(h_eff[flav], f"b-tag efficiency for {flav} jets", f"../../data/btagEff/plots/btag_eff_{flav}_{args.year}_2d", zmin=0.006, zmax=1)
-    btag.plot_1d_hist(h_eff[flav], f"b-tag efficiency for {flav} jets", f"../../data/btagEff/plots/btag_eff_{flav}_{args.year}_1d", ymin=0.006, ymax=6)
-btag.plot_1d_all_flavors(h_eff, f"../../data/btagEff/plots/btag_eff_all_flavors_{args.year}_1d", ymin=0.006, ymax=2)
+    h_all, h_tagged, h_eff, h_all_err, h_tagged_err, h_eff_err = btag.read_histograms(root_file)
+btag.save_to_correctionlib_json(h_eff, f"../../data/btagEff/btag_{'signal' if args.is_signal else 'background'}_{args.year}.json.gz")
+# for flav in h_eff.keys():
+#     btag.plot_2d_hist(h_eff[flav], f"b-tag efficiency for {flav} jets", f"../../data/btagEff/plots/btag_eff_{flav}_{args.year}_2d", h_eff_err[flav], zmin=0.006, zmax=1)
+#     btag.plot_1d_hist(h_eff[flav], f"b-tag efficiency for {flav} jets", f"../../data/btagEff/plots/btag_eff_{flav}_{args.year}_1d", h_eff_err[flav], ymin=0.006, ymax=6)
+btag.plot_1d_all_flavors(h_eff, f"../../data/btagEff/plots/btag_eff_all_flavors_{args.year}_1d_{'signal' if args.is_signal else 'background'}", h_eff_err, ymin=0.006, ymax=2)
