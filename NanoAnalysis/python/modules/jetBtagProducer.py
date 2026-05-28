@@ -71,4 +71,4 @@ def getJetBtagProducer(era, tag, is_mc, is_signal, WP="M"):
         json_eff,
     )
 
-    return jetBtag(is_mc, tagger, tagger_name, WP, ["correlated","uncorrelated"], json_SF, json_eff)
+    return jetBtag(is_mc, tagger, tagger_name, WP, json_SF, json_eff, ["correlated","uncorrelated"])
