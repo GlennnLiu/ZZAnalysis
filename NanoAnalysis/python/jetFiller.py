@@ -21,18 +21,19 @@ class jetFiller(Module):
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
         self.out.branch("Jet_ZZMask", "O", lenVar="nJet", title="jet is vetoed by selected leptons or FSR photons")
-        self.out.branch("Jet_ZZLepEF", "F", lenVar="nJet", title="Fraction of jet pt carried by the vetoing leptons or FSR photons", limitedPrecision=6),
+        self.out.branch("Jet_ZZLepEF", "F", lenVar="nJet", title="Fraction of jet pt carried by the vetoing leptons or FSR photons", limitedPrecision=6)
+        self.out.branch("Jet_ptThreshold", "F", lenVar="nJet", title="pT threshold applied to the jet for counting nCleanedJetsPt30, etc.")
         self.out.branch("JetLeadingIdx", "S", title="index of leading jet after cleaning")
         self.out.branch("JetSubleadingIdx", "S", title="index of subleading jet after cleaning")
         self.out.branch("nCleanedJetsPt30", "B", title="number of cleaned jets above 30 GeV")
-        self.out.branch("nCleanedJetsPt30_jesUp", "B", title="number of cleaned jets, up JES variation")
-        self.out.branch("nCleanedJetsPt30_jesDn", "B", title="number of cleaned jets, down JES variation")
+        # self.out.branch("nCleanedJetsPt30_jesUp", "B", title="number of cleaned jets, up JES variation")
+        # self.out.branch("nCleanedJetsPt30_jesDn", "B", title="number of cleaned jets, down JES variation")
         self.out.branch("nCleanedJetsPt30BTagged", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement")
         self.out.branch("nCleanedJetsPt30BTagged_bTagSF", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF applied")
-        self.out.branch("nCleanedJetsPt30BTagged_bTagSFUp_correlated", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF up variation applied (variation correlated across years)")
-        self.out.branch("nCleanedJetsPt30BTagged_bTagSFUp_uncorrelated", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF up variation applied (variation uncorrelated across years)")
-        self.out.branch("nCleanedJetsPt30BTagged_bTagSFDn_correlated", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF down variation applied (variation correlated across years)")
-        self.out.branch("nCleanedJetsPt30BTagged_bTagSFDn_uncorrelated", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF down variation applied (variation uncorrelated across years)")
+        # self.out.branch("nCleanedJetsPt30BTagged_bTagSFUp_correlated", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF up variation applied (variation correlated across years)")
+        # self.out.branch("nCleanedJetsPt30BTagged_bTagSFUp_uncorrelated", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF up variation applied (variation uncorrelated across years)")
+        # self.out.branch("nCleanedJetsPt30BTagged_bTagSFDn_correlated", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF down variation applied (variation correlated across years)")
+        # self.out.branch("nCleanedJetsPt30BTagged_bTagSFDn_uncorrelated", "B", title="number of cleaned jets above 30 GeV passing the b-tagging requirement with SF down variation applied (variation uncorrelated across years)")
 
     def getJetAttr(self, jet, name, default=False):
         try:
@@ -53,23 +54,27 @@ class jetFiller(Module):
         ## Jet-lepton cleaning with best candidate's leptons and FSR..
         mask = [False]*event.nJet
         jet_lepPtF = [0.]*event.nJet
+        jet_ptThreshold = [30.]*event.nJet
         leadingJetIdx = -1
         subleadingJetIdx =-1
         leadingJetPt = 0.
         subleadingJetPt = 0.
         nCleanedJetsPt30 = 0
-        nCleanedJetsPt30_jesDn = 0
-        nCleanedJetsPt30_jesUp = 0
+        # nCleanedJetsPt30_jesDn = 0
+        # nCleanedJetsPt30_jesUp = 0
         nCleanedJetsPt30BTagged = 0
         nCleanedJetsPt30BTagged_bTagSF = 0
-        nCleanedJetsPt30BTagged_bTagSFUp_correlated = 0
-        nCleanedJetsPt30BTagged_bTagSFUp_uncorrelated = 0
-        nCleanedJetsPt30BTagged_bTagSFDn_correlated = 0
-        nCleanedJetsPt30BTagged_bTagSFDn_uncorrelated = 0
+        # nCleanedJetsPt30BTagged_bTagSFUp_correlated = 0
+        # nCleanedJetsPt30BTagged_bTagSFUp_uncorrelated = 0
+        # nCleanedJetsPt30BTagged_bTagSFDn_correlated = 0
+        # nCleanedJetsPt30BTagged_bTagSFDn_uncorrelated = 0
 
         # According to the analysis recipe at https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsZZ4lRunIILegacy#Jets, "[jets] must be cleaned with a DeltaR>0.4 cut wrt all tight leptons in the event passing the SIP and isolation cut computed after FSR correction, as well as with all FSR collected photons attached to these leptons."
         # Note: the current implementation on miniAODs (https://github.com/CJLST/ZZAnalysis/blob/Run2UL_22_nano/AnalysisStep/plugins/JetsWithLeptonsRemover.cc) probably does something different than this. To be reviewed.
         for ij, jet in enumerate(jets) :
+            if 2.5 <= abs(jet.eta) < 3.0 or (abs(jet.eta) >= 3.0 and self.year in [2022, 2023]):
+                jet_ptThreshold[ij] = 50.
+
             for lep in leps :
                 if not lep.ZZFullSel : continue
                 if deltaR(lep.eta, lep.phi, jet.eta, jet.phi) < self.dRMin :
@@ -91,32 +96,29 @@ class jetFiller(Module):
                     #Jets with abs(eta) >= 3.0 in 2022/2023 -> pt_cut = 50
                     #Jets with abs(eta) >= 3.0 in other years -> pt_cut = 30
                     #See slide 14: https://indico.cern.ch/event/1615783/contributions/6811120/attachments/3186812/5672346/20251204_JetMET_PerformanceRun3.pdf
-                    pt_cut = 30
-                    if 2.5 <= abs(jet.eta) < 3.0 or (abs(jet.eta) >= 3.0 and self.year in [2022, 2023]):
-                        pt_cut = 50
 
-                    if jet.pt > pt_cut:
+                    if jet.pt > jet_ptThreshold[ij]:
                         nCleanedJetsPt30 += 1
                         #FIXME: add jesUp, jesDn
                         isBtagged = self.getJetAttr(jet, "isBtagged", False)
                         isBtaggedSF = self.getJetAttr(jet, "isBtaggedwithSF", isBtagged)
-                        isBtaggedSFUp_correlated = self.getJetAttr(jet, "isBtaggedwithSF_up_correlated", isBtaggedSF)
-                        isBtaggedSFUp_uncorrelated = self.getJetAttr(jet, "isBtaggedwithSF_up_uncorrelated", isBtaggedSF)
-                        isBtaggedSFDn_correlated = self.getJetAttr(jet, "isBtaggedwithSF_down_correlated", isBtaggedSF)
-                        isBtaggedSFDn_uncorrelated = self.getJetAttr(jet, "isBtaggedwithSF_down_uncorrelated", isBtaggedSF)
+                        # isBtaggedSFUp_correlated = self.getJetAttr(jet, "isBtaggedwithSF_up_correlated", isBtaggedSF)
+                        # isBtaggedSFUp_uncorrelated = self.getJetAttr(jet, "isBtaggedwithSF_up_uncorrelated", isBtaggedSF)
+                        # isBtaggedSFDn_correlated = self.getJetAttr(jet, "isBtaggedwithSF_down_correlated", isBtaggedSF)
+                        # isBtaggedSFDn_uncorrelated = self.getJetAttr(jet, "isBtaggedwithSF_down_uncorrelated", isBtaggedSF)
 
                         if isBtagged:
                             nCleanedJetsPt30BTagged += 1
                         if isBtaggedSF:
                             nCleanedJetsPt30BTagged_bTagSF += 1
-                        if isBtaggedSFUp_correlated:
-                            nCleanedJetsPt30BTagged_bTagSFUp_correlated += 1
-                        if isBtaggedSFUp_uncorrelated:
-                            nCleanedJetsPt30BTagged_bTagSFUp_uncorrelated += 1
-                        if isBtaggedSFDn_correlated:
-                            nCleanedJetsPt30BTagged_bTagSFDn_correlated += 1
-                        if isBtaggedSFDn_uncorrelated:
-                            nCleanedJetsPt30BTagged_bTagSFDn_uncorrelated += 1
+                        # if isBtaggedSFUp_correlated:
+                        #     nCleanedJetsPt30BTagged_bTagSFUp_correlated += 1
+                        # if isBtaggedSFUp_uncorrelated:
+                        #     nCleanedJetsPt30BTagged_bTagSFUp_uncorrelated += 1
+                        # if isBtaggedSFDn_correlated:
+                        #     nCleanedJetsPt30BTagged_bTagSFDn_correlated += 1
+                        # if isBtaggedSFDn_uncorrelated:
+                        #     nCleanedJetsPt30BTagged_bTagSFDn_uncorrelated += 1
                 
                         # IDX of Leading/subleading jets passing all selections (including pT).
                         # Note: we cannot rely on the fact that the jet collection is sorted by pt since JES can change this.  
@@ -131,17 +133,18 @@ class jetFiller(Module):
         
         self.out.fillBranch("Jet_ZZMask", mask)
         self.out.fillBranch("Jet_ZZLepEF", jet_lepPtF)
+        self.out.fillBranch("Jet_ptThreshold", jet_ptThreshold)
         self.out.fillBranch("JetLeadingIdx", leadingJetIdx)
         self.out.fillBranch("JetSubleadingIdx", subleadingJetIdx)
         self.out.fillBranch("nCleanedJetsPt30", nCleanedJetsPt30)
-        self.out.fillBranch("nCleanedJetsPt30_jesUp", nCleanedJetsPt30_jesUp)
-        self.out.fillBranch("nCleanedJetsPt30_jesDn", nCleanedJetsPt30_jesDn)
+        # self.out.fillBranch("nCleanedJetsPt30_jesUp", nCleanedJetsPt30_jesUp)
+        # self.out.fillBranch("nCleanedJetsPt30_jesDn", nCleanedJetsPt30_jesDn)
         self.out.fillBranch("nCleanedJetsPt30BTagged", nCleanedJetsPt30BTagged)
         self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSF", nCleanedJetsPt30BTagged_bTagSF)
-        self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSFUp_correlated", nCleanedJetsPt30BTagged_bTagSFUp_correlated)
-        self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSFUp_uncorrelated", nCleanedJetsPt30BTagged_bTagSFUp_uncorrelated)
-        self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSFDn_correlated", nCleanedJetsPt30BTagged_bTagSFDn_correlated)
-        self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSFDn_uncorrelated", nCleanedJetsPt30BTagged_bTagSFDn_uncorrelated)
+        # self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSFUp_correlated", nCleanedJetsPt30BTagged_bTagSFUp_correlated)
+        # self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSFUp_uncorrelated", nCleanedJetsPt30BTagged_bTagSFUp_uncorrelated)
+        # self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSFDn_correlated", nCleanedJetsPt30BTagged_bTagSFDn_correlated)
+        # self.out.fillBranch("nCleanedJetsPt30BTagged_bTagSFDn_uncorrelated", nCleanedJetsPt30BTagged_bTagSFDn_uncorrelated)
 
         return True
 

@@ -4,7 +4,6 @@ Instantiate the correctionlib-based b-tagging module.
 
 import os
 
-
 def getJetBtagProducer(era, tag, is_mc, is_signal, WP="M"):
     from PhysicsTools.NATModules.modules.jetBtag import jetBtag
 
@@ -14,28 +13,28 @@ def getJetBtagProducer(era, tag, is_mc, is_signal, WP="M"):
         tagger = "particleNet"
         tagger_name = "btagPNetB"
         if "pre_EE" in tag:
-            json_SF = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2022_Summer22/btagging.json.gz"
+            json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-22CDSep23-Summer22-NanoAODv12/2025-08-20/btagging.json.gz"
             json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2022.json.gz")
         else:
-            json_SF = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2022_Summer22EE/btagging.json.gz"
+            json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-22EFGSep23-Summer22EE-NanoAODv12/2025-08-20/btagging.json.gz"
             json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2022EE.json.gz")
 
     elif era == 2023:
         tagger = "particleNet"
         tagger_name = "btagPNetB"
         if "pre_BPix" in tag:
-            json_SF = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2023_Summer23/btagging.json.gz"
+            json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-23CSep23-Summer23-NanoAODv12/2025-08-20/btagging.json.gz"
             json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2022EE.json.gz")
             print("WARNING: using 2022 EE efficiency JSON for 2023 pre-BPix era. Please update this when the correct one is available.")
         else:
-            json_SF = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2023_Summer23BPix/btagging.json.gz"
+            json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-23DSep23-Summer23BPix-NanoAODv12/2025-08-20/btagging.json.gz"
             json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2022EE.json.gz")
             print("WARNING: using 2022 EE efficiency JSON for 2023 post-BPix era. Please update this when the correct one is available.")
 
     elif era == 2024:
         tagger = "UParTAK4"
         tagger_name = "btagUParTAK4B"
-        json_SF = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2024_Summer24/btagging.json.gz"
+        json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-03-10/btagging.json.gz"
         json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2022EE.json.gz")
         print("WARNING: using 2022 EE efficiency JSON for 2024 era. Please update this when the correct one is available.")
 
@@ -44,7 +43,7 @@ def getJetBtagProducer(era, tag, is_mc, is_signal, WP="M"):
         print("WARNING: official btagging json not available, using the one for 2022_Summer22")
         tagger = "particleNet"
         tagger_name = "btagPNetB"
-        json_SF = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2022_Summer22/btagging.json.gz"
+        json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-22CDSep23-Summer22-NanoAODv12/2025-08-20/btagging.json.gz"
         json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2022.json.gz")
 
     else:
@@ -72,4 +71,4 @@ def getJetBtagProducer(era, tag, is_mc, is_signal, WP="M"):
         json_eff,
     )
 
-    return jetBtag(is_mc, tagger, tagger_name, WP, json_SF, json_eff)
+    return jetBtag(is_mc, tagger, tagger_name, WP, json_SF, json_eff, ["correlated","uncorrelated"])

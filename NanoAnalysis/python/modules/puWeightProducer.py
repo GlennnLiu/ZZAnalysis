@@ -231,29 +231,29 @@ def puWeight(era, data_tag):
         
         from PhysicsTools.NATModules.modules.puWeightProducer import puWeightProducer as puWeightProducer_corrlib
         if "pre_EE" in data_tag :
-            json = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/LUM/2022_Summer22/puWeights.json.gz" # md5sum: 4ace5f732cc3fe8ba2ed816b6f76d60a
+            json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-22CDSep23-Summer22-NanoAODv12/2024-01-31/puWeights.json.gz"
             key = "Collisions2022_355100_357900_eraBCD_GoldenJson"
         else :
-            json = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/LUM/2022_Summer22EE/puWeights.json.gz" # md5sum: d959ba71b4f10fbe8517bff06f5bd11f  
+            json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-22EFGSep23-Summer22EE-NanoAODv12/2024-01-31/puWeights.json.gz"
             key = "Collisions2022_359022_362760_eraEFG_GoldenJson"
         return puWeightProducer_corrlib(json, key)
 
     elif era == 2023 :
         from PhysicsTools.NATModules.modules.puWeightProducer import puWeightProducer as puWeightProducer_corrlib
         if "pre_BPix" in data_tag :
-            json = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/LUM/2023_Summer23/puWeights.json.gz" # md5sum: 6c70dd5f5b08e0d7c49a47282f2b64a9
+            json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-23CSep23-Summer23-NanoAODv12/2024-01-31/puWeights.json.gz"
             key = "Collisions2023_366403_369802_eraBC_GoldenJson"
         else :
-            json = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/LUM/2023_Summer23BPix/puWeights.json.gz" # md5sum: fe3eb93fc147cf30247980325869145a
+            json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-23DSep23-Summer23BPix-NanoAODv12/2024-01-31/puWeights.json.gz"
             key = "Collisions2023_369803_370790_eraD_GoldenJson"
         return puWeightProducer_corrlib(json, key)
 
 
     elif era == 2024:
         from PhysicsTools.NATModules.modules.puWeightProducer import puWeightProducer as puWeightProducer_corrlib
-        json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2025-12-02/puWeights_BCDEFGHI.json.gz"
+        json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-04-15/puWeights_BCDEFGHI.json.gz"
         key = "Collisions24_BCDEFGHI_goldenJSON"
-        return puWeightProducer_corrlib(json, key)
+        return puWeightProducer_corrlib(json, key) 
 
     else:
         raise ValueError(f"Era {era} not supported yet")

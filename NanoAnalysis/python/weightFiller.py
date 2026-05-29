@@ -120,7 +120,7 @@ class weightFiller(Module):
             htxsNJets = event.HTXS_njets30
             htxsHPt = event.HTXS_Higgs_pt
             if htxsNJets==0 :
-                ggH_NNLOPS_Weight = self.gr_NNLOPSratio_pt_powheg_0jet.Eval(min(htxsHPt, 125.0))
+                ggH_NNLOPS_Weight = self.gr_NNLOPSratio_pt_powheg_0jet.Eval(min(htxsHPt,125.0))
             elif htxsNJets==1 :
                 ggH_NNLOPS_Weight = self.gr_NNLOPSratio_pt_powheg_1jet.Eval(min(htxsHPt,625.0))
             elif htxsNJets==2 :
