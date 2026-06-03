@@ -287,7 +287,9 @@ class MyBatchManager:
 
         self.parser_.add_option("-a", "--add-variables", dest="variables",
                                 default="",
-                                help='Additional variables to be set, possibly overriding the value set in the csv (eg: -a "bestCandByMELA=False;runMELA=False")',)
+                                help='Additional ;-separated list of variables or pyFragments to be set, eg: -a "bestCandByMELA=False;runMELA=False;STXS_probs.py"\n'+
+                                     'Variables and pyFragments specified here in this way have precedence (override) over settings specified in the csv file.'
+                                ,)
 
         (self.options_,self.args_) = self.parser_.parse_args()
 
@@ -353,6 +355,7 @@ class MyBatchManager:
 
         # Extract additional variables specified with -a
         self.addVariables = {}
+        self.addPyFragments = {}
         if self.options_.variables != "" :
             vars = [s.strip() for s in self.options_.variables.split(";")]
             for v in vars:
@@ -366,6 +369,8 @@ class MyBatchManager:
                     self.addVariables[bareelement[0]] = float(bareelement[1])
                 else:
                   self.addVariables[bareelement[0]] = checkBool(bareelement[1])
+              elif len(bareelement) == 1 and bareelement[0].endswith(".py"): # check if this is a pyFragment
+                  self.addPyFragments[bareelement[0]] = bareelement[0] # Note: this is also handled as a dictionary even if only the key is used later on
               else:
                   # self.addVariables[bareelement[0]] = bareelement[0]
                   raise ValueError("ERROR: failed to parse -a '" + self.options_.variables + "': cannot parse: '" + v + "'")
@@ -489,7 +494,8 @@ class MyBatchManager:
        
        variables = splitComponents[value].variables | batchManager.addVariables
        pyFragments = splitComponents[value].pyFragments
-
+       pyFragments.update(self.addPyFragments)
+       
        if not 'IsMC' in variables: 
            variables['IsMC'] = True
            if 'PD' in variables and not variables['PD'] == '': variables['IsMC'] = False
@@ -504,7 +510,7 @@ class MyBatchManager:
        template_name = variables['SAMPLENAME'] + 'run_template_cfg.py'
        print('\tSaving template as %s/%s'%(os.path.basename(self.outputDir_), template_name))
        print("\tParameters: ", variables)
-       print('\tpyFragments: ',splitComponents[value].pyFragments)
+       print('\tpyFragments: ', [pf for pf in pyFragments])
 #       print('jobDir=',jobDir)
 
        cfgFile = open('%s/%s'%(self.outputDir_, template_name),'w')
