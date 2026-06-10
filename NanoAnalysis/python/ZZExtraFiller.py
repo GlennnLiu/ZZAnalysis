@@ -11,8 +11,7 @@
 from __future__ import print_function
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
-#from PhysicsTools.NanoAODTools.postprocessing.tools import deltaR
-from ctypes import c_float
+from ZZAnalysis.NanoAnalysis.tools import branchCollection, rebuildCandidate
 import heapq
 import Mela
 
@@ -26,20 +25,33 @@ class ZZExtraFiller(Module):
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
-        self.bookExtra("ZZCand")
+        self.fillerSR = branchCollection(wrappedOutputTree, lenVar="nZZCand")
+        self.bookExtra("ZZCand", self.fillerSR)
         if self.processCR :
-            self.bookExtra("ZLLCand")
+            self.fillerCR = branchCollection(wrappedOutputTree, lenVar="nZLLCand")
+            self.bookExtra("ZLLCand", self.fillerCR)
 
-    def bookExtra(self, collName) :
-        theLenVar="n"+collName
-        self.out.branch(collName+"_nExtraLep", "I", lenVar=theLenVar, title="number of extra leptons passing H4l full sel")
-        self.out.branch(collName+"_extraLep1Idx", "S", lenVar=theLenVar, title="index of the first extra lepton (ordered by descending pT)")
-        self.out.branch(collName+"_extraLep2Idx", "S", lenVar=theLenVar, title="index of the second extra lepton (ordered by descending pT)")
-        self.out.branch(collName+"_nExtraZ", "I", lenVar=theLenVar, title="number of extra Zs passing H4l full sel")
+    def bookExtra(self, collName, filler) :
+        filler.branch(collName+"_nExtraLep", "I",    title="number of extra leptons passing H4l full sel")
+        filler.branch(collName+"_extraLep1Idx", "S", title="index of the first extra lepton (ordered by descending pT)")
+        filler.branch(collName+"_extraLep2Idx", "S", title="index of the second extra lepton (ordered by descending pT)")
+        filler.branch(collName+"_nExtraZ", "I",      title="number of extra Zs passing H4l full sel")
+
         if self.isMC:
-            self.out.branch(collName+"_dataMCWeight", "F", lenVar=theLenVar, title="data/MC efficiency correction weight", limitedPrecision=12)
+            filler.branch(collName+"_dataMCWeight", "F", title="data/MC efficiency correction weight", limitedPrecision=12)
+            if collName=="ZZCand" : #Only for SR for the time being
+                filler.branch("ZZCand_escaleUp_mass", "F", title="mass, ele scale up var", limitedPrecision=18) # 18 bits = <0.2 MeV rounding
+                filler.branch("ZZCand_escaleDn_mass", "F", title="mass, ele scale dn var", limitedPrecision=18)
+                filler.branch("ZZCand_esmearUp_mass", "F", title="mass, ele scale up var", limitedPrecision=18)
+                filler.branch("ZZCand_esmearDn_mass", "F", title="mass, ele scale dn var", limitedPrecision=18)
+                filler.branch("ZZCand_muscaleUp_mass", "F", title="mass, mu scale up var", limitedPrecision=18)
+                filler.branch("ZZCand_muscaleDn_mass", "F", title="mass, mu scale dn var", limitedPrecision=18)
+                filler.branch("ZZCand_musmearUp_mass", "F", title="mass, mu scale up var", limitedPrecision=18)
+                filler.branch("ZZCand_musmearDn_mass", "F", title="mass, mu scale dn var", limitedPrecision=18)
 
-        # Book MELA angle branches
+                
+        # Book MELA angle branches. These will have to be moved to RecoProbFiller.
+        theLenVar="n"+collName
         self.out.branch(collName + "_costheta1", "F", lenVar=theLenVar, limitedPrecision=12)
         self.out.branch(collName + "_costheta2", "F", lenVar=theLenVar, limitedPrecision=12)
         self.out.branch(collName + "_Phi", "F", lenVar=theLenVar, limitedPrecision=12)
@@ -51,22 +63,16 @@ class ZZExtraFiller(Module):
         muons = Collection(event, "Muon")
         self.leps = list(electrons) + list(muons)
         self.Zs = Collection(event, 'ZCand')
+        self.fsrPhotons = Collection(event, "FsrPhoton")
 
-        self.addExtra('ZZCand', event)
+        self.addExtra('ZZCand', event, self.fillerSR)
         if self.processCR :
-            self.addExtra('ZLLCand', event)
+            self.addExtra('ZLLCand', event, self.fillerCR)
 
         return True
 
-    def addExtra(self, collName, event) :
+    def addExtra(self, collName, event, filler) :
         cands = Collection(event, collName)
-        fsrPhotons = Collection(event, "FsrPhoton")
-
-        nExtraLeps = [-1]*len(cands)
-        extraLep1Idx = [-1]*len(cands)
-        extraLep2Idx = [-1]*len(cands)
-        nExtraZs = [-1]*len(cands)
-        wDataMC = [-1]*len(cands)
 
         # MELA angle arrays
         helcosthetaZ1s = [-999.] * len(cands)
@@ -91,22 +97,29 @@ class ZZExtraFiller(Module):
             for iZ, Z in enumerate(self.Zs) :
                 if Z.l1Idx in theCandLepIdxs or Z.l2Idx in theCandLepIdxs : continue
                 extraZs.append(iZ)
-            nExtraLeps[iCand] = len(extraLeps)
+            filler.appendValue(collName+"_nExtraLep", len(extraLeps))
             # Take the two highest-pT additional leptons
             leadingLeps = (heapq.nlargest(2, extraLeps, key=lambda x: self.leps[x].pt) + [-1, -1])[:2]
-            if nExtraLeps[iCand] > 0:
-                extraLep1Idx[iCand] = leadingLeps[0]
-            if nExtraLeps[iCand] > 1:
-                extraLep2Idx[iCand] = leadingLeps[1]
-            nExtraZs[iCand] = len(extraZs)
+            filler.appendValue(collName+"_extraLep1Idx", leadingLeps[0])
+            filler.appendValue(collName+"_extraLep2Idx", leadingLeps[1])
+            filler.appendValue(collName+"_nExtraZ", len(extraZs))
 
             theCandLeps = [self.leps[i] for i in theCandLepIdxs] 
             if self.isMC:
-                wDataMC[iCand] = self.getDataMCWeight(theCandLeps)
+                filler.appendValue(collName+"_dataMCWeight", self.getDataMCWeight(theCandLeps))
+                if collName=="ZZCand" :
+                    filler.appendValue("ZZCand_escaleUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleUp_pt if abs(l.pdgId)==11 else l.pt)))
+                    filler.appendValue("ZZCand_escaleDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleDn_pt if abs(l.pdgId)==11 else l.pt)))
+                    filler.appendValue("ZZCand_esmearUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearUp_pt if abs(l.pdgId)==11 else l.pt)))
+                    filler.appendValue("ZZCand_esmearDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearDn_pt if abs(l.pdgId)==11 else l.pt)))
+                    filler.appendValue("ZZCand_muscaleUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleUp_pt if abs(l.pdgId)==13 else l.pt)))
+                    filler.appendValue("ZZCand_muscaleDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleDn_pt if abs(l.pdgId)==13 else l.pt)))
+                    filler.appendValue("ZZCand_musmearUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearUp_pt if abs(l.pdgId)==13 else l.pt)))
+                    filler.appendValue("ZZCand_musmearDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearDn_pt if abs(l.pdgId)==13 else l.pt)))
 
             # Kinematic angles 
             
-            dressedLepsp4 = [self.getDressedP4(l, fsrPhotons) for l in theCandLeps]
+            dressedLepsp4 = [self.getDressedP4(l, self.fsrPhotons) for l in theCandLeps]
             
 
             if self.MELA != None: 
@@ -136,12 +149,7 @@ class ZZExtraFiller(Module):
                 mZ1s[iCand] = mZ1
                 mZ2s[iCand] = mZ2
         
-        self.out.fillBranch(collName+"_nExtraLep", nExtraLeps)
-        self.out.fillBranch(collName+"_extraLep1Idx", extraLep1Idx)
-        self.out.fillBranch(collName+"_extraLep2Idx", extraLep2Idx)
-        self.out.fillBranch(collName+"_nExtraZ", nExtraZs)
-        if self.isMC:
-            self.out.fillBranch(collName+"_dataMCWeight", wDataMC)    
+        filler.fillBranches(cands)
 
         # Fill MELA angle branches
         self.out.fillBranch(collName + "_costheta1", helcosthetaZ1s)
@@ -166,4 +174,6 @@ class ZZExtraFiller(Module):
             
         return dataMCWeight
 
-        
+    def getVariedM(self, cand, leps, fsrPhotons, varied_pt_fun) :
+        ret, p4 = rebuildCandidate(cand, leps, fsrPhotons, varied_pt_fun)
+        return p4.M() if ret == 0 else -p4.M() # Set as negative is failing kin cuts
