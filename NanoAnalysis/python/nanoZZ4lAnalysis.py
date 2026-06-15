@@ -197,11 +197,11 @@ reco_sequence = [lepFiller(cuts, LEPTON_SETUP, MUON_ID_BYMVA), # FSR and FSR-cor
                           candsToStore=CANDSTOSTORE,
                           debug=DEBUG), # Build ZZ candidates; choose best candidate; filter events with candidates
                  jetFiller(year=LEPTON_SETUP), # Jets cleaning with leptons
-                 ZZExtraFiller(mela, IsMC, LEPTON_SETUP, DATA_TAG, PROCESS_CR), # Additional variables to selected candidates
+                 ZZExtraFiller(IsMC, LEPTON_SETUP, DATA_TAG, PROCESS_CR), # Additional variables to selected candidates
                  ]
-if melaSettings != None:
+if runMELA is not None:
     from ZZAnalysis.NanoAnalysis.RecoProbFiller import *
-    reco_sequence.append(RecoProbFiller(mela, NANOVERSION, melaSettings, processCR=PROCESS_CR))  #Reco level probabilities. 
+    reco_sequence.append(RecoProbFiller(mela, NANOVERSION, melaSettings, processCR=PROCESS_CR))  #Reco level angles and probabilities. 
 
 # Add muon scale corrections
 if APPLYMUCORR :

@@ -167,6 +167,7 @@ class branchCollection():
             getter = self.getters[i]
             if getter is not None:
                 vals = [getter(item) for item in collection]
+                self.out.fillBranch(name, vals)
             else :
                 vals = self.buffers[name]
                 if len(vals) != len(collection):
@@ -174,8 +175,8 @@ class branchCollection():
                         f"Buffer length mismatch for branch '{name}': "
                         f"expected {len(collection)}, got {len(self.buffers[name])}. "
                     )
-            self.out.fillBranch(name, vals)
-            vals.clear()
+                self.out.fillBranch(name, vals)
+                self.buffers[name] = []
 
 
 def getZaZb(zzleps, p4s) :
