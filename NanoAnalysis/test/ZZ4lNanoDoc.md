@@ -26,11 +26,13 @@ Jump to:
 | [**GenZZ**](#genzz) | product of pdgId of the four gen leptons from ZZ decay |
 | [**Generator**](#generator) | MC generator weight |
 | [**HLT**](#hlt) | pass ZZ Ele triggers |
-| [**HTXS**](#htxs) | number of jets with pt>30 GeV as identified in HTXS |
+| [**HTXS**](#htxs) | number of jets with pt>25 GeV as identified in HTXS |
 | [**Jet**](#jet) | slimmedJetsPuppi, i.e. ak4 PFJets Puppi with JECs applied, after basic selection (pt > 15) |
 | [**JetLeadingIdx**](#jetleadingidx) | index of leading jet after cleaning |
 | [**JetSubleadingIdx**](#jetsubleadingidx) | index of subleading jet after cleaning |
 | [**KFactor**](#kfactor) | EW k-factor for qqZZ |
+| [**LHEMela**](#lhemela) | In the Higgs" rest frame, theta_1 is the angle between the momentum of Z1 and the momentum of one of its decay products. |
+| [**LHEPart**](#lhepart) | PDG ID of LHE particles |
 | [**LHEPdfWeight**](#lhepdfweight) | LHE pdf variation weights (w_var / w_nominal) for LHA IDs 325300 - 325402 |
 | [**LHEReweightingWeight**](#lhereweightingweight) |  |
 | [**LHEScaleWeight**](#lhescaleweight) | LHE scale variation weights (w_var / w_nominal); [0] is renscfact=0.5d0 facscfact=0.5d0 ; [1] is renscfact=0.5d0 facscfact=1d0 ; [2] is renscfact=0.5d0 facscfact=2d0 ; [3] is renscfact=1d0 facscfact=0.5d0 ; [4] is renscfact=1d0 facscfact=1d0 ; [5] is renscfact=1d0 facscfact=2d0 ; [6] is renscfact=2d0 facscfact=0.5d0 ; [7] is renscfact=2d0 facscfact=1d0 ; [8] is renscfact=2d0 facscfact=2d0  |
@@ -44,7 +46,6 @@ Jump to:
 | [**ZLLCand**](#zllcand) | Z+LL control region candidates |
 | [**ZLLbest2P2FIdx**](#zllbest2p2fidx) | best candidate for the 2P2F CR |
 | [**ZLLbest3P1FIdx**](#zllbest3p1fidx) | best candidate for the 3P1F CR |
-| [**ZLLbestSIPCRIdx**](#zllbestsipcridx) | best candidate for the SIP CR |
 | [**ZLLbestSSIdx**](#zllbestssidx) | best candidate for the SS CR |
 | [**ZZCand**](#zzcand) | ZZ candidates passing the full H4l selection |
 | [**bestCandIdx**](#bestcandidx) | Index of seleced ZZCand candidate in the event |
@@ -54,7 +55,8 @@ Jump to:
 | [**ggH**](#ggh) | Reweighting for ggH as a function of njets and pT |
 | [**luminosityBlock**](#luminosityblock) | luminosityBlock/i |
 | [**nCleanedJetsPt30**](#ncleanedjetspt30) | number of cleaned jets above 30 GeV |
-| [**overallEventWeight**](#overalleventweight) | overallEventWeight/F |
+| [**nCleanedJetsPt30BTagged**](#ncleanedjetspt30btagged) | number of cleaned jets above 30 GeV passing the b-tagging requirement |
+| [**overallEventWeight**](#overalleventweight) | Event weight: Generator_weight*XS*puWeight*(relevant k-factors where applicable). Must be normalized by sum of genEventSumw in the Runs tree |
 | [**passedFiducial**](#passedfiducial) | event passes fiducial selection at gen level |
 | [**puWeight**](#puweight) | puWeight/F |
 | [**puWeightDn**](#puweightdn) | puWeightDn/F |
@@ -76,6 +78,7 @@ Jump to:
 | **Electron_cutBased** | UChar_t| cut-based ID RunIII Winter22 (0:fail, 1:veto, 2:loose, 3:medium, 4:tight) |
 | **Electron_cutBased_HEEP** | Bool_t| cut-based HEEP ID |
 | **Electron_dataMC** | Float_t| data/MC correction |
+| **Electron_dataMCUnc** | Float_t| data/MC correction relative uncertainty |
 | **Electron_deltaEtaSC** | Float_t| delta eta (SC,ele) with sign |
 | **Electron_dr03EcalRecHitSumEt** | Float_t| Non-PF Ecal isolation within a delta R cone of 0.3 with electron pt > 35 GeV |
 | **Electron_dr03HcalDepth1TowerSumEt** | Float_t| Non-PF Hcal isolation within a delta R cone of 0.3 with electron pt > 35 GeV |
@@ -118,21 +121,21 @@ Jump to:
 | **Electron_pfRelIso03_chg** | Float_t| PF relative isolation dR=0.3, charged component |
 | **Electron_phi** | Float_t| phi |
 | **Electron_photonIdx** | Short_t(index to Photon)| index of the first associated photon (-1 if none) |
-| **Electron_pt** | Float_t| pt |
+| **Electron_pt** | Float_t| pT (with scale/smearing corrections) |
 | **Electron_r9** | Float_t| R9 of the supercluster, calculated with full 5x5 region |
 | **Electron_scEtOverPt** | Float_t| (supercluster transverse energy)/pt-1 |
-| **Electron_scaleDn_pt** | Float_t| Electron_scaleDn_pt[nElectron]/F |
-| **Electron_scaleUp_pt** | Float_t| Electron_scaleUp_pt[nElectron]/F |
+| **Electron_scaleDn_pt** | Float_t| scale uncertainty |
+| **Electron_scaleUp_pt** | Float_t| scale uncertainty |
 | **Electron_seedGain** | UChar_t| Gain of the seed crystal |
 | **Electron_seediEtaOriX** | Char_t| iEta or iX of seed crystal. iEta is barrel-only, iX is endcap-only. iEta runs from -85 to +85, with no crystal at iEta=0. iX runs from 1 to 100. |
 | **Electron_seediPhiOriY** | Int_t| iPhi or iY of seed crystal. iPhi is barrel-only, iY is endcap-only. iPhi runs from 1 to 360. iY runs from 1 to 100. |
 | **Electron_sieie** | Float_t| sigma_IetaIeta of the supercluster, calculated with full 5x5 region |
 | **Electron_sip3d** | Float_t| 3D impact parameter significance wrt first PV, in cm |
-| **Electron_smearDn_pt** | Float_t| Electron_smearDn_pt[nElectron]/F |
-| **Electron_smearUp_pt** | Float_t| Electron_smearUp_pt[nElectron]/F |
+| **Electron_smearDn_pt** | Float_t| smearing uncertainty |
+| **Electron_smearUp_pt** | Float_t| smearing uncertainty |
 | **Electron_svIdx** | Short_t(index to Sv)| index of matching secondary vertex |
 | **Electron_tightCharge** | UChar_t| Tight charge criteria (0:none, 1:isGsfScPixChargeConsistent, 2:isGsfCtfScPixChargeConsistent) |
-| **Electron_uncorrected_pt** | Float_t| Electron_uncorrected_pt[nElectron]/F |
+| **Electron_uncorrected_pt** | Float_t| original (uncorrected) pT |
 | **Electron_vidNestedWPBitmap** | Int_t| VID compressed bitmap (MinPtCut,GsfEleSCEtaMultiRangeCut,GsfEleEBEECut,GsfEleEBEECut,GsfEleEBEECut,GsfEleHadronicOverEMEnergyScaledCut,GsfEleEBEECut,GsfEleRelPFIsoScaledCut,GsfEleConversionVetoCut,GsfEleMissingHitsCut), 3 bits per cut |
 | **Electron_vidNestedWPBitmapHEEP** | Int_t| VID compressed bitmap (MinPtCut,GsfEleSCEtaMultiRangeCut,GsfEleEBEECut,GsfEleEBEECut,GsfEleFull5x5SigmaIEtaIEtaWithSatCut,GsfEleFull5x5E2x5OverE5x5WithSatCut,GsfEleHadronicOverEMLinearCut,GsfEleTrkPtIsoCut,GsfEleEmHadD1IsoRhoCut,GsfEleDxyCut,GsfEleMissingHitsCut,GsfEleEcalDrivenCut), 1 bits per cut |
 | **nElectron** | Int_t| slimmedElectrons after basic selection (pt > 5 ) |
@@ -170,6 +173,8 @@ Jump to:
 ### <a id='fidzz'></a>FidZZ [<sup>[back to top]</sup>](#events-tree-content)
 | Object property | Type | Description |
 | - | - | - |
+| **FidZZ_GenJetLeadingIdx** | Short_t(index to Genjetleading)| FidZZ_GenJetLeadingIdx/S |
+| **FidZZ_GenJetSubleadingIdx** | Short_t(index to Genjetsubleading)| FidZZ_GenJetSubleadingIdx/S |
 | **FidZZ_Phi** | Float_t| FidZZ_Phi/F |
 | **FidZZ_Phi1** | Float_t| FidZZ_Phi1/F |
 | **FidZZ_Z1l1Idx** | Short_t(index to Z1L1)| Index of 1st Z1 daughter in FidDressedLeps collection |
@@ -181,6 +186,7 @@ Jump to:
 | **FidZZ_costhetastar** | Float_t| FidZZ_costhetastar/F |
 | **FidZZ_eta** | Float_t| FidZZ_eta/F |
 | **FidZZ_mass** | Float_t| mass of gen ZZ made with FidDressedLeps |
+| **FidZZ_nCleanedGenJetsPt30** | Char_t| FidZZ_nCleanedGenJetsPt30/B |
 | **FidZZ_phi** | Float_t| FidZZ_phi/F |
 | **FidZZ_pt** | Float_t| FidZZ_pt/F |
 | **FidZZ_rapidity** | Float_t| FidZZ_rapidity/F |
@@ -201,7 +207,7 @@ Jump to:
 | **Flag_HBHENoiseFilter** | Bool_t| Trigger/flag bit (process: PAT) |
 | **Flag_HBHENoiseIsoFilter** | Bool_t| Trigger/flag bit (process: PAT) |
 | **Flag_HcalStripHaloFilter** | Bool_t| Trigger/flag bit (process: PAT) |
-| **Flag_JetVetoed** | Int_t| Event veto flag from Jet Veto Map |
+| **Flag_JetVetoed** | Bool_t| Event veto flag from Jet Veto Map |
 | **Flag_METFilters** | Bool_t| Trigger/flag bit (process: PAT) |
 | **Flag_chargedHadronTrackResolutionFilter** | Bool_t| Trigger/flag bit (process: PAT) |
 | **Flag_ecalBadCalibFilter** | Bool_t| Trigger/flag bit (process: PAT) |
@@ -295,14 +301,70 @@ Jump to:
 | - | - | - |
 | **HTXS_Higgs_pt** | Float_t| pt of the Higgs boson as identified in HTXS |
 | **HTXS_Higgs_y** | Float_t| rapidity of the Higgs boson as identified in HTXS |
+| **HTXS_njets25** | UChar_t| number of jets with pt>25 GeV as identified in HTXS |
 | **HTXS_njets30** | UChar_t| number of jets with pt>30 GeV as identified in HTXS |
+| **HTXS_stage1_1_cat_pTjet25GeV** | Int_t| HTXS stage-1.1 category(jet pt>25 GeV) |
+| **HTXS_stage1_1_cat_pTjet30GeV** | Int_t| HTXS stage-1.1 category(jet pt>30 GeV) |
+| **HTXS_stage1_1_fine_cat_pTjet25GeV** | Int_t| HTXS stage-1.1-fine category(jet pt>25 GeV) |
+| **HTXS_stage1_1_fine_cat_pTjet30GeV** | Int_t| HTXS stage-1.1-fine category(jet pt>30 GeV) |
+| **HTXS_stage1_2_cat_pTjet25GeV** | Int_t| HTXS stage-1.2 category(jet pt>25 GeV) |
+| **HTXS_stage1_2_cat_pTjet30GeV** | Int_t| HTXS stage-1.2 category(jet pt>30 GeV) |
+| **HTXS_stage1_2_fine_cat_pTjet25GeV** | Int_t| HTXS stage-1.2-fine category(jet pt>25 GeV) |
+| **HTXS_stage1_2_fine_cat_pTjet30GeV** | Int_t| HTXS stage-1.2-fine category(jet pt>30 GeV) |
+| **HTXS_stage_0** | Int_t| HTXS stage-0 category |
+| **HTXS_stage_1_pTjet25** | Int_t| HTXS stage-1 category (jet pt>25 GeV) |
+| **HTXS_stage_1_pTjet30** | Int_t| HTXS stage-1 category (jet pt>30 GeV) |
 
 ### <a id='jet'></a>Jet [<sup>[back to top]</sup>](#events-tree-content)
 | Object property | Type | Description |
 | - | - | - |
+| **Jet_Absolute_2022EE_ScaleDn_mass** | Float_t| Jet_Absolute_2022EE_ScaleDn_mass[nJet]/F |
+| **Jet_Absolute_2022EE_ScaleDn_pt** | Float_t| Jet_Absolute_2022EE_ScaleDn_pt[nJet]/F |
+| **Jet_Absolute_2022EE_ScaleUp_mass** | Float_t| Jet_Absolute_2022EE_ScaleUp_mass[nJet]/F |
+| **Jet_Absolute_2022EE_ScaleUp_pt** | Float_t| Jet_Absolute_2022EE_ScaleUp_pt[nJet]/F |
+| **Jet_Absolute_ScaleDn_mass** | Float_t| Jet_Absolute_ScaleDn_mass[nJet]/F |
+| **Jet_Absolute_ScaleDn_pt** | Float_t| Jet_Absolute_ScaleDn_pt[nJet]/F |
+| **Jet_Absolute_ScaleUp_mass** | Float_t| Jet_Absolute_ScaleUp_mass[nJet]/F |
+| **Jet_Absolute_ScaleUp_pt** | Float_t| Jet_Absolute_ScaleUp_pt[nJet]/F |
+| **Jet_BBEC1_2022EE_ScaleDn_mass** | Float_t| Jet_BBEC1_2022EE_ScaleDn_mass[nJet]/F |
+| **Jet_BBEC1_2022EE_ScaleDn_pt** | Float_t| Jet_BBEC1_2022EE_ScaleDn_pt[nJet]/F |
+| **Jet_BBEC1_2022EE_ScaleUp_mass** | Float_t| Jet_BBEC1_2022EE_ScaleUp_mass[nJet]/F |
+| **Jet_BBEC1_2022EE_ScaleUp_pt** | Float_t| Jet_BBEC1_2022EE_ScaleUp_pt[nJet]/F |
+| **Jet_BBEC1_ScaleDn_mass** | Float_t| Jet_BBEC1_ScaleDn_mass[nJet]/F |
+| **Jet_BBEC1_ScaleDn_pt** | Float_t| Jet_BBEC1_ScaleDn_pt[nJet]/F |
+| **Jet_BBEC1_ScaleUp_mass** | Float_t| Jet_BBEC1_ScaleUp_mass[nJet]/F |
+| **Jet_BBEC1_ScaleUp_pt** | Float_t| Jet_BBEC1_ScaleUp_pt[nJet]/F |
+| **Jet_EC2_2022EE_ScaleDn_mass** | Float_t| Jet_EC2_2022EE_ScaleDn_mass[nJet]/F |
+| **Jet_EC2_2022EE_ScaleDn_pt** | Float_t| Jet_EC2_2022EE_ScaleDn_pt[nJet]/F |
+| **Jet_EC2_2022EE_ScaleUp_mass** | Float_t| Jet_EC2_2022EE_ScaleUp_mass[nJet]/F |
+| **Jet_EC2_2022EE_ScaleUp_pt** | Float_t| Jet_EC2_2022EE_ScaleUp_pt[nJet]/F |
+| **Jet_EC2_ScaleDn_mass** | Float_t| Jet_EC2_ScaleDn_mass[nJet]/F |
+| **Jet_EC2_ScaleDn_pt** | Float_t| Jet_EC2_ScaleDn_pt[nJet]/F |
+| **Jet_EC2_ScaleUp_mass** | Float_t| Jet_EC2_ScaleUp_mass[nJet]/F |
+| **Jet_EC2_ScaleUp_pt** | Float_t| Jet_EC2_ScaleUp_pt[nJet]/F |
+| **Jet_FlavorQCD_ScaleDn_mass** | Float_t| Jet_FlavorQCD_ScaleDn_mass[nJet]/F |
+| **Jet_FlavorQCD_ScaleDn_pt** | Float_t| Jet_FlavorQCD_ScaleDn_pt[nJet]/F |
+| **Jet_FlavorQCD_ScaleUp_mass** | Float_t| Jet_FlavorQCD_ScaleUp_mass[nJet]/F |
+| **Jet_FlavorQCD_ScaleUp_pt** | Float_t| Jet_FlavorQCD_ScaleUp_pt[nJet]/F |
+| **Jet_HF_2022EE_ScaleDn_mass** | Float_t| Jet_HF_2022EE_ScaleDn_mass[nJet]/F |
+| **Jet_HF_2022EE_ScaleDn_pt** | Float_t| Jet_HF_2022EE_ScaleDn_pt[nJet]/F |
+| **Jet_HF_2022EE_ScaleUp_mass** | Float_t| Jet_HF_2022EE_ScaleUp_mass[nJet]/F |
+| **Jet_HF_2022EE_ScaleUp_pt** | Float_t| Jet_HF_2022EE_ScaleUp_pt[nJet]/F |
+| **Jet_HF_ScaleDn_mass** | Float_t| Jet_HF_ScaleDn_mass[nJet]/F |
+| **Jet_HF_ScaleDn_pt** | Float_t| Jet_HF_ScaleDn_pt[nJet]/F |
+| **Jet_HF_ScaleUp_mass** | Float_t| Jet_HF_ScaleUp_mass[nJet]/F |
+| **Jet_HF_ScaleUp_pt** | Float_t| Jet_HF_ScaleUp_pt[nJet]/F |
 | **Jet_PNetRegPtRawCorr** | Float_t| ParticleNet universal flavor-aware visible pT regression (no neutrinos), correction relative to raw jet pT |
 | **Jet_PNetRegPtRawCorrNeutrino** | Float_t| ParticleNet universal flavor-aware pT regression neutrino correction, relative to visible. To apply full regression, multiply raw jet pT by both PNetRegPtRawCorr and PNetRegPtRawCorrNeutrino. |
 | **Jet_PNetRegPtRawRes** | Float_t| ParticleNet universal flavor-aware jet pT resolution estimator, (q84 - q16)/2 |
+| **Jet_RelativeBal_ScaleDn_mass** | Float_t| Jet_RelativeBal_ScaleDn_mass[nJet]/F |
+| **Jet_RelativeBal_ScaleDn_pt** | Float_t| Jet_RelativeBal_ScaleDn_pt[nJet]/F |
+| **Jet_RelativeBal_ScaleUp_mass** | Float_t| Jet_RelativeBal_ScaleUp_mass[nJet]/F |
+| **Jet_RelativeBal_ScaleUp_pt** | Float_t| Jet_RelativeBal_ScaleUp_pt[nJet]/F |
+| **Jet_RelativeSample_2022EE_ScaleDn_mass** | Float_t| Jet_RelativeSample_2022EE_ScaleDn_mass[nJet]/F |
+| **Jet_RelativeSample_2022EE_ScaleDn_pt** | Float_t| Jet_RelativeSample_2022EE_ScaleDn_pt[nJet]/F |
+| **Jet_RelativeSample_2022EE_ScaleUp_mass** | Float_t| Jet_RelativeSample_2022EE_ScaleUp_mass[nJet]/F |
+| **Jet_RelativeSample_2022EE_ScaleUp_pt** | Float_t| Jet_RelativeSample_2022EE_ScaleUp_pt[nJet]/F |
 | **Jet_ZZLepEF** | Float_t| Fraction of jet pt carried by the vetoing leptons or FSR photons |
 | **Jet_ZZMask** | Bool_t| jet is vetoed by selected leptons or FSR photons |
 | **Jet_area** | Float_t| jet catchment area, for JECs |
@@ -319,8 +381,13 @@ Jump to:
 | **Jet_btagRobustParTAK4CvB** | Float_t| RobustParTAK4 c vs b+bb+lepb discriminator |
 | **Jet_btagRobustParTAK4CvL** | Float_t| RobustParTAK4 c vs uds+g discriminator |
 | **Jet_btagRobustParTAK4QG** | Float_t| RobustParTAK4 g vs uds discriminator |
+| **Jet_btagSF** | Float_t| B-tagging scale factor for the jet |
 | **Jet_chEmEF** | Float_t| charged Electromagnetic Energy Fraction |
 | **Jet_chHEF** | Float_t| charged Hadron Energy Fraction |
+| **Jet_correlatedDn_btagSF** | Float_t| B-tagging scale factor for the jet, down variation, correlated |
+| **Jet_correlatedDn_isBtaggedwithSF** | Bool_t| Whether the jet is b-tagged according to the particleNet tagger, after applying SF down variation, correlated |
+| **Jet_correlatedUp_btagSF** | Float_t| B-tagging scale factor for the jet, up variation, correlated |
+| **Jet_correlatedUp_isBtaggedwithSF** | Bool_t| Whether the jet is b-tagged according to the particleNet tagger, after applying SF up variation, correlated |
 | **Jet_electronIdx1** | Short_t(index to Electron)| index of first matching electron |
 | **Jet_electronIdx2** | Short_t(index to Electron)| index of second matching electron |
 | **Jet_eta** | Float_t| eta |
@@ -330,9 +397,11 @@ Jump to:
 | **Jet_hfcentralEtaStripSize** | Int_t| eta size of the central tower strip in HF (noise discriminating variable) |
 | **Jet_hfsigmaEtaEta** | Float_t| sigmaEtaEta for HF jets (noise discriminating variable) |
 | **Jet_hfsigmaPhiPhi** | Float_t| sigmaPhiPhi for HF jets (noise discriminating variable) |
+| **Jet_isBtagged** | Bool_t| Whether the jet is b-tagged according to the particleNet tagger |
+| **Jet_isBtaggedwithSF** | Bool_t| Whether the jet is b-tagged according to the particleNet tagger, after applying SF |
 | **Jet_jetId** | UChar_t| Corrected Jet ID based on manual recipe for NanoAODv12 |
 | **Jet_jetIdOriginal** | UChar_t| Original Jet ID from NanoAOD |
-| **Jet_mass** | Float_t| mass |
+| **Jet_mass** | Float_t| mass (with JES/JER corrections) |
 | **Jet_muEF** | Float_t| muon Energy Fraction |
 | **Jet_muonIdx1** | Short_t(index to Muon)| index of first matching muon |
 | **Jet_muonIdx2** | Short_t(index to Muon)| index of second matching muon |
@@ -345,20 +414,21 @@ Jump to:
 | **Jet_neHEF** | Float_t| neutral Hadron Energy Fraction |
 | **Jet_partonFlavour** | Short_t| flavour from parton matching |
 | **Jet_phi** | Float_t| phi |
-| **Jet_pt** | Float_t| pt |
+| **Jet_pt** | Float_t| pT (with JES/JER corrections) |
+| **Jet_ptThreshold** | Float_t| pT threshold applied to the jet for counting nCleanedJetsPt30, etc. |
 | **Jet_rawFactor** | Float_t| 1 - Factor to get back to raw pT |
-| **Jet_scaleDn_mass** | Float_t| Jet_scaleDn_mass[nJet]/F |
-| **Jet_scaleDn_pt** | Float_t| Jet_scaleDn_pt[nJet]/F |
-| **Jet_scaleUp_mass** | Float_t| Jet_scaleUp_mass[nJet]/F |
-| **Jet_scaleUp_pt** | Float_t| Jet_scaleUp_pt[nJet]/F |
-| **Jet_smearDn_mass** | Float_t| Jet_smearDn_mass[nJet]/F |
-| **Jet_smearDn_pt** | Float_t| Jet_smearDn_pt[nJet]/F |
-| **Jet_smearUp_mass** | Float_t| Jet_smearUp_mass[nJet]/F |
-| **Jet_smearUp_pt** | Float_t| Jet_smearUp_pt[nJet]/F |
+| **Jet_smearDn_mass** | Float_t| smearing uncertainty |
+| **Jet_smearDn_pt** | Float_t| smearing uncertainty |
+| **Jet_smearUp_mass** | Float_t| smearing uncertainty |
+| **Jet_smearUp_pt** | Float_t| smearing uncertainty |
 | **Jet_svIdx1** | Short_t(index to Sv)| index of first matching secondary vertex |
 | **Jet_svIdx2** | Short_t(index to Sv)| index of second matching secondary vertex |
-| **Jet_uncorrected_mass** | Float_t| Jet_uncorrected_mass[nJet]/F |
-| **Jet_uncorrected_pt** | Float_t| Jet_uncorrected_pt[nJet]/F |
+| **Jet_uncorrected_mass** | Float_t| original (uncorrected) mass |
+| **Jet_uncorrected_pt** | Float_t| original (uncorrected) pT |
+| **Jet_uncorrelatedDn_btagSF** | Float_t| B-tagging scale factor for the jet, down variation, uncorrelated |
+| **Jet_uncorrelatedDn_isBtaggedwithSF** | Bool_t| Whether the jet is b-tagged according to the particleNet tagger, after applying SF down variation, uncorrelated |
+| **Jet_uncorrelatedUp_btagSF** | Float_t| B-tagging scale factor for the jet, up variation, uncorrelated |
+| **Jet_uncorrelatedUp_isBtaggedwithSF** | Bool_t| Whether the jet is b-tagged according to the particleNet tagger, after applying SF up variation, uncorrelated |
 | **nJet** | Int_t| slimmedJetsPuppi, i.e. ak4 PFJets Puppi with JECs applied, after basic selection (pt > 15) |
 
 ### <a id='jetleadingidx'></a>JetLeadingIdx [<sup>[back to top]</sup>](#events-tree-content)
@@ -375,6 +445,28 @@ Jump to:
 | Object property | Type | Description |
 | - | - | - |
 | **KFactor_EW_qqZZ_Weight** | Float_t| EW k-factor for qqZZ |
+
+### <a id='lhemela'></a>LHEMela [<sup>[back to top]</sup>](#events-tree-content)
+| Object property | Type | Description |
+| - | - | - |
+| **LHEMela_Phi** | Float_t| In the Higgs" rest frame, phi is the angle between the planes formed by the decay products of the two Z bosons. |
+| **LHEMela_Phi1** | Float_t| In the Higgs" rest frame, phi_1 is the angle between the decay plane of Z1 and the beamline. |
+| **LHEMela_costheta1** | Float_t| In the Higgs" rest frame, theta_1 is the angle between the momentum of Z1 and the momentum of one of its decay products. |
+| **LHEMela_costheta2** | Float_t| In the Higgs" rest frame, theta_2 is the angle between the momentum of Z2 and the momentum of one of its decay products. |
+| **LHEMela_costhetastar** | Float_t| In the Higgs" rest frame, theta_star is the angle between the beamline and the momentum of one of the Higgs" decay products. |
+
+### <a id='lhepart'></a>LHEPart [<sup>[back to top]</sup>](#events-tree-content)
+| Object property | Type | Description |
+| - | - | - |
+| **LHEPart_eta** | Float_t| Pseodorapidity of LHE particles |
+| **LHEPart_incomingpz** | Float_t| Pz of incoming LHE particles |
+| **LHEPart_mass** | Float_t| Mass of LHE particles |
+| **LHEPart_pdgId** | Int_t| PDG ID of LHE particles |
+| **LHEPart_phi** | Float_t| Phi of LHE particles |
+| **LHEPart_pt** | Float_t| Pt of LHE particles |
+| **LHEPart_spin** | Int_t| Spin of LHE particles |
+| **LHEPart_status** | Int_t| LHE particle status; -1:incoming, 1:outgoing |
+| **nLHEPart** | Int_t|  |
 
 ### <a id='lhepdfweight'></a>LHEPdfWeight [<sup>[back to top]</sup>](#events-tree-content)
 | Object property | Type | Description |
@@ -425,6 +517,7 @@ Jump to:
 | **Muon_bsConstrainedPtErr** | Float_t| pT error with beamspot constraint  |
 | **Muon_charge** | Int_t| electric charge |
 | **Muon_dataMC** | Float_t| data/MC correction |
+| **Muon_dataMCUnc** | Float_t| data/MC correction relative uncertainty |
 | **Muon_dxy** | Float_t| dxy (with sign) wrt first PV, in cm |
 | **Muon_dxyErr** | Float_t| dxy uncertainty, in cm |
 | **Muon_dxybs** | Float_t| dxy (with sign) wrt the beam spot, in cm |
@@ -469,17 +562,19 @@ Jump to:
 | **Muon_pfRelIso03_chg** | Float_t| PF relative isolation dR=0.3, charged component |
 | **Muon_pfRelIso04_all** | Float_t| PF relative isolation dR=0.4, total (deltaBeta corrections) |
 | **Muon_phi** | Float_t| phi |
-| **Muon_pt** | Float_t| corrected pT |
+| **Muon_pt** | Float_t| pT (with scale/smearing corrections) |
 | **Muon_ptErr** | Float_t| ptError of the muon track |
 | **Muon_puppiIsoId** | UChar_t| PuppiIsoId from miniAOD selector (1=Loose, 2=Medium, 3=Tight) |
+| **Muon_scaleDn_pt** | Float_t| scale uncertainty |
+| **Muon_scaleUp_pt** | Float_t| scale uncertainty |
 | **Muon_segmentComp** | Float_t| muon segment compatibility |
 | **Muon_sip3d** | Float_t| 3D impact parameter significance wrt first PV |
+| **Muon_smearDn_pt** | Float_t| smearing uncertainty |
+| **Muon_smearUp_pt** | Float_t| smearing uncertainty |
 | **Muon_softId** | Bool_t| soft cut-based ID |
 | **Muon_softMva** | Float_t| soft MVA ID score |
 | **Muon_softMvaId** | Bool_t| soft MVA ID |
-| **Muon_stat_pt** | Float_t| correction uncertainty |
 | **Muon_svIdx** | Short_t(index to Sv)| index of matching secondary vertex |
-| **Muon_syst_pt** | Float_t| correction uncertainty |
 | **Muon_tightCharge** | UChar_t| Tight charge criterion using pterr/pt of muonBestTrack (0:fail, 2:pass) |
 | **Muon_tightId** | Bool_t| cut-based ID, tight WP |
 | **Muon_tkIsoId** | UChar_t| TkIso ID (1=TkIsoLoose, 2=TkIsoTight) |
@@ -529,6 +624,22 @@ Jump to:
 | Object property | Type | Description |
 | - | - | - |
 | **ZLLCand_KD** | Float_t| ZLLCand_KD[nZLLCand]/F |
+| **ZLLCand_P_HadWH_SIG_ghw1_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZLLCand_P_HadWH_SIG_ghw1_1_JHUGen_JECNominal_mavjj** | Float_t| User-defined mavjj probability |
+| **ZLLCand_P_HadWH_SIG_ghw1_1_JHUGen_JECNominal_mavjj_true** | Float_t| User-defined mavjj_true probability |
+| **ZLLCand_P_HadZH_SIG_ghz1_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZLLCand_P_HadZH_SIG_ghz1_1_JHUGen_JECNominal_mavjj** | Float_t| User-defined mavjj probability |
+| **ZLLCand_P_HadZH_SIG_ghz1_1_JHUGen_JECNominal_mavjj_true** | Float_t| User-defined mavjj_true probability |
+| **ZLLCand_P_JJQCD_SIG_ghg2_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZLLCand_P_JJVBF_SIG_ghv1_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZLLCand_P_JQCD_SIG_ghg2_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZLLCand_P_JVBF_SIG_ghv1_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZLLCand_P_JVBF_SIG_ghv1_1_JHUGen_JECNominal_aux** | Float_t| User-defined auxiliary probability |
+| **ZLLCand_P_m4l_BKG** | Float_t| User-defined Reco-level probability |
+| **ZLLCand_P_m4l_BKG_ScaleDown** | Float_t| User-defined {self.ModuleContext}-level m4l probability with Scale uncertainties down |
+| **ZLLCand_P_m4l_BKG_ScaleUp** | Float_t| User-defined {self.ModuleContext}-level m4l probability with Scale uncertainties up |
+| **ZLLCand_P_m4l_BKG_SystDown** | Float_t| User-defined {self.ModuleContext}-level m4l probability with Systematic uncertainties down |
+| **ZLLCand_P_m4l_BKG_SystUp** | Float_t| User-defined {self.ModuleContext}-level m4l probability with Systematic uncertainties up |
 | **ZLLCand_Phi** | Float_t| ZLLCand_Phi[nZLLCand]/F |
 | **ZLLCand_Phi1** | Float_t| ZLLCand_Phi1[nZLLCand]/F |
 | **ZLLCand_Z1flav** | Int_t| ZLLCand_Z1flav[nZLLCand]/I |
@@ -544,6 +655,8 @@ Jump to:
 | **ZLLCand_costhetastar** | Float_t| ZLLCand_costhetastar[nZLLCand]/F |
 | **ZLLCand_dataMCWeight** | Float_t| data/MC efficiency correction weight |
 | **ZLLCand_eta** | Float_t| ZLLCand_eta[nZLLCand]/F |
+| **ZLLCand_extraLep1Idx** | Short_t(index to Extralep1)| index of the first extra lepton (ordered by descending pT) |
+| **ZLLCand_extraLep2Idx** | Short_t(index to Extralep2)| index of the second extra lepton (ordered by descending pT) |
 | **ZLLCand_mass** | Float_t| ZLLCand_mass[nZLLCand]/F |
 | **ZLLCand_massPreFSR** | Float_t| ZLLCand_massPreFSR[nZLLCand]/F |
 | **ZLLCand_nExtraLep** | Int_t| number of extra leptons passing H4l full sel |
@@ -563,11 +676,6 @@ Jump to:
 | - | - | - |
 | **ZLLbest3P1FIdx** | Short_t(index to Zllbest3P1F)| best candidate for the 3P1F CR |
 
-### <a id='zllbestsipcridx'></a>ZLLbestSIPCRIdx [<sup>[back to top]</sup>](#events-tree-content)
-| Object property | Type | Description |
-| - | - | - |
-| **ZLLbestSIPCRIdx** | Short_t(index to Zllbestsipcr)| best candidate for the SIP CR |
-
 ### <a id='zllbestssidx'></a>ZLLbestSSIdx [<sup>[back to top]</sup>](#events-tree-content)
 | Object property | Type | Description |
 | - | - | - |
@@ -577,6 +685,24 @@ Jump to:
 | Object property | Type | Description |
 | - | - | - |
 | **ZZCand_KD** | Float_t| Kinematic discriminant for the choice of best candidate |
+| **ZZCand_P_GG_SIG_ghg2_1_ghz1_1_JHUGen** | Float_t| p_GG_SIG_ghg2_1_ghz1_1_JHUGen probability for KD |
+| **ZZCand_P_HadWH_SIG_ghw1_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZZCand_P_HadWH_SIG_ghw1_1_JHUGen_JECNominal_mavjj** | Float_t| User-defined mavjj probability |
+| **ZZCand_P_HadWH_SIG_ghw1_1_JHUGen_JECNominal_mavjj_true** | Float_t| User-defined mavjj_true probability |
+| **ZZCand_P_HadZH_SIG_ghz1_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZZCand_P_HadZH_SIG_ghz1_1_JHUGen_JECNominal_mavjj** | Float_t| User-defined mavjj probability |
+| **ZZCand_P_HadZH_SIG_ghz1_1_JHUGen_JECNominal_mavjj_true** | Float_t| User-defined mavjj_true probability |
+| **ZZCand_P_JJQCD_SIG_ghg2_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZZCand_P_JJVBF_SIG_ghv1_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZZCand_P_JQCD_SIG_ghg2_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZZCand_P_JVBF_SIG_ghv1_1_JHUGen_JECNominal** | Float_t| User-defined Reco-level probability |
+| **ZZCand_P_JVBF_SIG_ghv1_1_JHUGen_JECNominal_aux** | Float_t| User-defined auxiliary probability |
+| **ZZCand_P_QQB_BKG_MCFM** | Float_t| p_QQB_BKG_MCFM probability for Kinematic discriminant |
+| **ZZCand_P_m4l_BKG** | Float_t| User-defined Reco-level probability |
+| **ZZCand_P_m4l_BKG_ScaleDown** | Float_t| User-defined {self.ModuleContext}-level m4l probability with Scale uncertainties down |
+| **ZZCand_P_m4l_BKG_ScaleUp** | Float_t| User-defined {self.ModuleContext}-level m4l probability with Scale uncertainties up |
+| **ZZCand_P_m4l_BKG_SystDown** | Float_t| User-defined {self.ModuleContext}-level m4l probability with Systematic uncertainties down |
+| **ZZCand_P_m4l_BKG_SystUp** | Float_t| User-defined {self.ModuleContext}-level m4l probability with Systematic uncertainties up |
 | **ZZCand_Phi** | Float_t| ZZCand_Phi[nZZCand]/F |
 | **ZZCand_Phi1** | Float_t| ZZCand_Phi1[nZZCand]/F |
 | **ZZCand_Z1flav** | Int_t| Product of the pdgIds of the 2 Z1 daughters |
@@ -588,13 +714,24 @@ Jump to:
 | **ZZCand_Z2l2Idx** | Short_t(index to Z2L2)| Index of 2nd Z2 daughter in the Electron+Muon merged collection |
 | **ZZCand_Z2mass** | Float_t| Z2 mass |
 | **ZZCand_Z2sumpt** | Float_t| sum of Z2 daughter pts (used in the choice of best candidate) |
+| **ZZCand_categoryMor18** | Short_t| Categorization |
 | **ZZCand_costheta1** | Float_t| ZZCand_costheta1[nZZCand]/F |
 | **ZZCand_costheta2** | Float_t| ZZCand_costheta2[nZZCand]/F |
 | **ZZCand_costhetastar** | Float_t| ZZCand_costhetastar[nZZCand]/F |
 | **ZZCand_dataMCWeight** | Float_t| data/MC efficiency correction weight |
+| **ZZCand_escaleDn_mass** | Float_t| mass, ele scale dn var |
+| **ZZCand_escaleUp_mass** | Float_t| mass, ele scale up var |
+| **ZZCand_esmearDn_mass** | Float_t| mass, ele scale dn var |
+| **ZZCand_esmearUp_mass** | Float_t| mass, ele scale up var |
 | **ZZCand_eta** | Float_t| ZZCand_eta[nZZCand]/F |
+| **ZZCand_extraLep1Idx** | Short_t(index to Extralep1)| index of the first extra lepton (ordered by descending pT) |
+| **ZZCand_extraLep2Idx** | Short_t(index to Extralep2)| index of the second extra lepton (ordered by descending pT) |
 | **ZZCand_mass** | Float_t| mass |
 | **ZZCand_massPreFSR** | Float_t| mass without FSR photons |
+| **ZZCand_muscaleDn_mass** | Float_t| mass, mu scale dn var |
+| **ZZCand_muscaleUp_mass** | Float_t| mass, mu scale up var |
+| **ZZCand_musmearDn_mass** | Float_t| mass, mu scale dn var |
+| **ZZCand_musmearUp_mass** | Float_t| mass, mu scale up var |
 | **ZZCand_nExtraLep** | Int_t| number of extra leptons passing H4l full sel |
 | **ZZCand_nExtraZ** | Int_t| number of extra Zs passing H4l full sel |
 | **ZZCand_phi** | Float_t| ZZCand_phi[nZZCand]/F |
@@ -636,13 +773,17 @@ Jump to:
 | Object property | Type | Description |
 | - | - | - |
 | **nCleanedJetsPt30** | Char_t| number of cleaned jets above 30 GeV |
-| **nCleanedJetsPt30_jesDn** | Char_t| number of cleaned jets, down JES variation |
-| **nCleanedJetsPt30_jesUp** | Char_t| number of cleaned jets, up JES variation |
+
+### <a id='ncleanedjetspt30btagged'></a>nCleanedJetsPt30BTagged [<sup>[back to top]</sup>](#events-tree-content)
+| Object property | Type | Description |
+| - | - | - |
+| **nCleanedJetsPt30BTagged** | Char_t| number of cleaned jets above 30 GeV passing the b-tagging requirement |
+| **nCleanedJetsPt30BTagged_bTagSF** | Char_t| number of cleaned jets above 30 GeV passing the b-tagging requirement with SF applied |
 
 ### <a id='overalleventweight'></a>overallEventWeight [<sup>[back to top]</sup>](#events-tree-content)
 | Object property | Type | Description |
 | - | - | - |
-| **overallEventWeight** | Float_t| overallEventWeight/F |
+| **overallEventWeight** | Float_t| Event weight: Generator_weight*XS*puWeight*(relevant k-factors where applicable). Must be normalized by sum of genEventSumw in the Runs tree |
 
 ### <a id='passedfiducial'></a>passedFiducial [<sup>[back to top]</sup>](#events-tree-content)
 | Object property | Type | Description |
@@ -679,8 +820,11 @@ Jump to:
 | [**FidZ2**](#fidz2) | FidZ2_mass/F |
 | [**FidZZ**](#fidzz) | Index of 1st Z1 daughter in FidDressedLeps collection |
 | [**GenDressedLepton**](#gendressedlepton) | Dressed leptons from Rivet-based ParticleLevelProducer |
+| [**GenJet**](#genjet) | slimmedGenJets, i.e. ak4 Jets made with visible genparticles |
+| [**GenJetAK8**](#genjetak8) | slimmedGenJetsAK8, i.e. ak8 Jets made with visible genparticles |
+| [**GenZZ**](#genzz) | product of pdgId of the four gen leptons from ZZ decay |
 | [**Generator**](#generator) | MC generator weight |
-| [**LHEPart**](#lhepart) | PDG ID of LHE particles |
+| [**HTXS**](#htxs) | number of jets with pt>25 GeV as identified in HTXS |
 | [**LHEPdfWeight**](#lhepdfweight) | LHE pdf variation weights (w_var / w_nominal) for LHA IDs 325300 - 325402 |
 | [**LHEReweightingWeight**](#lhereweightingweight) |  |
 | [**LHEScaleWeight**](#lhescaleweight) | LHE scale variation weights (w_var / w_nominal); [0] is renscfact=0.5d0 facscfact=0.5d0 ; [1] is renscfact=0.5d0 facscfact=1d0 ; [2] is renscfact=0.5d0 facscfact=2d0 ; [3] is renscfact=1d0 facscfact=0.5d0 ; [4] is renscfact=1d0 facscfact=1d0 ; [5] is renscfact=1d0 facscfact=2d0 ; [6] is renscfact=2d0 facscfact=0.5d0 ; [7] is renscfact=2d0 facscfact=1d0 ; [8] is renscfact=2d0 facscfact=2d0  |
@@ -688,7 +832,7 @@ Jump to:
 | [**event**](#event) | event/l |
 | [**ggH**](#ggh) | Reweighting for ggH as a function of njets and pT |
 | [**luminosityBlock**](#luminosityblock) | luminosityBlock/i |
-| [**overallEventWeight**](#overalleventweight) | overallEventWeight/F |
+| [**overallEventWeight**](#overalleventweight) | Event weight: Generator_weight*XS*puWeight*(relevant k-factors where applicable). Must be normalized by sum of genEventSumw in the Runs tree |
 | [**passedFiducial**](#passedfiducial) | event passes fiducial selection at gen level |
 | [**puWeight**](#puweight) | puWeight/F |
 | [**puWeightDn**](#puweightdn) | puWeightDn/F |
@@ -730,6 +874,8 @@ Jump to:
 ### <a id='fidzz'></a>FidZZ [<sup>[back to top]</sup>](#allevents-tree-content)
 | Object property | Type | Description |
 | - | - | - |
+| **FidZZ_GenJetLeadingIdx** | Short_t(index to Genjetleading)| FidZZ_GenJetLeadingIdx/S |
+| **FidZZ_GenJetSubleadingIdx** | Short_t(index to Genjetsubleading)| FidZZ_GenJetSubleadingIdx/S |
 | **FidZZ_Phi** | Float_t| FidZZ_Phi/F |
 | **FidZZ_Phi1** | Float_t| FidZZ_Phi1/F |
 | **FidZZ_Z1l1Idx** | Short_t(index to Z1L1)| Index of 1st Z1 daughter in FidDressedLeps collection |
@@ -741,6 +887,7 @@ Jump to:
 | **FidZZ_costhetastar** | Float_t| FidZZ_costhetastar/F |
 | **FidZZ_eta** | Float_t| FidZZ_eta/F |
 | **FidZZ_mass** | Float_t| mass of gen ZZ made with FidDressedLeps |
+| **FidZZ_nCleanedGenJetsPt30** | Char_t| FidZZ_nCleanedGenJetsPt30/B |
 | **FidZZ_phi** | Float_t| FidZZ_phi/F |
 | **FidZZ_pt** | Float_t| FidZZ_pt/F |
 | **FidZZ_rapidity** | Float_t| FidZZ_rapidity/F |
@@ -756,23 +903,56 @@ Jump to:
 | **GenDressedLepton_pt** | Float_t| pt |
 | **nGenDressedLepton** | Int_t| Dressed leptons from Rivet-based ParticleLevelProducer |
 
+### <a id='genjet'></a>GenJet [<sup>[back to top]</sup>](#allevents-tree-content)
+| Object property | Type | Description |
+| - | - | - |
+| **GenJet_eta** | Float_t| eta |
+| **GenJet_hadronFlavour** | UChar_t| flavour from hadron ghost clustering |
+| **GenJet_mass** | Float_t| mass |
+| **GenJet_partonFlavour** | Short_t| flavour from parton matching |
+| **GenJet_phi** | Float_t| phi |
+| **GenJet_pt** | Float_t| pt |
+| **nGenJet** | Int_t| slimmedGenJets, i.e. ak4 Jets made with visible genparticles |
+
+### <a id='genjetak8'></a>GenJetAK8 [<sup>[back to top]</sup>](#allevents-tree-content)
+| Object property | Type | Description |
+| - | - | - |
+| **GenJetAK8_eta** | Float_t| eta |
+| **GenJetAK8_hadronFlavour** | UChar_t| flavour from hadron ghost clustering |
+| **GenJetAK8_mass** | Float_t| mass |
+| **GenJetAK8_partonFlavour** | Short_t| flavour from parton matching |
+| **GenJetAK8_phi** | Float_t| phi |
+| **GenJetAK8_pt** | Float_t| pt |
+| **nGenJetAK8** | Int_t| slimmedGenJetsAK8, i.e. ak8 Jets made with visible genparticles |
+
+### <a id='genzz'></a>GenZZ [<sup>[back to top]</sup>](#allevents-tree-content)
+| Object property | Type | Description |
+| - | - | - |
+| **GenZZ_FinalState** | Int_t| product of pdgId of the four gen leptons from ZZ decay |
+
 ### <a id='generator'></a>Generator [<sup>[back to top]</sup>](#allevents-tree-content)
 | Object property | Type | Description |
 | - | - | - |
 | **Generator_weight** | Float_t| MC generator weight |
 
-### <a id='lhepart'></a>LHEPart [<sup>[back to top]</sup>](#allevents-tree-content)
+### <a id='htxs'></a>HTXS [<sup>[back to top]</sup>](#allevents-tree-content)
 | Object property | Type | Description |
 | - | - | - |
-| **LHEPart_eta** | Float_t| Pseodorapidity of LHE particles |
-| **LHEPart_incomingpz** | Float_t| Pz of incoming LHE particles |
-| **LHEPart_mass** | Float_t| Mass of LHE particles |
-| **LHEPart_pdgId** | Int_t| PDG ID of LHE particles |
-| **LHEPart_phi** | Float_t| Phi of LHE particles |
-| **LHEPart_pt** | Float_t| Pt of LHE particles |
-| **LHEPart_spin** | Int_t| Spin of LHE particles |
-| **LHEPart_status** | Int_t| LHE particle status; -1:incoming, 1:outgoing |
-| **nLHEPart** | Int_t|  |
+| **HTXS_Higgs_pt** | Float_t| pt of the Higgs boson as identified in HTXS |
+| **HTXS_Higgs_y** | Float_t| rapidity of the Higgs boson as identified in HTXS |
+| **HTXS_njets25** | UChar_t| number of jets with pt>25 GeV as identified in HTXS |
+| **HTXS_njets30** | UChar_t| number of jets with pt>30 GeV as identified in HTXS |
+| **HTXS_stage1_1_cat_pTjet25GeV** | Int_t| HTXS stage-1.1 category(jet pt>25 GeV) |
+| **HTXS_stage1_1_cat_pTjet30GeV** | Int_t| HTXS stage-1.1 category(jet pt>30 GeV) |
+| **HTXS_stage1_1_fine_cat_pTjet25GeV** | Int_t| HTXS stage-1.1-fine category(jet pt>25 GeV) |
+| **HTXS_stage1_1_fine_cat_pTjet30GeV** | Int_t| HTXS stage-1.1-fine category(jet pt>30 GeV) |
+| **HTXS_stage1_2_cat_pTjet25GeV** | Int_t| HTXS stage-1.2 category(jet pt>25 GeV) |
+| **HTXS_stage1_2_cat_pTjet30GeV** | Int_t| HTXS stage-1.2 category(jet pt>30 GeV) |
+| **HTXS_stage1_2_fine_cat_pTjet25GeV** | Int_t| HTXS stage-1.2-fine category(jet pt>25 GeV) |
+| **HTXS_stage1_2_fine_cat_pTjet30GeV** | Int_t| HTXS stage-1.2-fine category(jet pt>30 GeV) |
+| **HTXS_stage_0** | Int_t| HTXS stage-0 category |
+| **HTXS_stage_1_pTjet25** | Int_t| HTXS stage-1 category (jet pt>25 GeV) |
+| **HTXS_stage_1_pTjet30** | Int_t| HTXS stage-1 category (jet pt>30 GeV) |
 
 ### <a id='lhepdfweight'></a>LHEPdfWeight [<sup>[back to top]</sup>](#allevents-tree-content)
 | Object property | Type | Description |
@@ -815,7 +995,7 @@ Jump to:
 ### <a id='overalleventweight'></a>overallEventWeight [<sup>[back to top]</sup>](#allevents-tree-content)
 | Object property | Type | Description |
 | - | - | - |
-| **overallEventWeight** | Float_t| overallEventWeight/F |
+| **overallEventWeight** | Float_t| Event weight: Generator_weight*XS*puWeight*(relevant k-factors where applicable). Must be normalized by sum of genEventSumw in the Runs tree |
 
 ### <a id='passedfiducial'></a>passedFiducial [<sup>[back to top]</sup>](#allevents-tree-content)
 | Object property | Type | Description |
