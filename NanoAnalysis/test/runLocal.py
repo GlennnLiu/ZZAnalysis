@@ -43,7 +43,8 @@ SampleToRun = "MC2022EE"
 setConf("PROCESS_CR", True)
 setConf("PROCESS_ZL", True)
 setConf("DEBUG", False)
-setConf("SYNCMODE", True) # Force muon resolution correction with fixed +1 sigma smearing
+#setConf("SYNCMODE", True) # Force muon resolution correction with fixed +1 sigma smearing (only for Run2 muon "Rochester" corrections)
+setConf("IsSIGNAL", True) # required for btagging corrections for signals; also adds AllEvents tree (extra tree of gen info for all events)
 #setConf("ADD_ALLEVENTS", True) # Add extra tree of gen info for all events
 #setConf("FILTER_EVENTS", 'Z') # Store all events which contain a good Z candidate
 #setConf("FILTER_EVENTS", '3L_20_10') # for trigger studies
@@ -205,9 +206,11 @@ elif SampleToRun == "forNanoDoc" :
     setConf("APPLY_QCD_GGF_UNCERT", True)
     setConf("PROCESS_CR", True)
     setConf("PROCESS_ZL", True)
-    setConf("ADD_ALLEVENTS", True)
+    setConf("IsSIGNAL", True) 
+    import prod.pyFragments.STXS_probs
     setConf("fileNames",["/store/mc/Run3Summer22EENanoAODv12/GluGluHtoZZto4L_M-125_TuneCP5_13p6TeV_powheg2-JHUGenV752-pythia8/NANOAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/2540000/25c8f5ff-9de0-4a0c-9e2f-757332ad392f.root"])
-
+    # Generate doc with: 
+    # ./inspectNanoFile.py 25c8f5ff-9de0-4a0c-9e2f-757332ad392f_Skim.root --docmd ZZ4lNanoDoc.md
 
 ################################################################################
 elif SampleToRun == "MELA_Test" : 
