@@ -15,7 +15,7 @@ from ZZAnalysis.NanoAnalysis.lepFiller import *
 from ZZAnalysis.NanoAnalysis.jetFiller import *
 from ZZAnalysis.NanoAnalysis.ZZFiller import *
 from ZZAnalysis.NanoAnalysis.ZZExtraFiller import *
-
+from ZZAnalysis.NanoAnalysis.modules.jetIdProducer import getJetIdProducer
 
 ### Get processing customizations, if defined in the including .py; use defaults otherwise
 DEBUG = getConf("DEBUG", False)
@@ -196,6 +196,7 @@ reco_sequence = [lepFiller(cuts, LEPTON_SETUP, MUON_ID_BYMVA), # FSR and FSR-cor
                           filter=FILTER_EVENTS,
                           candsToStore=CANDSTOSTORE,
                           debug=DEBUG), # Build ZZ candidates; choose best candidate; filter events with candidates
+                 getJetIdProducer(LEPTON_SETUP, DATA_TAG, NANOVERSION),
                  jetFiller(year=LEPTON_SETUP), # Jets cleaning with leptons
                  ZZExtraFiller(IsMC, LEPTON_SETUP, DATA_TAG, PROCESS_CR), # Additional variables to selected candidates
                  ]
@@ -216,14 +217,6 @@ if APPLYMUCORR :
 if APPLYELECORR and LEPTON_SETUP >=2022 :
     from ZZAnalysis.NanoAnalysis.modules.eleScaleResProducer import getEleScaleRes
     insertBefore(reco_sequence, 'lepFiller', getEleScaleRes(LEPTON_SETUP, DATA_TAG, IsMC, overwritePt=True))
-
-# Update of JetId: manual recipe for NanoAOD v12, using JSON for v13 onwards, cf https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13p6TeV#nanoAOD_Flags
-if NANOVERSION == 12 :
-    from ZZAnalysis.NanoAnalysis.jetIdUpdate import *
-    insertBefore(reco_sequence, 'jetFiller', jetIdUpdate())
-elif NANOVERSION >=13 :
-    from ZZAnalysis.NanoAnalysis.modules.jetIdProducer import getJetIdProducer
-    insertBefore(reco_sequence, 'jetFiller', getJetIdProducer(LEPTON_SETUP, DATA_TAG))   
 
 # Add jet corrections for Run 3
 if APPLYJETCORR and LEPTON_SETUP >=2022 :

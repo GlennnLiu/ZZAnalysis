@@ -43,7 +43,8 @@ git clone https://github.com/pianonick411/CommonLHETools
 
 #MELA
 git clone https://github.com/JHUGen/JHUGenMELA.git JHUGenMELA
-(cd JHUGenMELA; git checkout -b from-v243 v2.4.3; ./setup.sh)
+#(cd JHUGenMELA; git checkout -b from-v243 v2.4.3; ./setup.sh)
+(cd JHUGenMELA; git fetch origin pull/78/head:v243_PR78; git checkout v243_PR78; ./setup.sh) # Silence warnings
 
 #MELA Analytics
 git clone https://github.com/MELALabs/MelaAnalytics.git
@@ -86,7 +87,7 @@ fi
    
 #get nanoAODTools modules
 git clone https://github.com/cms-cat/nanoAOD-tools-modules.git PhysicsTools/NATModules
-(cd PhysicsTools/NATModules; git checkout -b from-e1beaf3 e1beaf3)
+(cd PhysicsTools/NATModules; git checkout -b from-f2f8851 f2f8851)
 
 
 #CommonLHETools requires the MELA env to be set for compilation
