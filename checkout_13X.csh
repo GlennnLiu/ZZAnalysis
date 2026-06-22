@@ -66,7 +66,7 @@ sed -i '/SimTracker\/Records/d' KinZfitter/HelperFunction/BuildFile.xml
 sed -i '/SimTracker\/Records/d' KinZfitter/KinZfitter/BuildFile.xml
 sed -i '/#include "RooMinuit.h"/d' KinZfitter/KinZfitter/interface/KinZfitter.h
 
-#Fix some memory issues (#47289 queued CMSSW_15_0_X))
+#Fix some memory issues (#47289, released since CMSSW_15_1_0)
 git cms-addpkg PhysicsTools/NanoAODTools
 git fetch https://github.com/namapane/cmssw.git NAT-dev2:namapane_NAT-dev2
 git cherry-pick aa9ecbd04d6 98f8692142f
@@ -87,7 +87,7 @@ fi
    
 #get nanoAODTools modules
 git clone https://github.com/cms-cat/nanoAOD-tools-modules.git PhysicsTools/NATModules
-(cd PhysicsTools/NATModules; git checkout -b from-f2f8851 f2f8851)
+(cd PhysicsTools/NATModules; git checkout -b from-bf18407 bf18407)
 
 
 #CommonLHETools requires the MELA env to be set for compilation
