@@ -165,6 +165,8 @@ class ZZFiller(Module):
             self.out.branch("ZLLCand_Z2l1Idx", "S", lenVar="nZLLCand")
             self.out.branch("ZLLCand_Z2l2Idx", "S", lenVar="nZLLCand")
             self.out.branch("ZLLCand_KD", "F", lenVar="nZLLCand", limitedPrecision=12)
+            self.out.branch("ZLLCand_P_GG_SIG_ghg2_1_ghz1_1_JHUGen", "F", lenVar="nZLLCand", title="p_GG_SIG_ghg2_1_ghz1_1_JHUGen probability for KD", limitedPrecision=12)
+            self.out.branch("ZLLCand_P_QQB_BKG_MCFM", "F", lenVar="nZLLCand", title="p_QQB_BKG_MCFM probability for Kinematic discriminant", limitedPrecision=12)
             if self.addSSCR: self.out.branch("ZLLbestSSIdx", "S", title="best candidate for the SS CR")
             if self.addOSCR:
                 self.out.branch("ZLLbest2P2FIdx", "S", title="best candidate for the 2P2F CR")
@@ -483,6 +485,8 @@ class ZZFiller(Module):
             ZLLCand_Z2l1Idx = [-1]*len(ZLLs)
             ZLLCand_Z2l2Idx = [-1]*len(ZLLs)
             ZLLCand_KD     = [0.]*len(ZLLs)
+            ZLLCand_p_GG_SIG_ghg2_1_ghz1_1_JHUGen = [0.]*len(ZLLs)
+            ZLLCand_p_QQB_BKG_MCFM = [0.]*len(ZLLs)
 
             for iZLL, ZLL in enumerate(ZLLs) :
                 ZLLCand_mass[iZLL] = ZLL.p4.M()
@@ -500,6 +504,8 @@ class ZZFiller(Module):
                 ZLLCand_Z2l1Idx[iZLL] = ZLL.Z2.l1Idx
                 ZLLCand_Z2l2Idx[iZLL] = ZLL.Z2.l2Idx
                 ZLLCand_KD[iZLL] = ZLL.KD
+                ZLLCand_p_GG_SIG_ghg2_1_ghz1_1_JHUGen[iZLL] = ZLL.p_GG_SIG_ghg2_1_ghz1_1_JHUGen
+                ZLLCand_p_QQB_BKG_MCFM[iZLL] = ZLL.p_QQB_BKG_MCFM
 
             self.out.fillBranch("ZLLCand_mass",   ZLLCand_mass)
             self.out.fillBranch("ZLLCand_massPreFSR",   ZLLCand_massPreFSR)
@@ -516,6 +522,8 @@ class ZZFiller(Module):
             self.out.fillBranch("ZLLCand_Z2l1Idx", ZLLCand_Z2l1Idx)
             self.out.fillBranch("ZLLCand_Z2l2Idx", ZLLCand_Z2l2Idx)
             self.out.fillBranch("ZLLCand_KD",     ZLLCand_KD)
+            self.out.fillBranch("ZLLCand_P_GG_SIG_ghg2_1_ghz1_1_JHUGen", ZLLCand_p_GG_SIG_ghg2_1_ghz1_1_JHUGen)
+            self.out.fillBranch("ZLLCand_P_QQB_BKG_MCFM", ZLLCand_p_QQB_BKG_MCFM)
             if self.addSSCR :
                 self.out.fillBranch("ZLLbestSSIdx",  bestSSCRIdx)
             if self.addOSCR :
