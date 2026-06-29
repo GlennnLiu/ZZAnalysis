@@ -9,3 +9,10 @@ foreach f ( ${list} )
     endif
 end
 
+if ( -d log/ ) then
+    set logFile = ( log/*.log )
+    if ( -e $logFile[1] ) then
+	set ClusterId = `basename -s .log $logFile[1]`
+	mv  $logFile[1]  $logFile[1].bak
+	mv log/ProcIds log/ProcIds.$ClusterId
+endif

@@ -2,14 +2,17 @@
 # #set echo
 
 set opt=$1
+set debug=0
 
 if ( $opt == "help" ) then
-    echo "Scan production chunks and archive completed ones."
-    echo "Options:"
+    echo "Scan production chunks and archive completed ones. Usage:"
+    echo "checkProd.csh [option] [goodDir] [badDir]"
+    echo "Options: "
+    echo " dry = only print, do not archive chunks (default is to move files to AAAOK/)"
     echo " quiet = do not list jobs that are still running"
-    echo " dry = only print, do not move chunks"
-    echo " mf = move failed jobs to AAAFAIL"
-    echo " lf = link failed jobs (then you can run cleanup.csh; resubmit_Condor.csh in AAAFAIL)"
+    echo " mf = move failed jobs to AAAFAIL/"
+    echo " lf = link failed jobs (then you can run cleanup.csh; resubmit_Condor.csh in AAAFAIL)" #FIXME to be rechecked if this still works
+    echo "[goodDir], [badDir] = folder names to be used instead of AAAOK and AAAFAIL"
     exit
 endif
 
@@ -25,11 +28,42 @@ else
   set baddir=AAAFAIL
 endif
 
-foreach chunk ( *Chunk* )
- set fail="false"
+# Search for chunk -> condor ProcId map file that is written by job creation script
+set  idFile = log/ProcIds
+if ( ! -e $idFile ) then
+    echo "ERROR: $idFile not found"
+    exit 1
+endif
 
+# Search for condor log, which is a single one for all Chunks, and derive the condor ClusterId
+# (cleanup and submit script guarantee there can be only one)
+set nonomatch
+set logFile = ( log/*.log )
+if ( -e $logFile[1] ) then
+    set ClusterId = `basename -s .log $logFile[1]`
+else
+    echo "ERROR: $logFile not found"
+    exit 1
+endif
+unset nonomatch
+
+if ( $debug ) echo "ClusterId: $ClusterId"
+
+foreach chunk ( *Chunk* )
+ set fail=0
  set OUTPATH=$chunk
 
+ # Derive ProcId from ProcIds file, with padding of 3 zeroes as in logs
+ set tmpstr = ( `grep "^$chunk\ " log/ProcIds` )
+# echo $tmpstr
+ if ( $? != 0 ) then
+    echo "ERROR $chunk not found in log/ProcIds")
+    exit 1
+ endif
+ set ProcId = `printf "%03d" $tmpstr[2]`
+ 
+if ( $debug ) echo "   ${chunk}: ProcId: $ProcId"
+ 
  # Find out if output was copied to /eos instead than to submit folder 
  if (`grep ^TRANSFER_DIR ${chunk}/batchScript.sh` != "TRANSFER_DIR=" ) then
     set nonomatch
@@ -43,43 +77,40 @@ foreach chunk ( *Chunk* )
  # Check that root file is existing and not empty
  set filename=${OUTPATH}/ZZ4lAnalysis.root
  if ( ! -e $filename ) then
-#   echo "Missing root file in " ${filename}
-   set fail="true"
+   if ( $debug ) echo "   Missing root file in " ${filename}
+   set fail=1
  else if ( -z $filename ) then
-#   echo "Empty file: " $filename
-   set fail="true"
+   if ( $debug ) echo "   Empty file: " $filename
+   set fail=1
  endif
 
  # Check job exit status. Cf. https://twiki.cern.ch/twiki/bin/view/CMSPublic/JobExitCodes , https://twiki.cern.ch/twiki/bin/view/CMSPublic/StandardExitCodes
  set exitStatus = 0
  if ( -es ${OUTPATH}/exitStatus.txt ) then
    set exitStatus=`cat ${OUTPATH}/exitStatus.txt`
-   set fail="true"
+   set fail=1
  else if ( ! -e ${OUTPATH}/exitStatus.txt ) then
-   set fail="true"
+   set fail=1
  endif
 
- # Check for failures reported in the Condor log
+ # Check for failures reported in the Condor log, that would otherwise fail detection
  if ( $exitStatus == 0 ) then 
-  set nonomatch
-  set logFile = ( ${chunk}/log/*.log )
   if ( -e $logFile[1] ) then
-    if ( `grep -c -e "Job removed.*due to wall time exceeded" $logFile[$#logFile]` != 0 ) then
+    if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "Job removed.*time exceeded"` != 0 ) then
       set exitStatus=-152
-      set fail="true"
-    else if ( `grep -c -e "The job attribute PeriodicRemove expression.*evaluated to TRUE" $logFile[$#logFile]` != 0 ) then
+      set fail=1
+    else if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "The job attribute PeriodicRemove expression.*evaluated to TRUE"` != 0 ) then
       set exitStatus=-153
-      set fail="true"
-    else if ( `grep -c -e "Job was aborted by the user" $logFile[$#logFile]` != 0 ) then
+      set fail=1
+    else if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "Job was aborted"` != 0 ) then
       set exitStatus=-154
-      set fail="true"
+      set fail=1
     endif
   endif
-  unset nonomatch
  endif
 
  # Archive succesful jobs, or report failure
- if ( $fail == "false" ) then
+ if ( $fail == 0 ) then
   if ( $opt != "dry" ) then 
     mkdir -p $gooddir
     mv $chunk $gooddir/
@@ -89,10 +120,9 @@ foreach chunk ( *Chunk* )
    if ( $exitStatus == 0 ) then
      # is the job terminated?
      set nonomatch
-     set logFile = ( ${chunk}/log/*.log )
      set errFile = ( ${chunk}/log/*.err )
      if ( -e $logFile[1] ) then
-        if ( `grep -c -e "Job terminated" $logFile[$#logFile]` != 0 ) then
+        if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "Job terminated"` != 0 ) then
             if ( `grep -c -e "mkdir: cannot create directory '/eos" $errFile[$#errFile]` != 0 ) then
 		echo $chunk ": eos transfer problem, see " $errFile[$#errFile]
 	    else
@@ -101,7 +131,7 @@ foreach chunk ( *Chunk* )
         else if ( $opt != "quiet" ) then
 	    echo $chunk ": still running (or unknown failure)"
 	endif
-     else if ( $opt != "quiet" ) then
+     else if ( $opt != "quiet" ) then # this should be no longer possible
 	echo $chunk ": still pending (or unknown failure)"
      endif
      unset nonomatch

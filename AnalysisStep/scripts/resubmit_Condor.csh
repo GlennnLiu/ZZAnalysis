@@ -31,9 +31,19 @@ set JOBNAME=`basename $PWD`
 
 set queue=' -queue directory in'
 
+# Check that no log is present
+if ( -d log ) then
+   echo "\nJobs already submitted. If you want to resubmit, ensure all jobs are finished and run cleanup.csh.\nAborting."
+   exit 1
+endif
+
+# Create mapping file jobs -> ProcId
+mkdir log
+touch log/ProcIds
+set ProcId = 0
 foreach x (*Chunk*)
  set nonomatch
- set logFile = ( ${x}/log/*.log )
+ set logFile = ( log/*.out )
  if ( -e $logFile[1] ) then
     echo "\n${x}: job already submitted. If you want to resubmit, ensure all jobs are finished and run cleanup.csh.\nAborting."
     exit 1
@@ -42,6 +52,8 @@ foreach x (*Chunk*)
 
 
  set queue="$queue $x"
+ echo `basename $x` $ProcId >> log/ProcIds
+ @ ProcId++
 end
 
 if (! ($1 == "") ) then
