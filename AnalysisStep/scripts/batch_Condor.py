@@ -207,8 +207,9 @@ executable              = $(directory)/batchScript.sh
 arguments               = {mainDir}/$(directory) $(ClusterId)$(ProcId)
 output                  = log/$(ClusterId).$(ProcId).out
 error                   = log/$(ClusterId).$(ProcId).err
-log                     = log/$(ClusterId).$(ProcId).log
+log                     = {mainDir}/log/$(ClusterId).log
 Initialdir              = $(directory)
+MY.ChunkDir             = "$(directory)"
 request_memory          = '''+str(batchManager.jobmem)+'''
 #Possible values: longlunch, workday, tomorrow, etc.; cf. https://batchdocs.web.cern.ch/local/submit.html
 +JobFlavour             = "'''+batchManager.jobflavour+'''"
