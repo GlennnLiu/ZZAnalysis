@@ -80,10 +80,10 @@ melaSettings = getConf("probabilities", None)
 customizations = getConf("customizations", [])
 
 # Input customizations - list of drop/keep actions
-branchsel_in_ext = getConf("branchsel_in", [])
+branchsel_in_ext = getConf("branchsel_in_ext", [])
 
 # Outpuput customizations - list of drop/keep actions
-branchsel_out_ext = getConf("branchsel_out", [])
+branchsel_out_ext = getConf("branchsel_out_ext", [])
 
 
 # Keep GenXS and GenBr for properly scaling samples with AC. 
