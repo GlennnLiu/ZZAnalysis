@@ -79,6 +79,13 @@ melaSettings = getConf("probabilities", None)
 # Process customizations - list of functions that operate on process
 customizations = getConf("customizations", [])
 
+# Input customizations - list of drop/keep actions
+branchsel_in_ext = getConf("branchsel_in", [])
+
+# Outpuput customizations - list of drop/keep actions
+branchsel_out_ext = getConf("branchsel_out", [])
+
+
 # Keep GenXS and GenBr for properly scaling samples with AC. 
 genXS = getConf("GENXSEC", 1.)
 genBR = getConf("GENBR", 1.)
@@ -371,6 +378,9 @@ if IsMC:
                               'keep HTXS_*',
                               'keep LHEMela*'
                               ])
+
+branchsel_in.extend(branchsel_in_ext)
+branchsel_out.extend(branchsel_out_ext)
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 p = PostProcessor(".", fileNames,
