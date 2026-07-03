@@ -20,6 +20,30 @@ def isFloat(value):
   except ValueError:
     return False
 
+def parseVariableString(value) :
+  '''parse a ;-separated list of variables or pyFragments'''
+  dictionary = {}
+  if len(value.strip()) == 0:
+    value = []
+  else:
+    value = [s.strip() for s in value.split(";")]
+    for v in value:
+      bareelement = [s.strip() for s in v.split("=")]
+      if len(bareelement) == 2:
+        if isFloat(bareelement[1]):
+          try:
+            int(bareelement[1])==float(bareelement[1]) # int(float number) will return ValueError
+            dictionary[bareelement[0]] = int(bareelement[1]) # avoid turning integers to floats
+          except ValueError:
+            dictionary[bareelement[0]] = float(bareelement[1])
+        else:
+          dictionary[bareelement[0]] = checkBool(bareelement[1])
+      elif len(bareelement) == 1 :
+        if bareelement[0] != '': # Skip empty item which can be due to extra or trailing ";" in list
+          dictionary[bareelement[0]] = bareelement[0]
+      else:
+        raise ValueError("ERROR: failed to parse variable '" + v + "'")
+  return dictionary
 
 def readSamplesInfo(infoFilePath = 'samples_8TeV.csv', indexBy = 'identifier'):
   """
@@ -46,29 +70,7 @@ def readSamplesInfo(infoFilePath = 'samples_8TeV.csv', indexBy = 'identifier'):
       info                  = {}
       for (key, value) in zip(header, data):
         if key.startswith("::"):
-          dictionary = {}
-          if len(value.strip()) == 0:
-            value           = []
-          else:
-            value           = [s.strip() for s in value.split(";")]
-            for v in value:
-              bareelement = [s.strip() for s in v.split("=")]
-              if len(bareelement) == 2:
-                if isFloat(bareelement[1]):
-                  try:
-                    int(bareelement[1])==float(bareelement[1]) # int(float number) will return ValueError
-                    dictionary[bareelement[0]] = int(bareelement[1]) # avoid turning integers to floats
-                  except ValueError:
-                    dictionary[bareelement[0]] = float(bareelement[1])
-                else:
-                  dictionary[bareelement[0]] = checkBool(bareelement[1])
-              elif len(bareelement) == 1 :
-                if bareelement[0] != '': # Skip empty item which can be due to extra or trailing ";" in list
-                  dictionary[bareelement[0]] = bareelement[0]
-              else:
-                raise ValueError("ERROR: failed to parse variable '" + v + "'")
-
-#          print "Variables dictionary: ", dictionary
+          dictionary = parseVariableString(value)
           info[key]           = dictionary
         else:
           info[key]           = value.strip()
@@ -86,7 +88,10 @@ def readSamplesInfo(infoFilePath = 'samples_8TeV.csv', indexBy = 'identifier'):
         if not datum:       break
         if "=" in datum:
           (datum, default)  = map(str.strip, datum.split("="))
-          defaults[datum]   = checkBool(default)
+          if datum.startswith("::") :
+            defaults[datum] = parseVariableString(default)
+          else:
+            defaults[datum]   = checkBool(default)
         header.append(datum)
 
 
@@ -115,9 +120,9 @@ def readSampleDB(infoFilePath = 'samples_8TeV.csv', indexBy = 'identifier'):
   for sample in db:
     for key,val in db[sample].items():
       if key in defaults:
-        if val == "":
+        if val == "" or val == {}: 
           db[sample][key] = defaults[key]
-          #print "setting default for ", key, "=",db[sample][key]
+#          print("setting default for ", key, "=",db[sample][key])
 
   return db
 

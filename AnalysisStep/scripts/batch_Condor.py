@@ -614,7 +614,6 @@ if __name__ == '__main__':
     if eosSubmit :
         # check that the eossubmit schedd is set up
         result = subprocess.run(["bash", "-lc", "module is-loaded lxbatch/eossubmit"], capture_output=True, text=True)
-        print("EOS CHECK", result)
         if result.returncode != 0 :
             print("Running from /eos, but the eossubmit schedd is not set up. Please retry after issuing:")
             print("module load lxbatch/eossubmit")
