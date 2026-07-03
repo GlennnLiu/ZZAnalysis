@@ -1,8 +1,20 @@
-#!/bin/tcsh -f
+#!/bin/tcsh
 
 # parameter: XX = number of the bigbirdXX schedd; to look at loads in the different schedds run:
 # condor_status -schedd
 
+
+# Check if the eossubmit schedd is required and set up
+if ( $PWD =~ "/eos*" ) then
+    module is-loaded lxbatch/eossubmit
+    if ( $status != 0 ) then
+	echo "\nRunning from /eos, but the eossubmit schedd is not set up. Please retry after issuing:"
+	echo "module is-loaded lxbatch/eossubmit"
+	echo "Aborting."
+	exit 1
+    endif
+endif
+	
 # Make the grid proxy available in ~, if existing and valid
 set proxy_valid=`voms-proxy-info --timeleft`
 if ($proxy_valid > 10 ) then
@@ -31,25 +43,27 @@ set JOBNAME=`basename $PWD`
 
 set queue=' -queue directory in'
 
-# Check that no log is present
-if ( -d log ) then
+# Check that no log is present from a previous submission
+set nonomatch
+set logFile = ( log/*.log )
+unset nonomatch
+if ( $#logFile != 1 ) then
    echo "\nJobs already submitted. If you want to resubmit, ensure all jobs are finished and run cleanup.csh.\nAborting."
    exit 1
 endif
 
-# Create mapping file jobs -> ProcId
-mkdir log
+# Prepare submission string; create mapping file betwewn jobs and ProcIds
+mkdir -p log
 touch log/ProcIds
 set ProcId = 0
 foreach x (*Chunk*)
  set nonomatch
- set logFile = ( log/*.out )
- if ( -e $logFile[1] ) then
+ set outFile = ( log/*.out )
+ if ( $#outFile != 1 ) then
     echo "\n${x}: job already submitted. If you want to resubmit, ensure all jobs are finished and run cleanup.csh.\nAborting."
     exit 1
  endif
  unset nonomatch
-
 
  set queue="$queue $x"
  echo `basename $x` $ProcId >> log/ProcIds

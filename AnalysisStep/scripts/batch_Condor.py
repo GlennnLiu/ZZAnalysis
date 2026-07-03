@@ -97,7 +97,6 @@ echo "Files on node:"
 ls -la
 
 #delete mela stuff and $USER.cc
-#I have no idea what $USER.cc is
 rm -f br.sm1 br.sm2 ffwarn.dat input.DAT process.DAT "$USER.cc"
 
 #delete submission scripts, so that they are not copied back (which fails sometimes)
@@ -169,29 +168,7 @@ fi
 echo "Files on node:"
 ls -la
 
-#delete temporary files
-rm -f br.sm1 br.sm2 ffwarn.dat input.DAT process.DAT "$USER.cc"
-
-#delete intermediate _Skim.root files
-rm -f *_Skim.root
-
-#delete submission scripts, so that they are not copied back (which fails sometimes)
-rm -f run_cfg.py batchScript.sh
-
 echo '...done at' $(date)
-
-# Handle transfer of output to EOS.
-# As copying back of files is handled automatically by condor, it must be overridden in condor.sub
-# NOTE: using the FUSE interface since eos commands do not appear to work reliably on batch (issues with permissions etc)
-if [ -n "$TRANSFER_DIR" ] ; then
-    p1=`dirname $SUBMIT_DIR`
-    p2=`basename $p1`
-    eosOutputPath=$TRANSFER_DIR/$p2/`basename $SUBMIT_DIR`
-    echo "Transferring output to: "$eosOutputPath
-    mkdir -p $eosOutputPath
-    cp ZZ4lAnalysis.root* *.txt *.gz ${{eosOutputPath}}/
-    echo "...done"
-fi
 
 exit $exitStatus
 '''
@@ -200,7 +177,7 @@ exit $exitStatus
 
 # Create the CONDOR submit file (one per submission).
 # transferOutput = False skips the automatic CONDOR transfer of output files to the submission dir
-def condorSubScript( index, mainDir, transferOutput=True) :
+def condorSubScript( index, mainDir, eosTransferPath="") :
    '''prepare the Condor submition script'''
    script = '''
 executable              = $(directory)/batchScript.sh
@@ -219,14 +196,20 @@ x509userproxy           = {home}/x509up_u{uid}
 #cf. https://www-auth.cs.wisc.edu/lists/htcondor-users/2010-September/msg00009.shtml
 periodic_remove         = JobStatus == 5
 
+transfer_output_files = ZZ4lAnalysis.root, log.txt.gz, exitStatus.txt
 {transfer}
-max_materialize = '''+str(batchManager.max_materialize)+'''
+{materialize}
 '''   
-   if transferOutput == True :
-       transfer=''
-   else:
-       transfer='transfer_output_files   = ""'       
+   if eosTransferPath == "" :
+       transfer = ""
+   else :
+       transfer = "output_destination = root://eosuser.cern.ch/"+eosTransferPath+"/$(directory)"
 
+   if batchManager.max_materialize > 0 :
+       materialize = 'max_materialize = '+str(batchManager.max_materialize)
+   else :
+       materialize = ''
+       
    release=open('/etc/redhat-release','r').read()
    req = ""
    if "release 7" in release:
@@ -236,13 +219,14 @@ max_materialize = '''+str(batchManager.max_materialize)+'''
    elif "release 9" in release:
        req = "requirements = (OpSysAndVer =?= \"AlmaLinux9\")"    
 
-   return script.format(home=os.path.expanduser("~"), uid=os.getuid(), mainDir=mainDir, transfer=transfer, requirements=req)
+   return script.format(home=os.path.expanduser("~"), uid=os.getuid(), mainDir=mainDir, transfer=transfer, requirements=req, materialize=materialize)
 
             
 class MyBatchManager:
     '''Batch manager specific to cmsRun processes.''' 
 
-    def __init__(self):        
+    def __init__(self, eosSubmit):
+        self.eosSubmit = eosSubmit # whether the eossubmit schedd should be used instead of the normal schedd
         # define options and arguments ====================================
         self.parser_ = OptionParser()
         self.parser_.add_option("-o", "--output-dir", dest="outputDir",
@@ -336,8 +320,9 @@ class MyBatchManager:
             self.secondaryInputDir_ = None
 
         # Handle optional EOS transfer
-        self.eosTransferPath=self.options_.transferPath
-        if self.eosTransferPath!="":
+        self.eosTransferPath=""
+        if self.options_.transferPath!="":
+            self.eosTransferPath=os.path.join(self.options_.transferPath,outputDir)
             #Check that the specified path is legal. Only eos user areas are supported for the time being
             if not (self.eosTransferPath.startswith('/eos/user/') or self.eosTransferPath.startswith('/eos/home-')) :
                 print('Invalid path for -t:', self.eosTransferPath, ': only paths on /eos/user/ or /eos/home- are supported')
@@ -396,14 +381,14 @@ class MyBatchManager:
         else:
             for value, name in zip( listOfValues, listOfDirNames):
                 self.PrepareJob( value, name )
-        if batchManager.options_.verbose:
+        if self.options_.verbose:
             print("list of jobs:")
             pp = pprint.PrettyPrinter(indent=4)
             pp.pprint( self.listOfJobs_)
 
         condorscriptFileName = os.path.join(self.outputDir_, 'condor.sub')
         with open(condorscriptFileName,'w') as condorscriptFile:
-            condorscriptFile.write(condorSubScript(value, self.outputDir_,(self.eosTransferPath=="")))
+            condorscriptFile.write(condorSubScript(value, self.outputDir_,self.eosTransferPath))
 
     def PrepareJob( self, value, dirname=None):
        '''Prepare a job for a given value.
@@ -419,19 +404,20 @@ class MyBatchManager:
            'nanoaod' in (splitComponents[value].files)[0].casefold() : 
            inputType='nanoAOD'
        if self.jobmem == None:
-           if batchManager.options_.jobmem != None :
-               self.jobmem = batchManager.options_.jobmem
+           if self.options_.jobmem != None :
+               self.jobmem = self.options_.jobmem
            else :
+               self.max_materialize = 0
                if inputType == 'miniAOD' :
                    self.jobmem = '4000M'
-                   self.max_materialize = 0
                else :
                    self.jobmem = '3000M'
-                   self.max_materialize = 400
+                   if not self.eosSubmit  :
+                       self.max_materialize = 300 # need to cap the number of concurrently running jobs if running from AFS because of AFS load problems
 
        if self.jobflavour == None:
-           if batchManager.options_.jobflavour != None:
-               self.jobflavour = batchManager.options_.jobflavour
+           if self.options_.jobflavour != None:
+               self.jobflavour = self.options_.jobflavour
            else :
                if inputType == 'miniAOD' :
                    self.jobflavour = 'tomorrow'
@@ -493,7 +479,7 @@ class MyBatchManager:
        scriptFile.close()
        os.system('chmod +x %s' % scriptFileName)
        
-       variables = splitComponents[value].variables | batchManager.addVariables
+       variables = splitComponents[value].variables | self.addVariables
        pyFragments = splitComponents[value].pyFragments
        pyFragments.update(self.addPyFragments)
        
@@ -501,7 +487,7 @@ class MyBatchManager:
            variables['IsMC'] = True
            if 'PD' in variables and not variables['PD'] == '': variables['IsMC'] = False
 
-       if batchManager.options_.verbose:
+       if self.options_.verbose:
            print('value ',value)
            print('scv ',splitComponents[value].name)
        
@@ -623,7 +609,18 @@ if __name__ == '__main__':
     if not validateCheckout() :
         exit(1)
 
-    batchManager = MyBatchManager()
+    abs_path = os.path.realpath(os.getcwd())
+    eosSubmit = abs_path.startswith("/eos/")
+    if eosSubmit :
+        # check that the eossubmit schedd is set up
+        result = subprocess.run(["bash", "-lc", "module is-loaded lxbatch/eossubmit"], capture_output=True, text=True)
+        print("EOS CHECK", result)
+        if result.returncode != 0 :
+            print("Running from /eos, but the eossubmit schedd is not set up. Please retry after issuing:")
+            print("module load lxbatch/eossubmit")
+            exit(1)
+        
+    batchManager = MyBatchManager(eosSubmit)
     
     cfgFileName = batchManager.options_.cfgFileName # This is the python job config.
     sampleCSV  = batchManager.args_[0]            # This is the csv file with samples to be analyzed./
@@ -643,7 +640,4 @@ if __name__ == '__main__':
 
     batchManager.PrepareJobs( listOfValues, listOfNames )
 
-    waitingTime = 0.05
-#FIXME to be implemented; should check batchManager.options_.negate; can simply call resubmit.csh
-#batchManager.SubmitJobs( waitingTime )
 

@@ -51,28 +51,37 @@ if ( $debug ) echo "ClusterId: $ClusterId"
 
 foreach chunk ( *Chunk* )
  set fail=0
- set OUTPATH=$chunk
 
  # Derive ProcId from ProcIds file, with padding of 3 zeroes as in logs
  set tmpstr = ( `grep "^$chunk\ " log/ProcIds` )
-# echo $tmpstr
+
  if ( $? != 0 ) then
     echo "ERROR $chunk not found in log/ProcIds")
     exit 1
  endif
  set ProcId = `printf "%03d" $tmpstr[2]`
  
-if ( $debug ) echo "   ${chunk}: ProcId: $ProcId"
- 
- # Find out if output was copied to /eos instead than to submit folder 
- if (`grep ^TRANSFER_DIR ${chunk}/batchScript.sh` != "TRANSFER_DIR=" ) then
-    set nonomatch
-    set outFile = ( ${chunk}/log/*.out )
-    if ( -e $outFile[1] ) then
-	set OUTPATH=`grep "^Transferring output" $outFile[$#outFile] | sed s/^Transferring\ output\ to:\ //`
+ if ( $debug ) echo "   ${chunk}: ProcId: $ProcId"
+
+ # Check if job finished or aborted
+ if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "Job was aborted"` != 0 ) then
+    echo $chunk ": job aborted, see ${ClusterId}.${ProcId} in $logFile[1]"
+    continue
+ else if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "Job terminated"` == 0 ) then
+    if ( $opt != "quiet" ) then
+       echo $chunk ": still running (or unknown failure)"
     endif
-    unset nonomatch
+    continue
  endif
+
+
+ # Find out if eos transfer with -t was specified
+ if (-e transferPath) then
+    set OUTPATH="transferPath/"$chunk
+ else
+    set OUTPATH=$chunk
+ endif
+ if ( $debug ) echo "   OUTPATH:" $OUTPATH
 
  # Check that root file is existing and not empty
  set filename=${OUTPATH}/ZZ4lAnalysis.root
@@ -117,22 +126,13 @@ if ( $debug ) echo "   ${chunk}: ProcId: $ProcId"
   endif
  else
   set description=""
-   if ( $exitStatus == 0 ) then
-     # is the job terminated?
+  if ( $exitStatus == 0 ) then
+     # The job appears as terminated, but failed for some reason
+     echo $chunk ": terminated, unknown failure"
      set nonomatch
      set errFile = ( ${chunk}/log/*.err )
-     if ( -e $logFile[1] ) then
-        if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "Job terminated"` != 0 ) then
-            if ( `grep -c -e "mkdir: cannot create directory '/eos" $errFile[$#errFile]` != 0 ) then
-		echo $chunk ": eos transfer problem, see " $errFile[$#errFile]
-	    else
-		echo $chunk ": terminated, unknown failure"
-	    endif
-        else if ( $opt != "quiet" ) then
-	    echo $chunk ": still running (or unknown failure)"
-	endif
-     else if ( $opt != "quiet" ) then # this should be no longer possible
-	echo $chunk ": still pending (or unknown failure)"
+     if ( -es $errFile[$#errFile] ) then
+	    echo "   for details, see "$errFile[$#errFile]
      endif
      unset nonomatch
    else
