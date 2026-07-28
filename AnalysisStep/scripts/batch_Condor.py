@@ -157,12 +157,16 @@ gzip log.txt
 
 export ROOT_HIST=0
 if [ -s ZZ4lAnalysis.root ]; then
- root -q -b '${{CMSSW_BASE}}/src/ZZAnalysis/AnalysisStep/test/prod/rootFileIntegrity.r("ZZ4lAnalysis.root")'
+   root -q -b '${{CMSSW_BASE}}/src/ZZAnalysis/AnalysisStep/test/prod/rootFileIntegrity.r("ZZ4lAnalysis.root")'
+   # The output file MUST be present when the condor transfer_output_files option is used.
+   touch ZZ4lAnalysis.root
 elif [ -f  ZZ4lAnalysis.root ]; then
- echo moving away empty ZZ4lAnalysis.root file
- mv ZZ4lAnalysis.root ZZ4lAnalysis.root.empty
+   echo "ERROR: ZZ4lAnalysis.root is empty"
+   if [ $exitStatus -eq "0"  ]; then exitStatus=999; fi
 else
- echo ERROR: ZZ4lAnalysis.root file is missing
+   echo ERROR: ZZ4lAnalysis.root file is missing
+   touch ZZ4lAnalysis.root
+   if [ $exitStatus -eq "0"  ]; then exitStatus=999; fi
 fi
 
 echo "Files on node:"
@@ -196,7 +200,7 @@ x509userproxy           = {home}/x509up_u{uid}
 #cf. https://www-auth.cs.wisc.edu/lists/htcondor-users/2010-September/msg00009.shtml
 periodic_remove         = JobStatus == 5
 
-transfer_output_files = ZZ4lAnalysis.root, log.txt.gz, exitStatus.txt
+transfer_output_files = log.txt.gz, exitStatus.txt, ZZ4lAnalysis.root
 {transfer}
 {materialize}
 '''   
@@ -614,7 +618,6 @@ if __name__ == '__main__':
     if eosSubmit :
         # check that the eossubmit schedd is set up
         result = subprocess.run(["bash", "-lc", "module is-loaded lxbatch/eossubmit"], capture_output=True, text=True)
-        print("EOS CHECK", result)
         if result.returncode != 0 :
             print("Running from /eos, but the eossubmit schedd is not set up. Please retry after issuing:")
             print("module load lxbatch/eossubmit")

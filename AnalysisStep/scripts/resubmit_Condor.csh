@@ -9,7 +9,7 @@ if ( $PWD =~ "/eos*" ) then
     module is-loaded lxbatch/eossubmit
     if ( $status != 0 ) then
 	echo "\nRunning from /eos, but the eossubmit schedd is not set up. Please retry after issuing:"
-	echo "module is-loaded lxbatch/eossubmit"
+	echo "module load lxbatch/eossubmit"
 	echo "Aborting."
 	exit 1
     endif
