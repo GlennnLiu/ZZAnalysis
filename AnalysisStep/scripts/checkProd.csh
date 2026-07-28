@@ -64,10 +64,10 @@ foreach chunk ( *Chunk* )
  if ( $debug ) echo "   ${chunk}: ProcId: $ProcId"
 
  # Check if job finished or aborted
- if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "Job was aborted"` != 0 ) then
+ if ( `grep -F -e ${ClusterId}.${ProcId}. $logFile[1] | grep -c -e "Job was aborted"` != 0 ) then
     echo $chunk ": job aborted, see ${ClusterId}.${ProcId} in $logFile[1]"
     continue
- else if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "Job terminated"` == 0 ) then
+ else if ( `grep -F -e ${ClusterId}.${ProcId}. $logFile[1] | grep -c -e "Job terminated"` == 0 ) then
     if ( $opt != "quiet" ) then
        echo $chunk ": still running (or unknown failure)"
     endif
@@ -105,13 +105,13 @@ foreach chunk ( *Chunk* )
  # Check for failures reported in the Condor log, that would otherwise fail detection
  if ( $exitStatus == 0 ) then 
   if ( -e $logFile[1] ) then
-    if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "Job removed.*time exceeded"` != 0 ) then
+    if ( `grep -F -e ${ClusterId}.${ProcId}. $logFile[1] | grep -c -e "Job removed.*time exceeded"` != 0 ) then
       set exitStatus=-152
       set fail=1
-    else if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "The job attribute PeriodicRemove expression.*evaluated to TRUE"` != 0 ) then
+    else if ( `grep -F -e ${ClusterId}.${ProcId}. $logFile[1] | grep -c -e "The job attribute PeriodicRemove expression.*evaluated to TRUE"` != 0 ) then
       set exitStatus=-153
       set fail=1
-    else if ( `grep -e ${ClusterId}\.${ProcId} $logFile[1] | grep -c -e "Job was aborted"` != 0 ) then
+    else if ( `grep -F -e ${ClusterId}.${ProcId}. $logFile[1] | grep -c -e "Job was aborted"` != 0 ) then
       set exitStatus=-154
       set fail=1
     endif

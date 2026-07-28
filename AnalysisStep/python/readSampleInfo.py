@@ -87,7 +87,7 @@ def readSamplesInfo(infoFilePath = 'samples_8TeV.csv', indexBy = 'identifier'):
       for datum in data:
         if not datum:       break
         if "=" in datum:
-          (datum, default)  = map(str.strip, datum.split("="))
+          (datum, default)  = map(str.strip, datum.split("=",1))
           if datum.startswith("::") :
             defaults[datum] = parseVariableString(default)
           else:
@@ -114,15 +114,19 @@ def readSampleInfo(sample, infoFilePath = 'samples_8TeV.csv', indexBy = 'identif
 def crossSection(sample, infoFilePath = 'samples_8TeV.csv', indexBy = 'identifier'):
   return float(readSampleInfo(sample, infoFilePath, indexBy)['crossSection'])
 
-#merge together db and defaults
+# Merge together db and defaults.
+# For normal variables, the default is overriden by the specified value if present.
+# For list variables (::variables, ::pyFragments), the default is inserted before the specified values,
+# so that both default and specified values are kept (with the latter possibly overriding the former)
 def readSampleDB(infoFilePath = 'samples_8TeV.csv', indexBy = 'identifier'):
   db,defaults = readSamplesInfo(infoFilePath, indexBy)
   for sample in db:
     for key,val in db[sample].items():
       if key in defaults:
-        if val == "" or val == {}: 
+        if val == "" or val == {}:
           db[sample][key] = defaults[key]
-#          print("setting default for ", key, "=",db[sample][key])
+        elif key.startswith("::"):
+          db[sample][key] = defaults[key] | db[sample][key]
 
   return db
 
