@@ -41,7 +41,7 @@ def getJetBtagProducer(era, tag, is_mc, is_signal, WP="M"):
         tagger = "particleNet"
         tagger_name = "btagPNetB"
         json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-22CDSep23-Summer22-NanoAODv12/2025-08-20/btagging.json.gz"
-        json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2024.json.gz")
+        json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2022.json.gz")
 
     else:
         raise ValueError("getJetBtagProducer: Era", era, tag, "not supported")
