@@ -24,19 +24,16 @@ def getJetBtagProducer(era, tag, is_mc, is_signal, WP="M"):
         tagger_name = "btagPNetB"
         if "pre_BPix" in tag:
             json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-23CSep23-Summer23-NanoAODv12/2025-08-20/btagging.json.gz"
-            json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2022EE.json.gz")
-            print("JetBTag: WARNING: using 2022 EE efficiency JSON for 2023 pre-BPix era. Please update this when the correct one is available.")
+            json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2023preBPix.json.gz")
         else:
             json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-23DSep23-Summer23BPix-NanoAODv12/2025-08-20/btagging.json.gz"
-            json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2022EE.json.gz")
-            print("JetBTag: WARNING: using 2022 EE efficiency JSON for 2023 post-BPix era. Please update this when the correct one is available.")
+            json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2023postBPix.json.gz")
 
     elif era == 2024:
         tagger = "UParTAK4"
         tagger_name = "btagUParTAK4B"
         json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-03-10/btagging.json.gz"
-        json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2022EE.json.gz")
-        print("JetBTag: WARNING: using 2022 EE efficiency JSON for 2024 era. Please update this when the correct one is available.")
+        json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2024.json.gz")
 
     elif era >= 2016 and era <= 2018:
         # FIXME: official Run 2 SF JSONs and local efficiencies should be wired when available.
