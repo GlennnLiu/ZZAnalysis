@@ -47,11 +47,11 @@ ZH126  ,,0.7958,0.00082086,,/ZHto2Zto4L_M126_TuneCP5_13p6TeV_powheg2-minlo-HZJ-J
 
 
 ###,,,,,,,,,,,Filtered samples - BR includes filter eff from https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsZZ4lRunIII#Signal
-ttH124    ,,0.5845,0.0007449,,/TTH_Hto2Z_4LFilter_M-124_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,4,IsSIGNAL=True;LEPTON_SETUP=2023;DATA_TAG=pre_BPix,,
-ttH124p5  ,,0.5783,0.0007323,,/TTH_Hto2Z_4LFilter_M-124p5_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,4,IsSIGNAL=True;LEPTON_SETUP=2023;DATA_TAG=pre_BPix,,
-ttH125    ,,0.5700,0.0007689,,/TTH_Hto2Z_4LFilter_M-125_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,4,IsSIGNAL=True;LEPTON_SETUP=2023;DATA_TAG=pre_BPix,,
-ttH125p5  ,,0.5654,0.0008060,,/TTH_Hto2Z_4LFilter_M-125p5_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,4,IsSIGNAL=True;LEPTON_SETUP=2023;DATA_TAG=pre_BPix,,
-ttH126    ,,0.5591,0.0008386,,/TTH_Hto2Z_4LFilter_M-126_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,4,IsSIGNAL=True;LEPTON_SETUP=2023;DATA_TAG=pre_BPix,,
+ttH124    ,,0.5845,0.0007449,,/TTH_Hto2Z_4LFilter_M-124_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,4,IsSIGNAL=True;LEPTON_SETUP=2022;DATA_TAG=pre_EE,,
+ttH124p5  ,,0.5783,0.0007323,,/TTH_Hto2Z_4LFilter_M-124p5_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,4,IsSIGNAL=True;LEPTON_SETUP=2022;DATA_TAG=pre_EE,,
+ttH125    ,,0.5700,0.0007689,,/TTH_Hto2Z_4LFilter_M-125_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,4,IsSIGNAL=True;LEPTON_SETUP=2022;DATA_TAG=pre_EE,,
+ttH125p5  ,,0.5654,0.0008060,,/TTH_Hto2Z_4LFilter_M-125p5_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,4,IsSIGNAL=True;LEPTON_SETUP=2022;DATA_TAG=pre_EE,,
+ttH126    ,,0.5591,0.0008386,,/TTH_Hto2Z_4LFilter_M-126_TuneCP5_13p6TeV_powheg-jhugenv752-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM,dbs,root://cms-xrd-global.cern.ch/,4,IsSIGNAL=True;LEPTON_SETUP=2022;DATA_TAG=pre_EE,,
 
 # ,,,,,,,,,,,samples produced without filtering -> filter efficiency=1
 #ttH124_4l  ,,0.5845,0.0002502,,/TTH_Hto2Z_M-124_4LFilter_TuneCP5_13p6TeV_powheg2-JHUGenV752-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM  ,dbs,root://cms-xrd-global.cern.ch/,2,IsSIGNAL=True;LEPTON_SETUP=2022;DATA_TAG=pre_EE,,
