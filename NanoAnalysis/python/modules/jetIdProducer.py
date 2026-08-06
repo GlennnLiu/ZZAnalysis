@@ -18,13 +18,15 @@ def getJetIdProducer(era, tag, nanoVersion) :
 
         elif era == 2023:
             if "pre_BPix" in tag:
-                json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/JME/Run3-23CSep23-Summer23-NanoAODv12/2026-06-05/jetid.json.gz"
+                json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/JME/Run3-23CSep23-Summer23-NanoAODv12/2026-07-15/jetid.json.gz"
             else:
-                json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/JME/Run3-23DSep23-Summer23BPix-NanoAODv12/2026-06-05/jetid.json.gz"
+                json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/JME/Run3-23DSep23-Summer23BPix-NanoAODv12/2026-07-15/jetid.json.gz"
 
         elif era == 2024:
-           json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/JME/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-06-05/jetid.json.gz"
+           json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/JME/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-07-16/jetid.json.gz"
 
+        elif era == 2025:
+           json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/JME/Run3-25Prompt-Summer24-NanoAODv15/2026-07-16/jetid.json.gz"
            
         elif era >= 2016 and era <=2018:
             # FIXME: Assume the same as 2022_Summer22 since json file is not yet available for Run2/v15,

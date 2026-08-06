@@ -35,6 +35,13 @@ def getJetBtagProducer(era, tag, is_mc, is_signal, WP="M"):
         json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-03-10/btagging.json.gz"
         json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2024.json.gz")
 
+    elif era == 2025:
+        tagger = "UParTAK4"
+        tagger_name = "btagUParTAK4B"
+        json_SF = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-03-10/btagging.json.gz"
+        print("JetBTag: WARNING: efficiency file not yet available, using the one for 2024")
+        json_eff = os.path.join(data_dir, f"btag_{'signal' if is_signal else 'background'}_2024.json.gz")
+        
     elif era >= 2016 and era <= 2018:
         # FIXME: official Run 2 SF JSONs and local efficiencies should be wired when available.
         print("JetBTag: WARNING: official btagging json not available, using the one for 2022_Summer22")

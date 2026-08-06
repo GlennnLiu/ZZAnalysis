@@ -173,8 +173,8 @@ def getJetCorrected(era, tag, is_mc, useJesSplittingScheme11, overwritePt=True) 
                 JERsfUncKey = None
 
     elif era == 2024:
+        folderKey = "Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-06-05"
         if is_mc :
-            folderKey = "Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-06-05"
             L1Key = "Summer24Prompt24_V3_MC_L1FastJet_AK4PFPuppi"
             L2Key = "Summer24Prompt24_V3_MC_L2Relative_AK4PFPuppi"
             L3Key = "Summer24Prompt24_V3_MC_L3Absolute_AK4PFPuppi"
@@ -189,18 +189,40 @@ def getJetCorrected(era, tag, is_mc, useJesSplittingScheme11, overwritePt=True) 
             JERsfKey = "Summer24Prompt24_JRV1_MC_ScaleFactor_AK4PFPuppi"
             JERsfUncKey = "Summer24Prompt24_JRV1_MC_SFUncertainty_AK4PFPuppi"
         else :
-            # folderKey = "2024_Winter24" # JERC file md5sum: a0c4f7f29e09162f56c07a9b5fb97d1e
-            # L1Key = "Winter24Prompt24_V3_DATA_L1FastJet_AK4PFPuppi"
-            # L2Key = "Winter24Prompt24_V3_DATA_L2Relative_AK4PFPuppi"
-            # L3Key = "Winter24Prompt24_V3_DATA_L3Absolute_AK4PFPuppi"
-            # L2L3Key = "Winter24Prompt24_V3_DATA_L2L3Residual_AK4PFPuppi"
-            folderKey = "Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-06-05"
             L1Key = "Summer24Prompt24_V3_DATA_L1FastJet_AK4PFPuppi"
             L2Key = "Summer24Prompt24_V3_DATA_L2Relative_AK4PFPuppi"
             L3Key = "Summer24Prompt24_V3_DATA_L3Absolute_AK4PFPuppi"
             L2L3Key = "Summer24Prompt24_V3_DATA_L2L3Residual_AK4PFPuppi"
             scaleTotalKey = None
-            scaleKeyRegrouped11 = None 
+            scaleKeyRegrouped11 = None
+            smearKey = None
+            JERKey = None
+            JERsfKey = None
+            JERsfUncKey = None
+
+    elif era == 2025:
+        folderKey = "Run3-25Prompt-Summer24-NanoAODv15/2026-07-16"
+        if is_mc :
+            L1Key = "Summer24Prompt25_V3_MC_L1FastJet_AK4PFPuppi"
+            L2Key = "Summer24Prompt25_V3_MC_L2Relative_AK4PFPuppi"
+            L3Key = "Summer24Prompt25_V3_MC_L3Absolute_AK4PFPuppi"
+            L2L3Key = "Summer24Prompt25_V3_MC_L2L3Residual_AK4PFPuppi"
+            scaleTotalKey = "Summer24Prompt25_V3_MC_Total_AK4PFPuppi"
+            scaleKeyRegrouped11 = [
+                f"Summer24Prompt25_V3_MC_{label.format(year='2025')}_AK4PFPuppi" for label in jes_systematics_11split
+                ]
+            smearKey = "JERSmear"
+            # It appears the 23Bpix keys are used for the following:
+            JERKey = "Summer24Prompt25_JRV2_MC_PtResolution_AK4PFPuppi"
+            JERsfKey = "Summer24Prompt25_JRV2_MC_ScaleFactor_AK4PFPuppi"
+            JERsfUncKey = "Summer24Prompt25_JRV2_MC_SFUncertainty_AK4PFPuppi"
+        else :
+            L1Key = "Summer24Prompt25_V3_DATA_L1FastJet_AK4PFPuppi"
+            L2Key = "Summer24Prompt25_V3_DATA_L2Relative_AK4PFPuppi"
+            L3Key = "Summer24Prompt25_V3_DATA_L3Absolute_AK4PFPuppi"
+            L2L3Key = "Summer24Prompt25_V3_DATA_L2L3Residual_AK4PFPuppi"
+            scaleTotalKey = None
+            scaleKeyRegrouped11 = None
             smearKey = None
             JERKey = None
             JERsfKey = None
