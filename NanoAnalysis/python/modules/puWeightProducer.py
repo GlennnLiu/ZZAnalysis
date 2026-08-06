@@ -255,6 +255,11 @@ def puWeight(era, data_tag):
         key = "Collisions24_BCDEFGHI_goldenJSON"
         return puWeightProducer_corrlib(json, key) 
 
+    elif era == 2025:
+        json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-25Prompt-Summer24-NanoAODv15/2026-06-05/puWeights_2025pp_Golden_Summer24_25ns_69200ub.json.gz"
+        key = "Collisions25_goldenJSON"
+        return puWeightProducer_corrlib(json, key)
+        
     else:
         raise ValueError(f"Era {era} not supported yet")
 
