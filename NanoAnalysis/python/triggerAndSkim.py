@@ -78,7 +78,7 @@ class triggerAndSkim(Module):
             passTriEle = False
             passTriMu = event.HLT_TripleMu_10_5_5_DZ or event.HLT_TripleMu_12_10_5
 
-        elif (self.era == 2024 or self.era == 2025): #using same as 2023 
+        elif (self.era == 2024 or self.era == 2025): #using same as 2023; checked that they are unprescaled in runs 380348 and 398080
             passSingleEle = event.HLT_Ele30_WPTight_Gsf
             passSingleMu = event.HLT_IsoMu24
             passDiEle = event.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL or event.HLT_DoubleEle25_CaloIdL_MW
