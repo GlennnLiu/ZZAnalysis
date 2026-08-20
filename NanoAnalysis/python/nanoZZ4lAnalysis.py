@@ -172,11 +172,11 @@ jsonFile = None
 if not IsMC :
     if "UL" in DATA_TAG :
         if LEPTON_SETUP == 2016 :
-            jsonFile = localPath+"Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"
+            jsonFile = localPath+"test/prod/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"
         if LEPTON_SETUP == 2017 :
-            jsonFile = localPath+"Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"
+            jsonFile = localPath+"test/prod/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"
         if LEPTON_SETUP == 2018 :
-            jsonFile = localPath+"Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"
+            jsonFile = localPath+"test/prod/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"
 #    elif LEPTON_SETUP == 2018 : #pre-UL, for comparisons with HIG-19-001; kept commented for future reference
 #        jsonFile = localPath+"test/prod/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt"
     elif LEPTON_SETUP == 2022 :
@@ -205,7 +205,7 @@ reco_sequence = [lepFiller(cuts, LEPTON_SETUP, MUON_ID_BYMVA), # FSR and FSR-cor
                           debug=DEBUG), # Build ZZ candidates; choose best candidate; filter events with candidates
                  getJetIdProducer(LEPTON_SETUP, DATA_TAG, NANOVERSION),
                  jetFiller(year=LEPTON_SETUP), # Jets cleaning with leptons
-                 ZZExtraFiller(IsMC, LEPTON_SETUP, DATA_TAG, PROCESS_CR), # Additional variables to selected candidates
+                 ZZExtraFiller(IsMC, LEPTON_SETUP, DATA_TAG, PROCESS_CR, APPLYELECORR, APPLYMUCORR), # Additional variables to selected candidates
                  ]
 if runMELA is not None:
     from ZZAnalysis.NanoAnalysis.RecoProbFiller import *
@@ -220,8 +220,8 @@ if APPLYMUCORR :
         from ZZAnalysis.NanoAnalysis.modules.muonScaleResProducer import getMuonScaleRes
         insertBefore(reco_sequence, 'lepFiller', getMuonScaleRes(LEPTON_SETUP, DATA_TAG, IsMC, overwritePt=True))
         
-# Add ele scale corrections for Run 3
-if APPLYELECORR and LEPTON_SETUP >=2022 :
+# Add ele scale corrections for Run 3 (already included Run2 v9 samples, but not in Run2 v15)
+if APPLYELECORR and (LEPTON_SETUP >=2022 or NANOVERSION>=15):
     from ZZAnalysis.NanoAnalysis.modules.eleScaleResProducer import getEleScaleRes
     insertBefore(reco_sequence, 'lepFiller', getEleScaleRes(LEPTON_SETUP, DATA_TAG, IsMC, overwritePt=True))
 
