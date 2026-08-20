@@ -12,11 +12,13 @@ from ZZAnalysis.NanoAnalysis.tools import branchCollection, rebuildCandidate
 import heapq
 
 class ZZExtraFiller(Module):
-    def __init__(self, isMC, year, data_tag, processCR):
+    def __init__(self, isMC, year, data_tag, processCR, addEleScaleVar=True, addMuScaleVar=True):
         print("***ZZExtraFiller: isMC:", isMC, "year:", year, "data_tag:", data_tag, flush=True)
         self.isMC = isMC
         self.processCR = processCR
         self.year = year
+        self.addEleScaleVar = addEleScaleVar
+        self.addMuScaleVar = addMuScaleVar
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
@@ -35,14 +37,19 @@ class ZZExtraFiller(Module):
         if self.isMC:
             filler.branch(collName+"_dataMCWeight", "F", title="data/MC efficiency correction weight", limitedPrecision=12)
             if collName=="ZZCand" : #Only for SR for the time being
-                filler.branch("ZZCand_escaleUp_mass", "F", title="mass, ele scale up var", limitedPrecision=18) # 18 bits = <0.2 MeV rounding
-                filler.branch("ZZCand_escaleDn_mass", "F", title="mass, ele scale dn var", limitedPrecision=18)
-                filler.branch("ZZCand_esmearUp_mass", "F", title="mass, ele scale up var", limitedPrecision=18)
-                filler.branch("ZZCand_esmearDn_mass", "F", title="mass, ele scale dn var", limitedPrecision=18)
-                filler.branch("ZZCand_muscaleUp_mass", "F", title="mass, mu scale up var", limitedPrecision=18)
-                filler.branch("ZZCand_muscaleDn_mass", "F", title="mass, mu scale dn var", limitedPrecision=18)
-                filler.branch("ZZCand_musmearUp_mass", "F", title="mass, mu scale up var", limitedPrecision=18)
-                filler.branch("ZZCand_musmearDn_mass", "F", title="mass, mu scale dn var", limitedPrecision=18)                
+                if self.addEleScaleVar :
+                    filler.branch("ZZCand_escaleUp_mass", "F", title="mass, ele scale up var", limitedPrecision=18) # 18 bits = <0.2 MeV rounding
+                    filler.branch("ZZCand_escaleDn_mass", "F", title="mass, ele scale dn var", limitedPrecision=18)
+                    filler.branch("ZZCand_esmearUp_mass", "F", title="mass, ele scale up var", limitedPrecision=18)
+                    filler.branch("ZZCand_esmearDn_mass", "F", title="mass, ele scale dn var", limitedPrecision=18)
+
+                if self.addMuScaleVar :
+                    filler.branch("ZZCand_muscaleUp_mass", "F", title="mass, mu scale up var", limitedPrecision=18)
+                    filler.branch("ZZCand_muscaleDn_mass", "F", title="mass, mu scale dn var", limitedPrecision=18)
+                    if self.year >= 2022 : # Rochester muon correctsion provides only a single scale unc.
+                        filler.branch("ZZCand_musmearUp_mass", "F", title="mass, mu scale up var", limitedPrecision=18)
+                        filler.branch("ZZCand_musmearDn_mass", "F", title="mass, mu scale dn var", limitedPrecision=18)                
+
 
     def analyze(self, event) :
         electrons = Collection(event, "Electron")
@@ -85,14 +92,17 @@ class ZZExtraFiller(Module):
             if self.isMC:
                 filler.appendValue(collName+"_dataMCWeight", self.getDataMCWeight(theCandLeps))
                 if collName=="ZZCand" :
-                    filler.appendValue("ZZCand_escaleUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleUp_pt if abs(l.pdgId)==11 else l.pt)))
-                    filler.appendValue("ZZCand_escaleDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleDn_pt if abs(l.pdgId)==11 else l.pt)))
-                    filler.appendValue("ZZCand_esmearUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearUp_pt if abs(l.pdgId)==11 else l.pt)))
-                    filler.appendValue("ZZCand_esmearDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearDn_pt if abs(l.pdgId)==11 else l.pt)))
-                    filler.appendValue("ZZCand_muscaleUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleUp_pt if abs(l.pdgId)==13 else l.pt)))
-                    filler.appendValue("ZZCand_muscaleDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleDn_pt if abs(l.pdgId)==13 else l.pt)))
-                    filler.appendValue("ZZCand_musmearUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearUp_pt if abs(l.pdgId)==13 else l.pt)))
-                    filler.appendValue("ZZCand_musmearDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearDn_pt if abs(l.pdgId)==13 else l.pt)))
+                    if self.addEleScaleVar :
+                        filler.appendValue("ZZCand_escaleUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleUp_pt if abs(l.pdgId)==11 else l.pt)))
+                        filler.appendValue("ZZCand_escaleDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleDn_pt if abs(l.pdgId)==11 else l.pt)))
+                        filler.appendValue("ZZCand_esmearUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearUp_pt if abs(l.pdgId)==11 else l.pt)))
+                        filler.appendValue("ZZCand_esmearDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearDn_pt if abs(l.pdgId)==11 else l.pt)))
+                    if self.addMuScaleVar:
+                        filler.appendValue("ZZCand_muscaleUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleUp_pt if abs(l.pdgId)==13 else l.pt)))
+                        filler.appendValue("ZZCand_muscaleDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.scaleDn_pt if abs(l.pdgId)==13 else l.pt)))
+                        if self.year >= 2022 :
+                            filler.appendValue("ZZCand_musmearUp_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearUp_pt if abs(l.pdgId)==13 else l.pt)))
+                            filler.appendValue("ZZCand_musmearDn_mass", self.getVariedM(aCand, self.leps, self.fsrPhotons, lambda l : (l.smearDn_pt if abs(l.pdgId)==13 else l.pt)))
         
         filler.fillBranches(cands)
             
