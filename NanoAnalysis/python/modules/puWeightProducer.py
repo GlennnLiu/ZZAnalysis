@@ -12,6 +12,7 @@ import os
 import numpy as np
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
+# Run2 module based on ROOT histograms; replaced by the correctionlib version for Run3 (see below)
 class puWeightProducer(Module):
     def __init__(self,
                  myfile,
@@ -226,10 +227,10 @@ def puWeight(era, data_tag):
         return puWeight_UL2017()
     elif era == 2018 :
         return puWeight_UL2018()
-    elif era == 2022 :
-#        return puWeight_2022() # Merged pre and postEE - obsolete
-        
+    else : # For Run3, use the correctionlib module
         from PhysicsTools.NATModules.modules.puWeightProducer import puWeightProducer as puWeightProducer_corrlib
+        
+    if era == 2022 : 
         if "pre_EE" in data_tag :
             json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-22CDSep23-Summer22-NanoAODv12/2024-01-31/puWeights.json.gz"
             key = "Collisions2022_355100_357900_eraBCD_GoldenJson"
@@ -239,7 +240,6 @@ def puWeight(era, data_tag):
         return puWeightProducer_corrlib(json, key)
 
     elif era == 2023 :
-        from PhysicsTools.NATModules.modules.puWeightProducer import puWeightProducer as puWeightProducer_corrlib
         if "pre_BPix" in data_tag :
             json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-23CSep23-Summer23-NanoAODv12/2024-01-31/puWeights.json.gz"
             key = "Collisions2023_366403_369802_eraBC_GoldenJson"
@@ -248,9 +248,7 @@ def puWeight(era, data_tag):
             key = "Collisions2023_369803_370790_eraD_GoldenJson"
         return puWeightProducer_corrlib(json, key)
 
-
     elif era == 2024:
-        from PhysicsTools.NATModules.modules.puWeightProducer import puWeightProducer as puWeightProducer_corrlib
         json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/LUM/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-04-15/puWeights_BCDEFGHI.json.gz"
         key = "Collisions24_BCDEFGHI_goldenJSON"
         return puWeightProducer_corrlib(json, key) 
