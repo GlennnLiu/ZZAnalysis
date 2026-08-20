@@ -55,7 +55,7 @@ class muonScaleResProducer(Module):
         self.overwritePt = overwritePt
         self.syncMode = syncMode
 
-        print("***INIT muonScaleResProducer: dataYear:", dataYear, "tag:", tag, "overwritePt:", overwritePt, "syncMode:", syncMode)
+        print("***INIT muonScaleResProducer (Rochester): dataYear:", dataYear, "tag:", tag, "overwritePt:", overwritePt, "syncMode:", syncMode)
 
     def beginJob(self):
         pass
@@ -70,8 +70,8 @@ class muonScaleResProducer(Module):
             self.out.branch("Muon_uncorrected_pt", "F", lenVar="nMuon")
         else:
             self.out.branch("Muon_corrected_pt", "F", lenVar="nMuon")
-        self.out.branch("Muon_correctedUp_pt", "F", lenVar="nMuon")
-        self.out.branch("Muon_correctedDown_pt", "F", lenVar="nMuon")
+        self.out.branch("Muon_scaleUp_pt", "F", lenVar="nMuon")
+        self.out.branch("Muon_scaleDn_pt", "F", lenVar="nMuon")
         self.is_mc = bool(inputTree.GetBranch("GenJet_pt"))
 
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
@@ -130,8 +130,8 @@ class muonScaleResProducer(Module):
         pt_corr_down = list(
             max(pt_corr[imu] - pt_err[imu], 0.0)
             for imu, mu in enumerate(muons))
-        self.out.fillBranch("Muon_correctedUp_pt", pt_corr_up)
-        self.out.fillBranch("Muon_correctedDown_pt", pt_corr_down)
+        self.out.fillBranch("Muon_scaleUp_pt", pt_corr_up)
+        self.out.fillBranch("Muon_scaleDn_pt", pt_corr_down)
         return True
 
 

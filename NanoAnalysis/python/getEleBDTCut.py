@@ -30,6 +30,7 @@ def getEleBDTCut(era, dataTag, nanoVersion, useUncorrPt=False) :
                                      (fSCeta>=0.8 and fSCeta<1.479 and BDT > 0.0273863727) or \
                                      (fSCeta>=1.479                and BDT > -0.5532483665)))
 
+    # nanoAODv15 Run2 samples have final Run2UL training for each year
     def eleBDTCut_RunII2016UL_v15(ele) :
         fSCeta = ele.superclusterEta
         BDT = ele.mvaHZZIso
@@ -76,6 +77,7 @@ def getEleBDTCut(era, dataTag, nanoVersion, useUncorrPt=False) :
                                 (fSCeta>=0.8 and fSCeta<1.479 and BDT > 0.0759172100) or \
                                 (fSCeta>=1.479                and BDT > -0.5169136775)))
 
+    # Run3 nanoAODv15 samples include a bool WP.
     def eleBDTCut_RunIII_2022Training_WP(ele):
         return ele.mvaIso_WPHZZ
 
@@ -86,7 +88,7 @@ def getEleBDTCut(era, dataTag, nanoVersion, useUncorrPt=False) :
                 return eleBDTCut_RunIIUL_v9
             else :
                 return eleBDTCut_RunIIpreUL_v9
-        elif nanoVersion == 15 :
+        elif nanoVersion >= 15 :
             cutsv15 = {2016: eleBDTCut_RunII2016UL_v15, 2017: eleBDTCut_RunII2017UL_v15, 2018: eleBDTCut_RunII2018UL_v15}
             return cutsv15[era]
         else :
