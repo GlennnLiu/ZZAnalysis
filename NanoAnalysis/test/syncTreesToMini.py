@@ -11,7 +11,7 @@ region = 'SR'
 #region = '2P2F'
 #region = 'SS'
 
-verbose = 0
+verbose = 1
 
 #cjlstFile   = "../../AnalysisStep/test/ZZ4lAnalysis_sync_ggH_102X.root" 
 #nanoFile = "ggH125_Rereco_fixedFSR.root"
@@ -24,6 +24,9 @@ nanoFile = "ggH125_2017UL_fixedFSR_Skim.root"
 cjlstFile = "/eos/cms/store/group/phys_higgs/cmshzz4l/cjlst/RunIII/sync/ZZ4lAnalysis_sync_25c8f5ff-9de0-4a0c-9e2f-757332ad392f.root"
 nanoFile = "25c8f5ff-9de0-4a0c-9e2f-757332ad392f_Skim.root"
 
+#2018UL v15 MC ggH
+cjlstFile = "/afs/cern.ch/user/n/namapane/work/H4l/NANOv15-comp/CMSSW_10_6_30/src/ZZAnalysis/AnalysisStep/test/SyncToNano2018_E6F5DEE7-DAC9-E14E-8362-8A0EFF7B38CD_noelecorr.root"
+nanoFile = "501e594d-38c4-4ab1-8a86-ec8b2663173c_Skim_noelecorr.root"
 
 
 compareWeights = False
@@ -49,7 +52,13 @@ treeMini.Add(cjlstFile)
 treeNano = TChain("Events")
 treeNano.Add(nanoFile)
 
+if treeNano.GetEntries() == 0 :
+    print("Input file missing:", nanoFile)
+    exit(1)
 
+if treeMini.GetEntries() == 0 :
+    print("Input file missing", cjlstFile)
+    exit(1)
 
 iEntryMini=0
 nMatch=0
@@ -63,12 +72,12 @@ lastfound = -1
 h_m4lDiff = TH1F("h_m4lDiff","m4l_mini-m4l_nano", 2000, -1, 1)
 
 def printLeps_mini(treeMini, prefix="") :
-    print(prefix, end="")
-    for i in range(4): print(treeMini.LepLepId[i], '{:.5f} {:.3f} {:.3f}'.format(treeMini.LepPt[i], treeMini.LepEta[i], treeMini.LepPhi[i]), end=" ")
-    print()
+    for i in range(4):
+        prefix_=prefix if i==0 else " "*len(prefix)
+        print(prefix_, end="")
+        print(treeMini.LepLepId[i], '{:.5f} {:.3f} {:.3f} {:.3f} {} {:.3f}'.format(treeMini.LepPt[i], treeMini.LepEta[i], treeMini.LepPhi[i], treeMini.LepSIP[i], treeMini.LepisID[i],  treeMini.LepBDT[i]))
 
 def printLeps_nano(treeNano, prefix) :
-    print(prefix, end="")
     lepPts = list(treeNano.Electron_pt) + list(treeNano.Muon_pt)
     lepIds = list(treeNano.Electron_pdgId) + list(treeNano.Muon_pdgId)
     lepEtas = list(treeNano.Electron_eta) + list(treeNano.Muon_eta)
@@ -77,6 +86,8 @@ def printLeps_nano(treeNano, prefix) :
     case1 = False
     case2 = False
     for i, lIdx in enumerate(nanoLepIdxs) :
+        prefix_=prefix if i==0 else " "*len(prefix)
+        print(prefix_, end="")
         print(lepIds[lIdx], '{:.5f} {:.3f} {:.3f}'.format(lepPts[lIdx], lepEtas[lIdx], lepPhis[lIdx]), end=" ")
         if verbose>0 : 
             laId = abs(lepIds[lIdx])
@@ -90,8 +101,8 @@ def printLeps_nano(treeNano, prefix) :
                 print ("**", end="")
             print()
             if case1 : print ("   * : close to eta bound")
-            if case2 : print ("   ** : electron close to 10 GeV pt threshold",end="")
-    print()
+            if case2 : print ("   ** : electron close to 10 GeV pt threshold")
+
 
 while treeMini.GetEntry(iEntryMini):
 #    print("MINI: "+str(treeMini.RunNumber)+":"+str(treeMini.LumiNumber)+":"+str(treeMini.EventNumber))
@@ -120,7 +131,7 @@ while treeMini.GetEntry(iEntryMini):
         elif region == '2P2F' : iBC = treeNano.ZLLbest2P2FIdx
         elif region == '3P1F' : iBC = treeNano.ZLLbest3P1FIdx
 
-        if iBC < 0 or not treeNano.HLT_passZZ4l: # no candidate passes the selection
+        if iBC < 0 or not treeNano.HLT_passZZ4l or (eval(nanoPrefix+'mass[iBC]')<70.): # no candidate passes the selection
             # in this event, or the event does not pass the required triggers
             # (for samples processed with TRIGPASSTHROUGH=True)
             foundNano[thisEntryNano] = True
@@ -167,8 +178,8 @@ while treeMini.GetEntry(iEntryMini):
 #            if t2_Z1flav*t2_Z2flav != 13*13*13*13 : continue
             
             print("Mass Diff: "+str(treeMini.RunNumber)+":"+str(treeMini.LumiNumber)+":"+str(treeMini.EventNumber), m4lDiff)
-            print("   mini:", '{:.2f} {:.2f} {:.2f} {:.4f} {:.4f} {:.2f}'.format(treeMini.ZZMass,treeMini.Z1Mass,treeMini.Z2Mass, ps1, pb1, KD_mini), "hasFSR:",t1_hasFSR , "\n"
-                  "   nano:", '{:.2f} {:.2f} {:.2f} {:.2f}'.format(t2_ZZMass, t2_Z1Mass, t2_Z2Mass, eval(nanoPrefix+'KD[iBC]')), "hasFSR:", t2_hasFSR)
+            print("   mini:", '{:.2f} {:.2f} {:.2f} {:.4f} {:.4f} {:.2f}'.format(treeMini.ZZMass,treeMini.Z1Mass,treeMini.Z2Mass, ps1, pb1, KD_mini), "hasFSR:",t1_hasFSR , f"massPreFSR: {treeMini.ZZMassPreFSR:.2f}", "\n"
+                  "   nano:", '{:.2f} {:.2f} {:.2f} {:.2f}'.format(t2_ZZMass, t2_Z1Mass, t2_Z2Mass, eval(nanoPrefix+'KD[iBC]')), "hasFSR:", t2_hasFSR, f"massPreFSR: {t2_ZZMassPreFSR:.2f}")
             if region=='SR': #FIXME
                 printLeps_mini(treeMini, "   mini: ")                
                 printLeps_nano(treeNano, "   nano: ")
@@ -205,6 +216,15 @@ while treeMini.GetEntry(iEntryMini):
 for iEntryNano,found in enumerate(foundNano):
     if not found:
         treeNano.GetEntry(iEntryNano)
+
+        # Recheck if it passes selection (it may have not been reached since the main loop is on mini events)
+        if region == 'SR' :     iBC = treeNano.bestCandIdx
+        elif region == 'SS' :   iBC = treeNano.ZLLbestSSIdx
+        elif region == '2P2F' : iBC = treeNano.ZLLbest2P2FIdx
+        elif region == '3P1F' : iBC = treeNano.ZLLbest3P1FIdx
+        if iBC < 0 or not treeNano.HLT_passZZ4l:
+            continue
+        
         print("Missing in mini: "+str(treeNano.run)+":"+str(treeNano.luminosityBlock)+":"+str(treeNano.event))
         missing_mini +=1
         if verbose > 0 :

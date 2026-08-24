@@ -12,7 +12,7 @@ from ZZAnalysis.AnalysisStep.validateCheckout import validateCheckout
 if not validateCheckout() :
     exit(1)
 
-#SampleToRun = "MCsync_2018UL" # v15 2018UL nano
+#SampleToRun = "MCsync_2018ULv15" # v15 2018UL nano
 #SampleToRun = "Data2022"
 SampleToRun = "MC2022EE"
 #SampleToRun = "MC2023postBPix"
@@ -43,7 +43,6 @@ SampleToRun = "MC2022EE"
 setConf("PROCESS_CR", True)
 setConf("PROCESS_ZL", True)
 setConf("DEBUG", False)
-#setConf("SYNCMODE", True) # Force muon resolution correction with fixed +1 sigma smearing (only for Run2 muon "Rochester" corrections)
 setConf("IsSIGNAL", True) # required for btagging corrections for signals; also adds AllEvents tree (extra tree of gen info for all events)
 #setConf("ADD_ALLEVENTS", True) # Add extra tree of gen info for all events
 #setConf("FILTER_EVENTS", 'Z') # Store all events which contain a good Z candidate
@@ -126,15 +125,17 @@ elif SampleToRun == "MCsync_2018Rereco_v7" :
     setConf("fileNames",["/eos/user/n/namapane/H4lnano/ggH125_fixedFSR.root"])
 
 ################################################################################
-elif SampleToRun == "MCsync_2018UL" :
+elif SampleToRun == "MCsync_2018ULv15" :
     # 2018 UL, v15; LSs in json are included in parent /store/mc/RunIISummer20UL18MiniAODv2/GluGluHToZZTo4L_M125_TuneCP5_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/240000/E6F5DEE7-DAC9-E14E-8362-8A0EFF7B38CD.root
     setConf("SAMPLENAME", "ggH125")
     setConf("XSEC", 48.58*0.0002745)
     setConf("NANOVERSION", 15)
     setConf("DATA_TAG", "UL") 
     setConf("LEPTON_SETUP", 2018)
+    setConf("SYNCMODE", True) # Force muon resolution correction with fixed +1 sigma smearing (only for Run2 muon "Rochester" corrections)
     setConf("APPLY_QCD_GGF_UNCERT", True) # for ggH
-    setConf("APPLYJETCORR", False) #FIXME
+    setConf("APPLYELECORR", False) # Turned on for sync since smearings are different than in mini (and corrections are now Et-dependent)
+#    setConf("APPLYJETCORR", False)
     setConf("store","root://cms-xrd-global.cern.ch/")
     setConf("fileNames",["/store/mc/RunIISummer20UL18NanoAODv15/GluGluHToZZTo4L_M125_TuneCP5_13TeV_powheg2_JHUGenV7011_pythia8/NANOAODSIM/150X_mc2018_realistic_v1-v1/130000/501e594d-38c4-4ab1-8a86-ec8b2663173c.root"])
     json = {"1": [[847,848],[871,873],[874,875],[901,902]]}
@@ -277,7 +278,7 @@ def customizeProcessForLocal(p) :
     ### Print out detailed candidate information for debug purposes
     #from ZZAnalysis.NanoAnalysis.dumpEvents import dumpEvents
     #p.cut = None # Remove preselction
-    #insertAfter(p.modules,"lepFiller",dumpEvents(level=-1),getConf("NANOVERSION", 11)) 
+    #insertAfter(p.modules,"lepFiller",dumpEvents(level=-1,nanoVersion=getConf("NANOVERSION", 15)))
 
     ### Dump MC and LHE history for selected events
     #from ZZAnalysis.NanoAnalysis.mcHistoryDump import mcHistoryDump

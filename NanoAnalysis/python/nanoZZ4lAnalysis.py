@@ -24,7 +24,7 @@ LEPTON_SETUP = getConf("LEPTON_SETUP", 2018)
 DATA_TAG = getConf("DATA_TAG", "" ) # used to distinguish different subperiods/reprocessings.
                                     # Specific values currently recognized (other values->use defaults for era)
                                     # "UL" (used by muonScaleResProducer_Rochester, getEleBDTCut, jetJERC)
-                                    # "ULAPV", (used by LeptonSFHelper, jetJERC)
+                                    # "ULAPV", (used by LeptonSFHelper, jetJERC, jetVMAP)
                                     # "pre_EE", "pre_BPix" (used by LeptonSFHelper, eleScaleResProducer, muonScaleResProducer, puWeightProducer, jetJERC, jetVMAP)
                                     # "2022E", "2022F", "2022G" (used by jetJERC)
 NANOVERSION = getConf("NANOVERSION", 12)
@@ -226,11 +226,12 @@ if APPLYELECORR and (LEPTON_SETUP >=2022 or NANOVERSION>=15):
     insertBefore(reco_sequence, 'lepFiller', getEleScaleRes(LEPTON_SETUP, DATA_TAG, IsMC, overwritePt=True))
 
 # Add jet corrections for Run 3
-if APPLYJETCORR and LEPTON_SETUP >=2022 :
-    from ZZAnalysis.NanoAnalysis.modules.jetJERC import getJetCorrected
-    insertBefore(reco_sequence, 'jetFiller', getJetCorrected(LEPTON_SETUP, DATA_TAG, IsMC, JES_SPLITTING, overwritePt=True))
+if APPLYJETCORR :
     from ZZAnalysis.NanoAnalysis.modules.jetVMAP import getJetVetoMap
     insertBefore(reco_sequence, 'jetFiller', getJetVetoMap(LEPTON_SETUP, DATA_TAG))
+    if LEPTON_SETUP >=2022 : # FIXME: To be set up for Run2
+        from ZZAnalysis.NanoAnalysis.modules.jetJERC import getJetCorrected    
+        insertBefore(reco_sequence, 'jetFiller', getJetCorrected(LEPTON_SETUP, DATA_TAG, IsMC, JES_SPLITTING, overwritePt=True))
 
 if LEPTON_SETUP >=2022 :
     from ZZAnalysis.NanoAnalysis.modules.jetBtagProducer import getJetBtagProducer
