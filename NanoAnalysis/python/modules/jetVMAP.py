@@ -1,7 +1,23 @@
 def getJetVetoMap(era, tag) :
     from PhysicsTools.NATModules.modules.jetVetoMap import jetVMAP
 
-    if era == 2022:
+    if era == 2016 and "UL" in tag:
+        if "ULAPV" in tag:
+            folderKey = "Run2-2016preVFP-UL-NanoAODv15/2026-06-05"
+            corrName = "Summer19UL16_V1"
+        else:
+            folderKey = "Run2-2016postVFP-UL-NanoAODv15/2026-06-05"
+            corrName = "Summer19UL16_V1"
+
+    elif era == 2017 and "UL" in tag:
+        folderKey = "Run2-2017-UL-NanoAODv15/2026-06-05"
+        corrName = "Summer19UL17_V1"
+
+    elif era == 2018 and "UL" in tag:
+        folderKey = "Run2-2018-UL-NanoAODv15/2026-06-05"
+        corrName = "Summer19UL18_V1"
+
+    elif era == 2022:
             if "pre_EE" in tag:
                 folderKey = "Run3-22CDSep23-Summer22-NanoAODv12/2026-06-05"
                 corrName = "Summer22_23Sep2023_RunCD_V1"
