@@ -55,7 +55,7 @@ class muonScaleResProducer(Module):
         self.overwritePt = overwritePt
         self.syncMode = syncMode
 
-        print("***INIT muonScaleResProducer (Rochester): dataYear:", dataYear, "tag:", tag, "overwritePt:", overwritePt, "syncMode:", syncMode)
+        print("***muonScaleResProducer (Rochester): dataYear:", dataYear, "tag:", tag, "overwritePt:", overwritePt, "syncMode:", syncMode)
 
     def beginJob(self):
         pass

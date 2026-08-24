@@ -72,8 +72,9 @@ class jetFiller(Module):
         # According to the analysis recipe at https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsZZ4lRunIILegacy#Jets, "[jets] must be cleaned with a DeltaR>0.4 cut wrt all tight leptons in the event passing the SIP and isolation cut computed after FSR correction, as well as with all FSR collected photons attached to these leptons."
         # Note: the current implementation on miniAODs (https://github.com/CJLST/ZZAnalysis/blob/Run2UL_22_nano/AnalysisStep/plugins/JetsWithLeptonsRemover.cc) probably does something different than this. To be reviewed.
         for ij, jet in enumerate(jets) :
-            if 2.5 <= abs(jet.eta) < 3.0 or (abs(jet.eta) >= 3.0 and self.year in [2022, 2023]):
-                jet_ptThreshold[ij] = 50.
+            if self.year >=2022 : #Larger pT threshold at high eta, only for Run3
+                if 2.5 <= abs(jet.eta) < 3.0 or (abs(jet.eta) >= 3.0 and self.year in [2022, 2023]):
+                    jet_ptThreshold[ij] = 50.
 
             for lep in leps :
                 if not lep.ZZFullSel : continue

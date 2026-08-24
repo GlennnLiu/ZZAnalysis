@@ -32,7 +32,7 @@ def getEleBDTCut(era, dataTag, nanoVersion, useUncorrPt=False) :
 
     # nanoAODv15 Run2 samples have final Run2UL training for each year
     def eleBDTCut_RunII2016UL_v15(ele) :
-        fSCeta = ele.superclusterEta
+        fSCeta = abs(ele.superclusterEta)
         BDT = ele.mvaHZZIso
         return (ele.pt<=10. and     ((fSCeta<0.8                   and BDT > 0.9557993256) or \
                                      (fSCeta>=0.8 and fSCeta<1.479 and BDT > 0.9475406570) or \
@@ -42,7 +42,7 @@ def getEleBDTCut(era, dataTag, nanoVersion, useUncorrPt=False) :
                                      (fSCeta>=1.479                and BDT > -0.5955762814)))
 
     def eleBDTCut_RunII2017UL_v15(ele) :
-        fSCeta = ele.superclusterEta
+        fSCeta = abs(ele.superclusterEta)
         BDT = ele.mvaHZZIso
         return (ele.pt<=10. and     ((fSCeta<0.8                   and BDT > 0.9128577458 ) or \
                                      (fSCeta>=0.8 and fSCeta<1.479 and BDT > 0.9056792368 ) or \
@@ -52,7 +52,7 @@ def getEleBDTCut(era, dataTag, nanoVersion, useUncorrPt=False) :
                                      (fSCeta>=1.479                and BDT > -0.5532483665)))
 
     def eleBDTCut_RunII2018UL_v15(ele) :
-        fSCeta = ele.superclusterEta
+        fSCeta = abs(ele.superclusterEta)
         BDT = ele.mvaHZZIso
         return (ele.pt<=10. and     ((fSCeta<0.8                   and BDT > 0.9044286167) or \
                                      (fSCeta>=0.8 and fSCeta<1.479 and BDT > 0.9094166886) or \
