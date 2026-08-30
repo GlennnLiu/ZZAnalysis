@@ -22,8 +22,9 @@ parser.add_argument("-y", "--year", default="2022EE")
 parser.add_argument("-l", "--lumi", default=26.7)
 parser.add_argument("-i", "--input", default="/eos/user/a/atarabin/STXS_samples/PROD_samplesNano_2022EE_MC_8d4c03f7/")
 parser.add_argument("-m", "--hist-mode", choices=["make", "read"], default="make", help="Make histograms from NanoAOD inputs or read them from the saved ROOT file.")
-parser.add_argument("-s", "--is-signal", )
+parser.add_argument("-s", "--is-signal", type=int, choices=[0, 1], default=1)
 args = parser.parse_args()
+is_signal = bool(args.is_signal)
 
 class btagEffCalculator():
     def __init__(self, year, lumi, input_dir, isSignal=True):
@@ -57,9 +58,9 @@ class btagEffCalculator():
             btag_json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-22CDSep23-Summer22-NanoAODv12/2025-08-20/btagging.json.gz"
         elif self.year == "2022EE":
             btag_json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-22EFGSep23-Summer22EE-NanoAODv12/2025-08-20/btagging.json.gz"
-        elif self.year == "2023":
+        elif self.year == "2023preBPix":
             btag_json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-23CSep23-Summer23-NanoAODv12/2025-08-20/btagging.json.gz"
-        elif self.year == "2023BPix":
+        elif self.year == "2023postBPix":
             btag_json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-23DSep23-Summer23BPix-NanoAODv12/2025-08-20/btagging.json.gz"
         elif self.year == "2024":
             btag_json = "/cvmfs/cms-griddata.cern.ch/cat/metadata/BTV/Run3-24CDEReprocessingFGHIPrompt-Summer24-NanoAODv15/2026-03-10/btagging.json.gz"
@@ -401,7 +402,6 @@ class btagEffCalculator():
         pt_edges = np.array(self.pt_edges, dtype=float)
         eta_edges = np.array(self.eta_edges, dtype=float)
         pt_centers = 0.5 * (pt_edges[:-1] + pt_edges[1:])
-        pt_widths = np.diff(pt_edges)
         h = np.array(hist, dtype=float)
         h_err = None if hist_err is None else np.array(hist_err, dtype=float)
 
@@ -417,7 +417,6 @@ class btagEffCalculator():
                     pt_centers[valid],
                     h[valid, i_eta],
                     yerr=h_err[valid, i_eta],
-                    xerr=0.5 * pt_widths[valid],
                     fmt="none",
                     capsize=2,
                     linewidth=1.5,
@@ -443,7 +442,6 @@ class btagEffCalculator():
         pt_edges = np.array(self.pt_edges, dtype=float)
         eta_edges = np.array(self.eta_edges, dtype=float)
         pt_centers = 0.5 * (pt_edges[:-1] + pt_edges[1:])
-        pt_widths = np.diff(pt_edges)
         flavors = ["light", "c", "b"]
         line_styles = {
             "light": "-",
@@ -473,7 +471,6 @@ class btagEffCalculator():
                         pt_centers[valid],
                         h[valid, i_eta],
                         yerr=h_err[valid, i_eta],
-                        xerr=0.5 * pt_widths[valid],
                         fmt="none",
                         ecolor=color,
                         capsize=2,
@@ -548,15 +545,15 @@ class btagEffCalculator():
         plt.close(fig)
 
 
-btag = btagEffCalculator(args.year, args.lumi, args.input, args.is_signal)
+btag = btagEffCalculator(args.year, args.lumi, args.input, is_signal)
 root_file = f"../../data/btagEff/btag_{args.year}.root"
 if args.hist_mode == "make":
     h_all, h_tagged, h_eff, h_all_err, h_tagged_err, h_eff_err = btag.make_histograms()
     btag.save_to_root(h_all, h_tagged, h_eff, root_file, h_all_err, h_tagged_err, h_eff_err)
 else:
     h_all, h_tagged, h_eff, h_all_err, h_tagged_err, h_eff_err = btag.read_histograms(root_file)
-btag.save_to_correctionlib_json(h_eff, f"../../data/btagEff/btag_{'signal' if args.is_signal else 'background'}_{args.year}.json.gz")
+btag.save_to_correctionlib_json(h_eff, f"../../data/btagEff/btag_{'signal' if is_signal else 'background'}_{args.year}.json.gz")
 # for flav in h_eff.keys():
 #     btag.plot_2d_hist(h_eff[flav], f"b-tag efficiency for {flav} jets", f"../../data/btagEff/plots/btag_eff_{flav}_{args.year}_2d", h_eff_err[flav], zmin=0.006, zmax=1)
 #     btag.plot_1d_hist(h_eff[flav], f"b-tag efficiency for {flav} jets", f"../../data/btagEff/plots/btag_eff_{flav}_{args.year}_1d", h_eff_err[flav], ymin=0.006, ymax=6)
-btag.plot_1d_all_flavors(h_eff, f"../../data/btagEff/plots/btag_eff_all_flavors_{args.year}_1d_{'signal' if args.is_signal else 'background'}", h_eff_err, ymin=0.006, ymax=2)
+btag.plot_1d_all_flavors(h_eff, f"../../data/btagEff/plots/btag_eff_all_flavors_{args.year}_1d_{'signal' if is_signal else 'background'}", h_eff_err, ymin=0.006, ymax=2)
