@@ -1,4 +1,5 @@
 import copy
+import math
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 from ZZAnalysis.NanoAnalysis.MELAProbHelper import MELAProbHelper
@@ -24,6 +25,42 @@ class RecoProbFiller(Module):
         print("***RecoProbFiller: set for: ", self.probHelpers["ZZCand"].names,
               "processCR:", self.processCR, flush=True)
         self.filler = {}
+        self.jetVariations = []
+
+    def setJetVariations(self, jetCorrector):
+        """Configure the JES/JER kinematic points produced upstream.
+
+        The jet-correction module owns the exact JES labels, so deriving the
+        list from that module keeps the MELA output synchronized with either
+        the split-11 or total-JES configuration.  Data have no shifted jets.
+        """
+        hasJetDependentProbabilities = any(
+            probHelper._isJetDependent(prob)
+            for probHelper in self.probHelpers.values()
+            for prob in probHelper.sortedSettings
+        )
+        if not getattr(jetCorrector, "is_mc", False) or not hasJetDependentProbabilities:
+            self.jetVariations = []
+        elif isinstance(jetCorrector.evaluator_JES, dict):
+            self.jetVariations = [
+                f"{label}_{direction}"
+                for label in jetCorrector.evaluator_JES
+                for direction in ("ScaleUp", "ScaleDn")
+            ]
+        else:
+            self.jetVariations = ["scaleUp", "scaleDn"]
+        if getattr(jetCorrector, "is_mc", False) and hasJetDependentProbabilities:
+            self.jetVariations.extend(("smearUp", "smearDn"))
+
+        # Jet-varied MELA probabilities belong only to the signal-region
+        # ZZCand collection.  Keep nominal probabilities for the ZLL control
+        # region, but never book or compute JES/JER probability variations.
+        for candColl, probHelper in self.probHelpers.items():
+            probHelper.setJetVariations(
+                self.jetVariations if candColl == "ZZCand" else []
+            )
+
+        print("***RecoProbFiller: jet-varied MELA points:", self.jetVariations, flush=True)
 
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
@@ -75,15 +112,73 @@ class RecoProbFiller(Module):
 
         return candsDaughters, candsAssociated
 
+    @staticmethod
+    def _particleFromPtEtaPhiM(pdgId, pt, eta, phi, mass):
+        px = pt * math.cos(phi)
+        py = pt * math.sin(phi)
+        pz = pt * math.sinh(eta)
+        energy = math.sqrt(max(mass * mass + px * px + py * py + pz * pz, 0.))
+        return Mela.SimpleParticle_t(pdgId, px, py, pz, energy)
+
+    def _selectVariedJets(self, jets, variation):
+        """Return shifted leading/subleading jets after the nominal selection.
+
+        Jet-lepton cleaning is reevaluated because ``Jet_ZZLepEF`` has the
+        nominal jet pt in its denominator.  Nothing from this temporary
+        selection is written to the output tree.
+        """
+        selected = []
+        for idx, jet in enumerate(jets):
+            pt = getattr(jet, variation + "_pt")
+            mass = getattr(jet, variation + "_mass")
+            leptonPt = jet.ZZLepEF * jet.pt
+            overlapsLeptons = pt <= 0. or leptonPt / pt > 0.5
+            if overlapsLeptons or jet.jetId != 6 or pt <= jet.ptThreshold:
+                continue
+            selected.append((pt, idx, mass))
+        selected.sort(key=lambda item: item[0], reverse=True)
+        return selected[:2]
+
+    def _buildVariedAssociated(self, cands, leps, jets):
+        """Build per-candidate associated objects for every jet variation."""
+        associatedVariations = {}
+        selectedJetCounts = {}
+        for variation in self.jetVariations:
+            selectedJets = self._selectVariedJets(jets, variation)
+            selectedJetCounts[variation] = len(selectedJets)
+            varied = []
+            for aCand in cands:
+                associated = Mela.SimpleParticleCollection_t()
+                for pt, idx, mass in selectedJets:
+                    jet = jets[idx]
+                    associated.add_particle(self._particleFromPtEtaPhiM(
+                        0, pt, jet.eta, jet.phi, mass
+                    ))
+                for idx in (aCand.extraLep1Idx, aCand.extraLep2Idx):
+                    if idx < 0:
+                        continue
+                    lep = leps[idx]
+                    p4 = lep.p4()
+                    associated.add_particle(Mela.SimpleParticle_t(
+                        lep.pdgId, p4.Px(), p4.Py(), p4.Pz(), p4.E()
+                    ))
+                varied.append(associated)
+            associatedVariations[variation] = varied
+        return associatedVariations, selectedJetCounts
+
     def analyze(self, event):
         leps = Collection(event, 'Lepton')
         fsrPhotons = Collection(event, "FsrPhoton")
         jets = Collection(event, 'Jet')
+        selectedJetCountNominal = sum(
+            idx >= 0 for idx in (event.JetLeadingIdx, event.JetSubleadingIdx)
+        )
 
         for collName, probHelper in self.probHelpers.items():
             cands = Collection(event, collName)
             theFiller = self.filler[collName]
             candsDaughters, candsAssociated = self._buildMELAInputs(cands, event, leps, fsrPhotons, jets)
+            candsAssociatedVariations, selectedJetCounts = self._buildVariedAssociated(cands, leps, jets)
             for c in candsDaughters:
                 self.MELA.setInputEvent(c, None, None, False)
                 qH, mZ1, mZ2, helcosthetaZ1, helcosthetaZ2, helPhi, costhetastar, phistarZ1 = self.MELA.computeDecayAngles() 
@@ -94,7 +189,14 @@ class RecoProbFiller(Module):
                 theFiller.appendValue(collName + "_Phi1", phistarZ1)
             theFiller.fillBranches(cands)
             if self.MELASettings is not None:
-                probHelper.fillProbs(candsDaughters, candsAssociated, None)
+                probHelper.fillProbs(
+                    candsDaughters,
+                    candsAssociated,
+                    None,
+                    candAssociatedVariations=candsAssociatedVariations,
+                    selectedJetCounts=selectedJetCounts,
+                    selectedJetCountNominal=selectedJetCountNominal,
+                )
         return True
 
     def getDressedP4(self, lep, fsrPhotons):
